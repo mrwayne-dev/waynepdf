@@ -3,7 +3,7 @@ import { renderHook, act } from '@testing-library/react';
 import useText from './useText.js';
 import { initialText } from './InitialText.js';
 
-// Ported from upstream md2pdf src/App/Container/Hooks/useText.test.js,
+// Ported from the upstream project's src/App/Container/Hooks/useText.test.js,
 // updated for React 18 (@testing-library/react now ships renderHook, so
 // @testing-library/react-hooks is no longer needed).
 

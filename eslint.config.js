@@ -48,7 +48,7 @@ export default [
   { ignores: ['dist/**', '.reference/**', 'node_modules/**', 'dev-dist/**'] },
   js.configs.recommended,
   {
-    files: ['**/*.{js,jsx}'],
+    files: ['**/*.{js,jsx,mjs}'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',

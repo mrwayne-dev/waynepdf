@@ -39,9 +39,6 @@ export default function Upload(props) {
           cursor: 'pointer',
         }}
       />
-      <span role="img" aria-label="upload">
-        📁
-      </span>
       <span>Choose</span>
     </p>
   );

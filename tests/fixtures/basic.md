@@ -17,7 +17,7 @@ A paragraph with **bold**, *italic*, ~~strikethrough~~, and `inline code`.
 
 ## Links
 
-Visit [the upstream project](https://github.com/realdennis/md2pdf) or the bare
+Visit [the project site](https://example.org/waynepdf) or the bare
 URL https://example.com for details.
 
 ## Blockquote

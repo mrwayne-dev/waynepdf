@@ -8,6 +8,6 @@ allowBuilds:
 peerDependencyRules:
   allowedVersions:
     # nonaction@0.0.5 declares react ^16.8.0. It is a ~40-line hooks + context
-    # container and is API-compatible with React 18. Upstream md2pdf is
-    # unmaintained, so the declaration will not be updated. Accepted knowingly.
+    # container and is API-compatible with React 18. It is unmaintained, so the
+    # declaration will not be updated. Accepted knowingly.
     nonaction>react: '18'

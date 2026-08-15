@@ -1,36 +1,104 @@
 # WaynePDF
 
-Amazing Markdown to PDF — offline, private, and yours to configure.
+Write Markdown. Get a beautiful PDF. Offline, private, and yours to configure.
 
-Based on [md2pdf](https://github.com/realdennis/md2pdf) by realdennis (MIT, see `UPSTREAM_LICENSE`).
+[Screenshot placeholder — coming in a later phase]
 
-> This is a stub. The full README lands in a later phase.
+## What it is
 
-## Requirements
+WaynePDF is a browser-based Markdown-to-PDF converter. You paste or drop
+Markdown, it renders it with clean styling, and you save it to PDF using your
+browser's built-in print dialog. Nothing you write ever leaves your machine —
+there's no backend, no telemetry, no analytics, and no accounts.
 
-- Node 22 LTS (see `.nvmrc`)
-- pnpm
+Under the hood it's a React 18 + Vite SPA with a PWA manifest, so you can
+install it and use it fully offline once it's loaded.
 
-## Commands
+## Getting started
+
+### Use it online
+
+[Deployed URL to be added]
+
+### Run it locally
+
+Requires **Node 22** and **pnpm**.
 
 ```bash
-pnpm install       # install dependencies
-pnpm dev           # start the dev server
-pnpm build         # production build to dist/
-pnpm preview       # serve the production build
-pnpm test          # unit tests (Vitest)
-pnpm test:e2e      # browser tests (Playwright)
-pnpm lint          # lint src and tests
-pnpm format        # format with Prettier
+git clone git@github.com:mrwayne-dev/waynepdf.git
+cd waynepdf
+nvm use 22
+corepack enable pnpm
+pnpm install
+pnpm dev
 ```
 
-## Docker
+Open `http://localhost:5173`.
+
+### Run it in Docker
 
 ```bash
 docker build -t waynepdf .
 docker run -p 8080:80 waynepdf
 ```
 
+Open `http://localhost:8080`.
+
+## Usage
+
+Drop a `.md` file onto the window, or click **Choose** to pick one, or start
+typing on the left. When you're ready, click **Transform** and pick **Save as
+PDF** in the print dialog. For cleaner output, uncheck **Headers and Footers**
+and check **Background graphics** in that dialog.
+
+## Roadmap
+
+WaynePDF is being built in phases. Current state: **Phase 1 complete**.
+
+- **Phase 0** — Vite + React 18 foundation, markdown-it parser, test harness.
+  Done.
+- **Phase 1** — Debranding and identity. Done.
+- **Phase 2** — Theming layer: bundled fonts, color variants, dark/light/sepia
+  themes.
+- **Phase 3** — Unicode correctness: BOM handling, encoding detection,
+  `lang`/`dir` support.
+- **Phase 4** — Math rendering via KaTeX.
+- **Phase 5** — Real PDF output via paged.js: page control, running
+  headers/footers, TOC.
+- **Phase 6** — Frontmatter, autosave, Mermaid, callouts, Shiki, task lists,
+  sanitization, exports.
+
+## Development
+
+```bash
+pnpm dev              # dev server
+pnpm build            # production build
+pnpm preview          # preview production build
+pnpm test             # unit tests (Vitest)
+pnpm test:e2e         # browser tests (Playwright)
+pnpm lint             # ESLint
+pnpm format           # Prettier
+pnpm gen:icons        # regenerate favicon and PWA icons from public/favicon.svg
+```
+
+### Icons
+
+Every icon the app ships — the SVG favicon, the ICO fallback, the PWA icons,
+the Apple touch icon, and the social share image — is generated from the single
+master at `public/favicon.svg` by `scripts/generate-icons.mjs`. To change the
+mark, edit that SVG and run `pnpm gen:icons`; the generated files are committed,
+and the script is idempotent, so a re-run with an unchanged master produces
+byte-identical output.
+
+## Credits
+
+WaynePDF is a fork and rewrite of
+[realdennis/md2pdf](https://github.com/realdennis/md2pdf), an offline-first
+Markdown-to-PDF web app. The original project is MIT-licensed; upstream's
+license is preserved in `UPSTREAM_LICENSE`. Every substantive component has been
+rewritten, but the debt is real and acknowledged.
+
 ## License
 
-MIT © 2026 Michael Mgbah. Portions © 2019 realdennis.
+MIT. See `LICENSE` for the current copyright and `UPSTREAM_LICENSE` for the
+original.

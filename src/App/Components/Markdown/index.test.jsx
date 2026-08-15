@@ -8,7 +8,7 @@ import { Provider } from 'nonaction';
 import { TextContainer } from '../../Container';
 import Markdown from './index.jsx';
 
-// Ported from upstream md2pdf src/App/Components/Markdown/index.test.js,
+// Ported from the upstream project's src/App/Components/Markdown/index.test.js,
 // updated for React 18 + Vitest.
 
 describe('<Markdown />', () => {
@@ -38,7 +38,7 @@ describe('<Markdown />', () => {
     // Not waitForElementToBeRemoved here: by this point the lazy Preview
     // module is already resolved in the module cache, so the Suspense fallback
     // may never commit. Wait on the outcome instead.
-    // initialText opens with "# Markdown2PDF", so the parser must emit an h1.
+    // initialText opens with "# WaynePDF", so the parser must emit an h1.
     await waitFor(() =>
       expect(container.querySelector('.preview h1')).toBeInTheDocument(),
     );

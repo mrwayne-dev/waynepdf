@@ -22,28 +22,14 @@ const Header = ({ className }) => {
   };
   return (
     <header className={className + ' no-print'}>
-      <p className="project"> waynepdf </p>
-      <iframe
-        title="github-button"
-        className="project"
-        style={{ display: 'block' }}
-        src="https://ghbtns.com/github-btn.html?user=realdennis&repo=md2pdf&type=star&count=true"
-        frameBorder="0"
-        scrolling="0"
-        width="100px"
-        height="20px"
-      />
+      <p className="project"> WaynePDF </p>
 
       <div className="menu">
         <UploadButton className="button upload" />
         <p className="button download" onClick={onTransfrom}>
-          <span role="img" aria-label="download">
-            🎉
-          </span>
           <span>Transform</span>
         </p>
       </div>
-      {/* <span className="author">Powered by @realdennis</span> */}
     </header>
   );
 };
@@ -88,15 +74,6 @@ export default styled(Header)`
     }
   }
 
-  /* span.author {
-    position: fixed;
-    bottom: 2px;
-    left: 2px;
-    opacity: 0.5;
-    color: white;
-    height: 20px;
-    z-index:99;
-  } */
   @keyframes dance {
     0% {
       transform: rotate(3deg);

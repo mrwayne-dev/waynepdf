@@ -1,48 +1,66 @@
-export const initialText = `# Markdown2PDF 
-https://realdennis.github.io/md2pdf/
-> Awesome Markdown to PDF!
-\`\`\`diff
-- Online? Upload resume.md to stranger server?
-+ Try Offline Web App!
-\`\`\`
+export const initialText = `# WaynePDF
 
-## How to use md2pdf?
-1. Click button choose \`.md\` file.
-2. Edit in editor (left panel).
-3. Click **Transform**!
-4. Switch 'Destination' to **Save as PDF**.
-4. **Chrome recommended**
+Write Markdown. Get a beautiful PDF. Nothing leaves your browser.
 
-## Tips
-- \`Resize\` the layout what you want.
-- After click \`Transform\` button, inverse the checkbox of **'Headers and Footers'**. 
-- **反選頁首與頁尾**.
+## Getting started
 
-## What's special?
-- You can use <span style="color:#0984e3">html</span> tag!
-<blockquote>Hey I'm in blockquote!</blockquote>
+Drop a \`.md\` file onto this window, or start typing on the left. When you're ready, click **Transform** in the top-right and choose **Save as PDF** in your browser's print dialog.
 
-## Profile
-- Github: [@realdennis](https://github.com/realdennis)
-- Project: md2pdf (Markdown2PDF)
-- What about me: ☕ 、 👨🏻‍💻️、 🍕、 🎞️
+Two settings in that dialog make the output cleaner:
 
-## Code Like this
+- Uncheck **Headers and Footers** so the browser doesn't stamp URLs and page numbers over your document.
+- Check **Background graphics** so code-block and blockquote backgrounds actually print.
+
+## The basics
+
+**Bold**, *italic*, ~~strikethrough~~, \`inline code\`, and [links](https://example.com) all work. Unicode too — CJK, Arabic, Hebrew, and emoji render correctly.
+
+## Lists
+
+- Bulleted items
+- Nested if you need them
+  - Two levels
+  - Three, four, however many
+
+1. Ordered lists
+2. Also work
+3. Exactly as you'd expect
+
+## Quotes
+
+> Simplicity is the ultimate sophistication.
+
+## Code
+
+Fenced blocks with syntax highlighting for most languages:
+
 \`\`\`javascript
-// index.js
-function Hello(){
-  console.log('World!')
+function greet(name) {
+  return \`Hello, \${name}\`;
 }
-Hello();
 \`\`\`
-
-or this
 
 \`\`\`python
-# main.py
-def awesome():
-    print('awesome!')
-awesome()
+def greet(name):
+    return f"Hello, {name}"
 \`\`\`
 
+## Tables
+
+| Feature                    | Status       |
+| -------------------------- | ------------ |
+| Headings, lists, quotes    | Ready        |
+| Tables and fenced code     | Ready        |
+| Unicode and emoji          | Ready        |
+| LaTeX math                 | Coming soon  |
+| Mermaid diagrams           | Coming soon  |
+| Themes, fonts, page layout | Coming soon  |
+
+## Raw HTML
+
+Standard HTML passes through if you need it. GitHub-flavored Markdown extensions — tables, strikethrough, fenced code — all render.
+
+---
+
+Delete this document and write your own.
 `;

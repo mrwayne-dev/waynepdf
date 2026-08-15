@@ -1,7 +1,8 @@
 {
   "name": "waynepdf",
   "version": "0.1.0",
-  "description": "Amazing Markdown to PDF — offline, private, and yours to configure.",
+  "description": "Write Markdown. Get a beautiful PDF. Offline, private, and yours to configure.",
+  "homepage": "https://waynepdf.mgbah.dev",
   "private": true,
   "type": "module",
   "engines": {
@@ -15,7 +16,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:update": "playwright test --update-snapshots",
-    "lint": "eslint src tests",
+    "lint": "eslint src tests scripts",
+    "gen:icons": "node scripts/generate-icons.mjs",
     "format": "prettier --write \"src/**/*.{js,jsx,json,css}\" \"tests/**/*.{js,jsx}\""
   },
   "dependencies": {
@@ -41,6 +43,7 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "jsdom": "^25.0.1",
     "prettier": "^3.3.3",
+    "sharp": "^0.35.3",
     "vite": "^5.4.8",
     "vite-plugin-pwa": "^0.20.5",
     "vitest": "^2.1.2",

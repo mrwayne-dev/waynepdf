@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { fileURLToPath, URL } from 'node:url';
 
-// Mirrors upstream md2pdf `homepage: "./"` so the build works from any
+// Mirrors the upstream project's `homepage: "./"` so the build works from any
 // subpath (GitHub Pages, Docker/nginx).
 export default defineConfig({
   base: './',
@@ -11,26 +11,30 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'icons/*.png'],
+      includeAssets: [
+        'favicon.ico',
+        'favicon.svg',
+        'og-image.png',
+        'icons/*.png',
+      ],
       manifest: {
         name: 'WaynePDF',
         short_name: 'WaynePDF',
         description:
-          'Amazing Markdown to PDF — offline, private, and yours to configure.',
+          'Write Markdown. Get a beautiful PDF. Offline, private, and yours to configure.',
         theme_color: '#000000',
         background_color: '#000000',
         display: 'standalone',
-        start_url: './index.html',
+        start_url: './',
+        categories: ['productivity', 'utilities'],
         icons: [
+          { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
           {
-            src: './icons/android-icon-144x144.png',
-            sizes: '144x144',
+            src: '/icons/icon-maskable-512.png',
+            sizes: '512x512',
             type: 'image/png',
-          },
-          {
-            src: './icons/android-icon-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
+            purpose: 'maskable',
           },
         ],
       },

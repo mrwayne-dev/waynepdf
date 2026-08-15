@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom/vitest';
 
 // CodeMirror 5 reaches for this legacy IE API during init; jsdom does not
-// provide it. Ported from upstream md2pdf src/setupTests.js.
+// provide it. Ported from the upstream project's src/setupTests.js.
 global.document.body.createTextRange = () => ({
   setEnd: () => {},
   setStart: () => {},

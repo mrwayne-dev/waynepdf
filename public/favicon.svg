@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="WaynePDF">
+  <title>WaynePDF</title>
+  <rect width="512" height="512" fill="#000000"/>
+  <!--
+    Geometric W: four angled strokes of uniform 52px horizontal weight, drawn as
+    one filled polygon so every join stays sharp (no round caps, no gradients).
+    Skeleton vertices sit at x = 128/192/256/320/384, giving an outer span of
+    102..410 = 60% of the canvas. The glyph box spans y 142..354, so its centre
+    lands at 248 — eight pixels above true centre, because a W is bottom-heavy
+    and reads as sunken when centred geometrically.
+  -->
+  <path fill="#ffffff" d="
+    M 102,142
+    L 154,142
+    L 198.8,290.4
+    L 230,230
+    L 282,230
+    L 313.2,290.4
+    L 358,142
+    L 410,142
+    L 346,354
+    L 294,354
+    L 256,280.4
+    L 218,354
+    L 166,354
+    Z"/>
+</svg>
