@@ -13,5 +13,5 @@ export default styled(Editor)`
   flex-shrink: 0;
   height: 100%;
   width: 50%;
-  color: rgb(204, 204, 204);
+  color: var(--wp-color-fg);
 `;

@@ -49,17 +49,28 @@ Open `http://localhost:8080`.
 Drop a `.md` file onto the window, or click **Choose** to pick one, or start
 typing on the left. When you're ready, click **Transform** and pick **Save as
 PDF** in the print dialog. For cleaner output, uncheck **Headers and Footers**
-and check **Background graphics** in that dialog.
+in that dialog — backgrounds print automatically.
+
+### Themes and typography
+
+The gear button opens a settings panel with five themes — Light, Dark, Sepia,
+High Contrast and Print Optimized — plus a System option that follows your OS.
+Body font (Inter, Source Serif 4 or JetBrains Mono), body size, line height and
+code size are all adjustable, and the preview updates live. Settings persist in
+`localStorage` under `waynepdf.settings.v1`.
+
+All three fonts are bundled as WOFF2 and served from the app's own origin, so
+they work offline and no request ever leaves your machine.
 
 ## Roadmap
 
-WaynePDF is being built in phases. Current state: **Phase 1 complete**.
+WaynePDF is being built in phases. Current state: **Phase 2 complete**.
 
 - **Phase 0** — Vite + React 18 foundation, markdown-it parser, test harness.
   Done.
 - **Phase 1** — Debranding and identity. Done.
-- **Phase 2** — Theming layer: bundled fonts, color variants, dark/light/sepia
-  themes.
+- **Phase 2** — Theming layer: five themes, three bundled fonts, settings panel.
+  Done.
 - **Phase 3** — Unicode correctness: BOM handling, encoding detection,
   `lang`/`dir` support.
 - **Phase 4** — Math rendering via KaTeX.

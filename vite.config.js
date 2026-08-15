@@ -17,6 +17,15 @@ export default defineConfig({
         'og-image.png',
         'icons/*.png',
       ],
+      workbox: {
+        // Workbox's default glob omits woff2, which would leave the bundled
+        // Inter/Source Serif/JetBrains Mono faces uncached — the app would come
+        // up offline and silently fall back to system fonts.
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,webmanifest}'],
+        // The lazily-loaded Preview chunk carries all of highlight.js and is
+        // over the 2 MiB default ceiling once source maps are off.
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+      },
       manifest: {
         name: 'WaynePDF',
         short_name: 'WaynePDF',

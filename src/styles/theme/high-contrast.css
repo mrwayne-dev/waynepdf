@@ -1,0 +1,21 @@
+/* High Contrast — Accessibility-first. WCAG AAA contrast wherever the palette allows. */
+
+[data-theme='high-contrast'] {
+  color-scheme: light;
+
+  --wp-color-canvas: #ffffff;
+  --wp-color-canvas-subtle: #f0f0f0;
+  --wp-color-fg: #000000;
+  --wp-color-fg-muted: #1a1a1a;
+  --wp-color-fg-subtle: #333333;
+  --wp-color-accent: #0000ee;
+  --wp-color-accent-emphasis: #000099;
+  --wp-color-border: #000000;
+  --wp-color-border-muted: #333333;
+  --wp-color-neutral-muted: #e0e0e0;
+  --wp-color-danger: #a00000;
+  --wp-color-success: #006000;
+  --wp-color-attention: #805000;
+  --wp-color-blockquote-fg: #000000;
+  --wp-color-blockquote-border: #000000;
+}

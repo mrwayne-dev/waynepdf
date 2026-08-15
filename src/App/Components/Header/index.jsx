@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import UploadButton from '../Upload.jsx';
+import Settings from '../Settings/index.jsx';
 
 const Header = ({ className }) => {
   const onTransfrom = () => {
@@ -23,6 +24,7 @@ const Header = ({ className }) => {
   return (
     <header className={className + ' no-print'}>
       <p className="project"> WaynePDF </p>
+      <Settings />
 
       <div className="menu">
         <UploadButton className="button upload" />
@@ -44,8 +46,13 @@ export default styled(Header)`
   user-select: none;
   padding-left: 5px;
   padding-right: 5px;
-  color: black;
-  background-color: rgb(233, 233, 233);
+  /* Theme tokens, not literals: the header sits outside .markdown-body, so
+     without these it stays light grey in Dark and Sepia. */
+  color: var(--wp-color-fg);
+  background-color: var(--wp-color-canvas-subtle);
+  border-bottom: 1px solid var(--wp-color-border);
+  font-family: var(--wp-font-family-sans);
+  font-size: var(--wp-ui-font-size);
   display: flex;
   align-items: center;
   height: 40px;
@@ -67,10 +74,15 @@ export default styled(Header)`
       display: flex;
       align-items: center;
       margin-left: 3px;
-      border-radius: 3px;
-      border: 1px solid black;
+      border-radius: var(--wp-ui-radius);
+      border: 1px solid var(--wp-color-border);
+      background-color: var(--wp-color-canvas);
       padding: 10px;
       cursor: pointer;
+      transition: background-color var(--wp-ui-transition);
+    }
+    .button:hover {
+      background-color: var(--wp-color-neutral-muted);
     }
   }
 

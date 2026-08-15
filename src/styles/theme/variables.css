@@ -1,0 +1,61 @@
+/*
+ * Root defaults for the WaynePDF design tokens.
+ *
+ * Everything is namespaced --wp-*. Colours are redefined per theme in the
+ * sibling [data-theme="..."] files; the font stacks and the three typography
+ * scalars live here because they are theme-independent — ThemeContainer
+ * overwrites the scalars inline on :root when the user moves a slider.
+ */
+
+:root {
+  /* Font stacks. Bundled faces come first, system fallbacks after, so a
+     failed font load degrades instead of breaking. */
+  --wp-font-family-sans:
+    'Inter Variable', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    'Noto Sans', Helvetica, Arial, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji';
+  --wp-font-family-serif:
+    'Source Serif 4 Variable', 'Source Serif 4', 'Iowan Old Style',
+    'Palatino Linotype', Palatino, Georgia, serif;
+  --wp-font-family-mono:
+    'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'SF Mono',
+    SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+
+  /* Active body face. ThemeContainer rewrites this to point at one of the
+     three stacks above. */
+  --wp-font-family-body: var(--wp-font-family-sans);
+
+  --wp-font-size-base: 16px;
+  --wp-font-size-code: 14px;
+  --wp-line-height-base: 1.6;
+
+  /* Chrome (header, settings panel, editor gutter) reads these rather than the
+     document palette, so app furniture stays legible in every theme. */
+  --wp-ui-font-size: 13px;
+  --wp-ui-radius: 6px;
+  --wp-ui-transition: 180ms ease;
+}
+
+/*
+ * Fallback palette. If no data-theme is set — first paint before the
+ * ThemeContainer effect runs, or JS disabled entirely — the document still
+ * renders as Light rather than as unstyled black-on-white.
+ */
+:root {
+  color-scheme: light;
+  --wp-color-canvas: #ffffff;
+  --wp-color-canvas-subtle: #f6f8fa;
+  --wp-color-fg: #1f2328;
+  --wp-color-fg-muted: #59636e;
+  --wp-color-fg-subtle: #6e7781;
+  --wp-color-accent: #0969da;
+  --wp-color-accent-emphasis: #0550ae;
+  --wp-color-border: #d1d9e0;
+  --wp-color-border-muted: #d1d9e0b3;
+  --wp-color-neutral-muted: #818b981f;
+  --wp-color-danger: #d1242f;
+  --wp-color-success: #1a7f37;
+  --wp-color-attention: #9a6700;
+  --wp-color-blockquote-fg: #59636e;
+  --wp-color-blockquote-border: #d1d9e0;
+}

@@ -1,0 +1,288 @@
+/*
+ * Settings panel chrome.
+ *
+ * Plain CSS rather than styled-components because every colour here is a theme
+ * token: the panel has to repaint itself when --wp-color-* changes, and vars in
+ * a static stylesheet do that for free.
+ */
+
+/* ------------------------------------------------------------------ gear */
+
+.wp-gear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-left: 8px;
+  padding: 0;
+  color: var(--wp-color-fg);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--wp-ui-radius);
+  cursor: pointer;
+  transition: background-color var(--wp-ui-transition);
+}
+
+.wp-gear:hover {
+  background-color: var(--wp-color-neutral-muted);
+}
+
+.wp-gear:focus-visible {
+  outline: 2px solid var(--wp-color-accent);
+  outline-offset: 1px;
+}
+
+/* ----------------------------------------------------------------- panel */
+
+.wp-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+  height: 100vh;
+  color: var(--wp-color-fg);
+  background-color: var(--wp-color-canvas-subtle);
+  border-left: 1px solid var(--wp-color-border);
+  transform: translateX(100%);
+  transition: transform var(--wp-ui-transition);
+}
+
+.wp-panel.is-open {
+  transform: translateX(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wp-panel {
+    transition: none;
+  }
+}
+
+.wp-panel-head {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--wp-color-border);
+}
+
+.wp-panel-title {
+  margin: 0;
+  font-family: var(--wp-font-family-sans);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.wp-close {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--wp-color-fg-muted);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--wp-ui-radius);
+  cursor: pointer;
+}
+
+.wp-close:hover {
+  color: var(--wp-color-fg);
+  background-color: var(--wp-color-neutral-muted);
+}
+
+.wp-close:focus-visible,
+.wp-reset:focus-visible,
+.wp-swatch:focus-visible,
+.wp-range:focus-visible,
+.wp-pill:focus-within {
+  outline: 2px solid var(--wp-color-accent);
+  outline-offset: 1px;
+}
+
+.wp-panel-body {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  font-family: var(--wp-font-family-sans);
+  font-size: var(--wp-ui-font-size);
+}
+
+/* --------------------------------------------------------------- fields */
+
+.wp-fieldset {
+  margin: 0 0 20px;
+  padding: 0;
+  border: 0;
+}
+
+.wp-label {
+  padding: 0;
+  font-size: var(--wp-ui-font-size);
+  font-weight: 600;
+  color: var(--wp-color-fg);
+}
+
+.wp-hint {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--wp-color-fg-muted);
+}
+
+.wp-field {
+  margin-bottom: 20px;
+}
+
+.wp-field-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.wp-readout {
+  font-family: var(--wp-font-family-mono);
+  font-size: 12px;
+  color: var(--wp-color-fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.wp-range {
+  width: 100%;
+  margin: 0;
+  accent-color: var(--wp-color-accent);
+  cursor: pointer;
+}
+
+/* ------------------------------------------------------------- swatches */
+
+.wp-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.wp-swatch {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  overflow: hidden;
+  background: none;
+  border: 1px solid var(--wp-color-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: box-shadow var(--wp-ui-transition);
+}
+
+/*
+ * The ring uses the *panel's* accent, not the swatch's own. Each swatch carries
+ * data-theme, so an unqualified var() inside it would resolve to that theme's
+ * accent and the ring would change colour per swatch.
+ */
+.wp-swatch.is-active {
+  box-shadow:
+    0 0 0 2px var(--wp-color-canvas-subtle),
+    0 0 0 4px var(--wp-color-accent);
+}
+
+.wp-swatch-bands {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.wp-swatch-band {
+  flex: 1;
+}
+
+.wp-swatch-canvas {
+  background-color: var(--wp-color-canvas);
+}
+
+.wp-swatch-fg {
+  background-color: var(--wp-color-fg);
+}
+
+.wp-swatch-accent {
+  background-color: var(--wp-color-accent);
+}
+
+.wp-swatch-system {
+  flex-direction: row;
+}
+
+.wp-swatch-system-half {
+  flex: 1;
+  background-color: var(--wp-color-canvas);
+}
+
+/* ---------------------------------------------------------------- pills */
+
+.wp-pills {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.wp-pill {
+  flex: 1;
+  padding: 7px 4px;
+  font-size: var(--wp-ui-font-size);
+  color: var(--wp-color-fg);
+  text-align: center;
+  background-color: var(--wp-color-canvas);
+  border: 1px solid var(--wp-color-border);
+  border-radius: var(--wp-ui-radius);
+  cursor: pointer;
+  transition:
+    background-color var(--wp-ui-transition),
+    border-color var(--wp-ui-transition);
+}
+
+.wp-pill.is-active {
+  color: var(--wp-color-canvas);
+  background-color: var(--wp-color-accent);
+  border-color: var(--wp-color-accent);
+}
+
+/* The radio itself is the accessible control; the pill is its visible form. */
+.wp-pill input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------- footer */
+
+.wp-divider {
+  height: 1px;
+  margin: 4px 0 16px;
+  background-color: var(--wp-color-border);
+  border: 0;
+}
+
+.wp-reset {
+  width: 100%;
+  padding: 8px;
+  font-family: var(--wp-font-family-sans);
+  font-size: var(--wp-ui-font-size);
+  color: var(--wp-color-fg);
+  background-color: var(--wp-color-canvas);
+  border: 1px solid var(--wp-color-border);
+  border-radius: var(--wp-ui-radius);
+  cursor: pointer;
+  transition: background-color var(--wp-ui-transition);
+}
+
+.wp-reset:hover {
+  background-color: var(--wp-color-neutral-muted);
+}

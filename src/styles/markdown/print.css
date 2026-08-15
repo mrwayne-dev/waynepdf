@@ -1,0 +1,33 @@
+/*
+ * Print rules for the rendered document.
+ *
+ * Fixes the Phase 0 §5.8 backlog item: browsers strip background colours from
+ * printed output by default, which silently flattened every code block and
+ * blockquote fill. print-color-adjust: exact opts back in, so users no longer
+ * have to find "Background graphics" in the print dialog themselves.
+ */
+
+@media print {
+  .markdown-body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* The elements whose meaning depends on their fill surviving. */
+  .markdown-body pre,
+  .markdown-body code,
+  .markdown-body blockquote,
+  .markdown-body table th,
+  .markdown-body table tr:nth-child(2n) {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Links lose their affordance on paper, so keep them underlined as well as
+     coloured — the colour alone may not survive a greyscale printer. */
+  .markdown-body a {
+    color: var(--wp-color-accent) !important;
+    text-decoration: underline;
+  }
+}

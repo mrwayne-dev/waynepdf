@@ -22,7 +22,10 @@ const UnwrappedDragBar = ({ className, setDrag, setStartX }) => {
 export default styled(UnwrappedDragBar)`
   width: ${width + 'px'};
   flex-shrink: 0;
-  background-color: ${(props) => (props.isDrag ? '#0984e3' : 'rgb(233,233,233)')};
+  background-color: ${(props) =>
+    props.isDrag ? 'var(--wp-color-accent)' : 'var(--wp-color-canvas-subtle)'};
+  border-left: 1px solid var(--wp-color-border);
+  border-right: 1px solid var(--wp-color-border);
   height: 100%;
   color: white;
   text-align: center;

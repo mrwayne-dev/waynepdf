@@ -1,0 +1,33 @@
+/*
+ * WaynePDF's markdown stylesheet.
+ *
+ * Forked from github-markdown-css 5.5.1 (MIT, Sindre Sorhus) — see
+ * UPSTREAM_LICENSE for the notice, and README Credits for the wider debt.
+ * This replaces the package as a dependency; it is now our source to edit.
+ *
+ * Changes from upstream:
+ *   - both @media (prefers-color-scheme) blocks removed. Themes are chosen
+ *     explicitly by the user; the palettes live in src/styles/theme/.
+ *   - every --color-* reference rewritten onto the 15-token --wp-color-*
+ *     palette. blockquote picks up its own two tokens; `mark` derives its tint
+ *     with color-mix rather than adding a token that only it would use.
+ *   - font family, body size, code size and line height read --wp-font-*, which
+ *     is how the settings panel reaches the rendered document.
+ *   - .pl-* dropped (24 rules). Those style GitHub's server-side "prettylights"
+ *     highlighter; WaynePDF renders with highlight.js, which only ever emits
+ *     .hljs-*, so they could never match.
+ *
+ * Split by concern so a change to, say, table borders is findable. Splitting
+ * reorders the cascade, so the fork was checked for same-specificity rule pairs
+ * that swapped places: of 48 candidates only two inverted, and both are
+ * class-only selectors that cannot land on one element (.emoji vs
+ * .task-list-item-checkbox, .highlight vs .markdown-alert). Within each file
+ * upstream's relative order is intact. print.css is last so its !important
+ * rules sit above everything.
+ */
+@import './base.css';
+@import './typography.css';
+@import './code.css';
+@import './tables.css';
+@import './media.css';
+@import './print.css';

@@ -1,0 +1,21 @@
+/* Sepia — Warm, low blue-light, tuned for long reading sessions. */
+
+[data-theme='sepia'] {
+  color-scheme: light;
+
+  --wp-color-canvas: #f4ecd8;
+  --wp-color-canvas-subtle: #ebe0c4;
+  --wp-color-fg: #433422;
+  --wp-color-fg-muted: #6b5a44;
+  --wp-color-fg-subtle: #8b7a5f;
+  --wp-color-accent: #8b4513;
+  --wp-color-accent-emphasis: #6b3410;
+  --wp-color-border: #c9b98a;
+  --wp-color-border-muted: #c9b98ab3;
+  --wp-color-neutral-muted: #a89968;
+  --wp-color-danger: #a03030;
+  --wp-color-success: #4a7c2e;
+  --wp-color-attention: #a06b1a;
+  --wp-color-blockquote-fg: #6b5a44;
+  --wp-color-blockquote-border: #c9b98a;
+}

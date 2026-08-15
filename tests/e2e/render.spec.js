@@ -57,6 +57,84 @@ test.describe('fixture rendering', () => {
   }
 });
 
+test.describe('theming does not change the DOM, only the paint', () => {
+  const THEMES = ['light', 'dark', 'sepia', 'high-contrast', 'print-optimized'];
+
+  /** Boots with a theme already stored, so first paint is the theme under test. */
+  async function bootWithTheme(page, theme, markdown) {
+    await page.addInitScript(
+      ([key, value]) => window.localStorage.setItem(key, value),
+      [
+        'waynepdf.settings.v1',
+        JSON.stringify({
+          theme,
+          fontFamily: 'sans',
+          fontSize: 16,
+          lineHeight: 1.6,
+          codeFontSize: 14,
+        }),
+      ],
+    );
+    await renderFixture(page, markdown);
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.dataset.theme))
+      .toBe(theme);
+  }
+
+  const paintOf = (page) =>
+    page.evaluate(() => {
+      const s = getComputedStyle(document.querySelector('.markdown-body'));
+      return { background: s.backgroundColor, color: s.color };
+    });
+
+  test('rendered HTML is byte-identical across all five themes', async ({
+    page,
+  }) => {
+    const markdown = fs.readFileSync(
+      path.join(FIXTURE_DIR, 'basic.md'),
+      'utf8',
+    );
+    const html = {};
+    for (const theme of THEMES) {
+      await bootWithTheme(page, theme, markdown);
+      html[theme] = await page.locator('.preview').innerHTML();
+    }
+    // Themes are CSS-only. If a theme ever starts injecting markup, this fails.
+    for (const theme of THEMES.slice(1)) {
+      expect(html[theme], `${theme} vs light`).toBe(html.light);
+    }
+  });
+
+  test('Light, Dark and Sepia paint the document differently', async ({
+    page,
+  }) => {
+    const markdown = fs.readFileSync(
+      path.join(FIXTURE_DIR, 'basic.md'),
+      'utf8',
+    );
+    const paint = {};
+    for (const theme of ['light', 'dark', 'sepia']) {
+      await bootWithTheme(page, theme, markdown);
+      paint[theme] = await paintOf(page);
+    }
+
+    const backgrounds = Object.values(paint).map((p) => p.background);
+    const colors = Object.values(paint).map((p) => p.color);
+    expect(new Set(backgrounds).size, `backgrounds: ${backgrounds}`).toBe(3);
+    expect(new Set(colors).size, `colors: ${colors}`).toBe(3);
+
+    // Sanity-check the direction, not just the difference: dark must be darker.
+    const luma = (rgb) => {
+      const [r, g, b] = rgb.match(/\d+/g).map(Number);
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    expect(luma(paint.dark.background)).toBeLessThan(
+      luma(paint.light.background),
+    );
+    expect(luma(paint.dark.color)).toBeGreaterThan(luma(paint.light.color));
+  });
+});
+
 test.describe('baseline bugs are still present in the browser', () => {
   test('BOM-prefixed heading does not become an h1 (Phase 3)', async ({
     page,

@@ -1,0 +1,21 @@
+/* Light — GitHub-flavoured. Matches the perception users carry over from the upstream project. */
+
+[data-theme='light'] {
+  color-scheme: light;
+
+  --wp-color-canvas: #ffffff;
+  --wp-color-canvas-subtle: #f6f8fa;
+  --wp-color-fg: #1f2328;
+  --wp-color-fg-muted: #59636e;
+  --wp-color-fg-subtle: #6e7781;
+  --wp-color-accent: #0969da;
+  --wp-color-accent-emphasis: #0550ae;
+  --wp-color-border: #d1d9e0;
+  --wp-color-border-muted: #d1d9e0b3;
+  --wp-color-neutral-muted: #818b981f;
+  --wp-color-danger: #d1242f;
+  --wp-color-success: #1a7f37;
+  --wp-color-attention: #9a6700;
+  --wp-color-blockquote-fg: #59636e;
+  --wp-color-blockquote-border: #d1d9e0;
+}

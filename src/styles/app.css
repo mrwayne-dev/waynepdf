@@ -1,0 +1,39 @@
+/*
+ * App shell styling. Component-local styling stays in styled-components; this
+ * file owns the things that sit above React — the document element itself, and
+ * the scrollbars and selection colours that have to follow the active theme.
+ */
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+/*
+ * Without this the frame around the preview stays white in Dark and Sepia:
+ * .markdown-body paints only the preview pane, so the editor gutter, the
+ * overscroll area, and the print page margins would all show through.
+ */
+body {
+  background-color: var(--wp-color-canvas);
+  color: var(--wp-color-fg);
+}
+
+::selection {
+  background-color: color-mix(in srgb, var(--wp-color-accent) 28%, transparent);
+}
+
+/*
+ * The print sheet is the document, not the app frame. Force it white-backed
+ * regardless of the screen theme's canvas so a Dark-theme user does not get a
+ * black page bleed around the margins; the document body keeps its own theme
+ * colours via .markdown-body.
+ */
+@media print {
+  html,
+  body {
+    height: auto;
+    background: none;
+  }
+}

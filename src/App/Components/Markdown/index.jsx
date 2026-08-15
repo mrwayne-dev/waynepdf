@@ -5,7 +5,6 @@ import { TextContainer } from '../../Container';
 import Previewer from '../Previewer/index.jsx';
 import Editor from '../Editor/index.jsx';
 import DragBar from '../DragBar.jsx';
-import 'github-markdown-css';
 import useDrop from '../../Container/Hooks/useDrop.js';
 import uploadFile from '../../Lib/uploadFile.js';
 

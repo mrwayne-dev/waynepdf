@@ -1,0 +1,21 @@
+/* Dark — GitHub dark. */
+
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --wp-color-canvas: #0d1117;
+  --wp-color-canvas-subtle: #151b23;
+  --wp-color-fg: #f0f6fc;
+  --wp-color-fg-muted: #9198a1;
+  --wp-color-fg-subtle: #6e7681;
+  --wp-color-accent: #4493f8;
+  --wp-color-accent-emphasis: #1f6feb;
+  --wp-color-border: #3d444d;
+  --wp-color-border-muted: #3d444db3;
+  --wp-color-neutral-muted: #656c7633;
+  --wp-color-danger: #f85149;
+  --wp-color-success: #3fb950;
+  --wp-color-attention: #d29922;
+  --wp-color-blockquote-fg: #9198a1;
+  --wp-color-blockquote-border: #3d444d;
+}

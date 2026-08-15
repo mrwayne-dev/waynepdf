@@ -23,6 +23,9 @@ const browserGlobals = {
   File: 'readonly',
   setTimeout: 'readonly',
   clearTimeout: 'readonly',
+  getComputedStyle: 'readonly',
+  localStorage: 'readonly',
+  matchMedia: 'readonly',
 };
 
 const nodeGlobals = {

@@ -1,12 +1,12 @@
 import styled from 'styled-components';
 import { Provider } from 'nonaction';
 import { Header, Markdown } from './Components';
-import { TextContainer } from './Container';
+import { TextContainer, ThemeContainer } from './Container';
 
 const App = ({ className }) => {
   return (
     <div className={className} id="waynepdf-app">
-      <Provider inject={[TextContainer]}>
+      <Provider inject={[TextContainer, ThemeContainer]}>
         <Header />
         <Markdown />
       </Provider>
@@ -18,7 +18,7 @@ export default styled(App)`
   height: 100%;
   display: flex;
   flex-direction: column;
-  font-family: 微軟正黑體, sans-serif;
+  font-family: var(--wp-font-family-sans);
   @media print {
     &,
     div {

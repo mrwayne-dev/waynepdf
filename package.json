@@ -21,8 +21,10 @@
     "format": "prettier --write \"src/**/*.{js,jsx,json,css}\" \"tests/**/*.{js,jsx}\""
   },
   "dependencies": {
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "@fontsource-variable/source-serif-4": "^5.3.0",
     "codemirror": "^5.65.0",
-    "github-markdown-css": "5.5.1",
     "highlight.js": "11.9.0",
     "markdown-it": "14.1.0",
     "nonaction": "^0.0.5",

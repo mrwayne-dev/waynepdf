@@ -1,0 +1,14 @@
+/*
+ * WaynePDF theme layer.
+ *
+ * variables.css first: it declares the token contract and a Light fallback for
+ * the frame before ThemeContainer sets data-theme. The per-theme files then
+ * override the colour tokens under their own [data-theme] selector, so nothing
+ * here depends on source order beyond that.
+ */
+@import './variables.css';
+@import './light.css';
+@import './dark.css';
+@import './sepia.css';
+@import './high-contrast.css';
+@import './print-optimized.css';

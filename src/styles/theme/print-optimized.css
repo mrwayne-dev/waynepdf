@@ -1,0 +1,21 @@
+/* Print Optimized — Maximum contrast, always light, backgrounds forced on at print time. */
+
+[data-theme='print-optimized'] {
+  color-scheme: light;
+
+  --wp-color-canvas: #ffffff;
+  --wp-color-canvas-subtle: #f4f4f4;
+  --wp-color-fg: #000000;
+  --wp-color-fg-muted: #333333;
+  --wp-color-fg-subtle: #555555;
+  --wp-color-accent: #003399;
+  --wp-color-accent-emphasis: #001a66;
+  --wp-color-border: #666666;
+  --wp-color-border-muted: #999999;
+  --wp-color-neutral-muted: #eeeeee;
+  --wp-color-danger: #990000;
+  --wp-color-success: #006600;
+  --wp-color-attention: #996600;
+  --wp-color-blockquote-fg: #333333;
+  --wp-color-blockquote-border: #666666;
+}

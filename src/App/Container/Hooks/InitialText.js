@@ -6,10 +6,11 @@ Write Markdown. Get a beautiful PDF. Nothing leaves your browser.
 
 Drop a \`.md\` file onto this window, or start typing on the left. When you're ready, click **Transform** in the top-right and choose **Save as PDF** in your browser's print dialog.
 
-Two settings in that dialog make the output cleaner:
+One setting in that dialog makes the output cleaner:
 
 - Uncheck **Headers and Footers** so the browser doesn't stamp URLs and page numbers over your document.
-- Check **Background graphics** so code-block and blockquote backgrounds actually print.
+
+Backgrounds for code blocks and blockquotes print automatically — no need to hunt for the "Background graphics" checkbox.
 
 ## The basics
 
@@ -52,9 +53,10 @@ def greet(name):
 | Headings, lists, quotes    | Ready        |
 | Tables and fenced code     | Ready        |
 | Unicode and emoji          | Ready        |
+| Themes and fonts           | Ready        |
 | LaTeX math                 | Coming soon  |
 | Mermaid diagrams           | Coming soon  |
-| Themes, fonts, page layout | Coming soon  |
+| Page layout                | Coming soon  |
 
 ## Raw HTML
 

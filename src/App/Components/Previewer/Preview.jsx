@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import MarkdownIt from 'markdown-it';
 import hljs from 'highlight.js';
-import 'highlight.js/styles/github.css';
+// No stylesheet import here: all four hljs themes are injected in main.jsx and
+// toggled by applyTheme, so the highlighting follows the app theme.
 
 // Direct markdown-it ownership — replaces upstream's react-remarkable ->
 // remarkable@1.7.1 transitive chain. Both of those are unmaintained.

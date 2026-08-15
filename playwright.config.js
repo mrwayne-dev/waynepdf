@@ -10,6 +10,14 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI ? 'list' : [['list'], ['html', { open: 'never' }]],
   snapshotDir: './tests/e2e/__snapshots__',
+  expect: {
+    toHaveScreenshot: {
+      // Keep image baselines out of __snapshots__, which holds the rendered-HTML
+      // text snapshots. Separate trees because they are reviewed differently:
+      // the HTML diffs are read line by line, the images are eyeballed.
+      pathTemplate: './tests/e2e/__screenshots__/{arg}{ext}',
+    },
+  },
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: 'on-first-retry',
