@@ -1,0 +1,57 @@
+/*
+ * Right-to-left mirroring. Part of the forked markdown stylesheet; see
+ * index.css.
+ *
+ * Arabic and Hebrew shape correctly without help — that is the font's job, and
+ * the browser does it. What does not come free is layout: upstream's rules are
+ * written in physical `left`/`right` terms, so a `dir="rtl"` document still got
+ * its blockquote rail on the left and its list bullets on the far side of the
+ * text. These rules flip the handful of places that hardcode a side.
+ *
+ * Written against [dir="rtl"] rather than :dir(rtl) because the container's
+ * dir is explicit whenever it matters, and the attribute selector needs no
+ * fallback for older engines.
+ */
+
+.markdown-body[dir='rtl'] {
+  text-align: right;
+}
+
+.markdown-body[dir='rtl'] blockquote {
+  border-left: none;
+  border-right: 0.25em solid var(--wp-color-blockquote-border);
+  padding-left: 0;
+  padding-right: 1em;
+}
+
+.markdown-body[dir='rtl'] ul,
+.markdown-body[dir='rtl'] ol {
+  padding-left: 0;
+  padding-right: 2em;
+}
+
+.markdown-body[dir='rtl'] li {
+  text-align: right;
+}
+
+.markdown-body[dir='rtl'] table {
+  text-align: right;
+}
+
+.markdown-body[dir='rtl'] th,
+.markdown-body[dir='rtl'] td {
+  text-align: right;
+}
+
+/*
+ * Code is always left-to-right, whatever the surrounding prose. `unicode-bidi:
+ * isolate` stops the RTL paragraph direction leaking in and reordering
+ * operators and brackets — without it, `if (a && b)` inside an Arabic document
+ * renders with the parenthesis on the wrong end.
+ */
+.markdown-body[dir='rtl'] pre,
+.markdown-body[dir='rtl'] code {
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: isolate;
+}

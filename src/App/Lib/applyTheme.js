@@ -74,6 +74,12 @@ export function applyTheme({
     '--wp-font-family-body',
     `var(--wp-font-family-${fontFamily})`,
   );
+  // The generics-free variant, which the per-language stacks need so they can
+  // put Noto ahead of `sans-serif`. See variables.css.
+  root.style.setProperty(
+    '--wp-font-family-lead',
+    `var(--wp-font-family-${fontFamily}-lead)`,
+  );
   root.style.setProperty('--wp-font-size-base', `${fontSize}px`);
   root.style.setProperty('--wp-font-size-code', `${codeFontSize}px`);
   root.style.setProperty('--wp-line-height-base', String(lineHeight));

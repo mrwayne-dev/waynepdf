@@ -21,9 +21,23 @@
     'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'SF Mono',
     SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
 
-  /* Active body face. ThemeContainer rewrites this to point at one of the
-     three stacks above. */
+  /*
+   * "Lead" variants: the bundled face alone, with no generic keyword.
+   *
+   * These exist because a generic family (`sans-serif`) never fails to match —
+   * it resolves to whatever the OS default is. Any family listed after one is
+   * unreachable. The per-language stacks in markdown/lang.css therefore have to
+   * insert Noto *before* the generics, which means they need the bundled face
+   * without them. Without this split, a Hebrew document renders in the host's
+   * default font and Noto Sans Hebrew is never even downloaded.
+   */
+  --wp-font-family-sans-lead: 'Inter Variable', Inter;
+  --wp-font-family-serif-lead: 'Source Serif 4 Variable', 'Source Serif 4';
+  --wp-font-family-mono-lead: 'JetBrains Mono Variable', 'JetBrains Mono';
+
+  /* Active body face. ThemeContainer rewrites both to the selected family. */
   --wp-font-family-body: var(--wp-font-family-sans);
+  --wp-font-family-lead: var(--wp-font-family-sans-lead);
 
   --wp-font-size-base: 16px;
   --wp-font-size-code: 14px;

@@ -14,7 +14,7 @@ Backgrounds for code blocks and blockquotes print automatically — no need to h
 
 ## The basics
 
-**Bold**, *italic*, ~~strikethrough~~, \`inline code\`, and [links](https://example.com) all work. Unicode too — CJK, Arabic, Hebrew, and emoji render correctly.
+**Bold**, *italic*, ~~strikethrough~~, \`inline code\`, and [links](https://example.com) all work. Unicode too — CJK, Arabic, Hebrew, and emoji render correctly. Encoding is detected automatically for common non-UTF-8 files.
 
 ## Lists
 
@@ -54,6 +54,7 @@ def greet(name):
 | Tables and fenced code     | Ready        |
 | Unicode and emoji          | Ready        |
 | Themes and fonts           | Ready        |
+| Unicode and encodings      | Ready        |
 | LaTeX math                 | Coming soon  |
 | Mermaid diagrams           | Coming soon  |
 | Page layout                | Coming soon  |

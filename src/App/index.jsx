@@ -1,12 +1,24 @@
 import styled from 'styled-components';
 import { Provider } from 'nonaction';
 import { Header, Markdown } from './Components';
-import { TextContainer, ThemeContainer } from './Container';
+import {
+  TextContainer,
+  ThemeContainer,
+  LanguageContainer,
+  EncodingBannerContainer,
+} from './Container';
 
 const App = ({ className }) => {
   return (
     <div className={className} id="waynepdf-app">
-      <Provider inject={[TextContainer, ThemeContainer]}>
+      <Provider
+        inject={[
+          TextContainer,
+          ThemeContainer,
+          LanguageContainer,
+          EncodingBannerContainer,
+        ]}
+      >
         <Header />
         <Markdown />
       </Provider>

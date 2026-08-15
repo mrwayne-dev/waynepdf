@@ -87,23 +87,36 @@ test.describe('theming does not change the DOM, only the paint', () => {
       return { background: s.backgroundColor, color: s.color };
     });
 
-  test('rendered HTML is byte-identical across all five themes', async ({
-    page,
-  }) => {
-    const markdown = fs.readFileSync(
-      path.join(FIXTURE_DIR, 'basic.md'),
-      'utf8',
-    );
-    const html = {};
-    for (const theme of THEMES) {
-      await bootWithTheme(page, theme, markdown);
-      html[theme] = await page.locator('.preview').innerHTML();
-    }
-    // Themes are CSS-only. If a theme ever starts injecting markup, this fails.
-    for (const theme of THEMES.slice(1)) {
-      expect(html[theme], `${theme} vs light`).toBe(html.light);
-    }
-  });
+  // Latin, both Han scripts, kana, Hangul and both RTL scripts. If theming
+  // ever starts depending on document content, one of these catches it.
+  const CROSS_THEME_FIXTURES = [
+    'basic.md',
+    'cjk-tc.md',
+    'cjk-sc.md',
+    'cjk-ja.md',
+    'cjk-ko.md',
+    'rtl-arabic.md',
+    'rtl-hebrew.md',
+    'mixed-directional.md',
+  ];
+
+  for (const fixture of CROSS_THEME_FIXTURES) {
+    test(`${fixture} renders byte-identical HTML across all five themes`, async ({
+      page,
+    }) => {
+      const markdown = fs.readFileSync(path.join(FIXTURE_DIR, fixture), 'utf8');
+      const html = {};
+      for (const theme of THEMES) {
+        await bootWithTheme(page, theme, markdown);
+        html[theme] = await page.locator('.preview').innerHTML();
+      }
+      // Themes are CSS-only. If a theme ever starts injecting markup — or if
+      // lang/dir ever became theme-dependent — this fails.
+      for (const theme of THEMES.slice(1)) {
+        expect(html[theme], `${theme} vs light`).toBe(html.light);
+      }
+    });
+  }
 
   test('Light, Dark and Sepia paint the document differently', async ({
     page,

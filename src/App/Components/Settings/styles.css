@@ -158,6 +158,25 @@
   cursor: pointer;
 }
 
+/* --------------------------------------------------------------- select */
+
+.wp-select {
+  width: 100%;
+  padding: 7px 8px;
+  font-family: var(--wp-font-family-sans);
+  font-size: var(--wp-ui-font-size);
+  color: var(--wp-color-fg);
+  background-color: var(--wp-color-canvas);
+  border: 1px solid var(--wp-color-border);
+  border-radius: var(--wp-ui-radius);
+  cursor: pointer;
+}
+
+.wp-select:focus-visible {
+  outline: 2px solid var(--wp-color-accent);
+  outline-offset: 1px;
+}
+
 /* ------------------------------------------------------------- swatches */
 
 .wp-swatches {

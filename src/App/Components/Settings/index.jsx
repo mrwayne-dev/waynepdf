@@ -5,6 +5,7 @@ import { RANGES } from '../../Lib/settings.js';
 import SettingsButton from './SettingsButton.jsx';
 import ThemeSwatch from './ThemeSwatch.jsx';
 import FontPicker from './FontPicker.jsx';
+import LanguagePicker from './LanguagePicker.jsx';
 import Slider from './Slider.jsx';
 import './styles.css';
 
@@ -101,13 +102,15 @@ export default function Settings() {
                 />
               ))}
             </div>
-            <p className="wp-hint">{labelFor(settings.theme)}</p>
+            <p className="wp-hint wp-theme-name">{labelFor(settings.theme)}</p>
           </fieldset>
 
           <FontPicker
             value={settings.fontFamily}
             onChange={updaters.setFontFamily}
           />
+
+          <LanguagePicker />
 
           <Slider
             label="Body size"

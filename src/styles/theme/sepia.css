@@ -12,7 +12,10 @@
   --wp-color-accent-emphasis: #6b3410;
   --wp-color-border: #c9b98a;
   --wp-color-border-muted: #c9b98ab3;
-  --wp-color-neutral-muted: #a89968;
+  /* Translucent, matching Light and Dark. Fully opaque (#a89968) made inline
+     code a solid olive block far heavier than the same element in every other
+     theme — flagged in the Phase 2 debrief. */
+  --wp-color-neutral-muted: #a8996855;
   --wp-color-danger: #a03030;
   --wp-color-success: #4a7c2e;
   --wp-color-attention: #a06b1a;

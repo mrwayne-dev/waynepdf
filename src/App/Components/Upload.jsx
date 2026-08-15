@@ -1,21 +1,19 @@
-import uploadFile from '../Lib/uploadFile.js';
+import { useProvided } from 'nonaction';
+import loadDocument from '../Lib/loadDocument.js';
+import { EncodingBannerContainer, LanguageContainer } from '../Container';
 
 export default function Upload(props) {
+  const [, { showBanner }] = useProvided(EncodingBannerContainer);
+  const [, { detectNow }] = useProvided(LanguageContainer);
+
   const onChange = (e) => {
     const files = e.currentTarget.files;
-    if (files.length > 0) {
-      const reader = new FileReader();
-      reader.onload = (loadEvent) => {
-        if (loadEvent.target.readyState !== 2) return;
-        if (loadEvent.target.error) {
-          alert('Error while reading file');
-          return;
-        }
-        const content = loadEvent.target.result;
-        uploadFile(content);
-      };
-      reader.readAsText(e.target.files[0]);
-    }
+    if (files.length === 0) return;
+    // Reading is async now — encoding detection needs the bytes, not a string.
+    loadDocument(files[0], { showBanner, detectNow });
+    // Let the same file be picked twice in a row; without this the input keeps
+    // its value and the second selection fires no change event.
+    e.currentTarget.value = '';
   };
   return (
     <p {...props} style={{ position: 'relative' }}>

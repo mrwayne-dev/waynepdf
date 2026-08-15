@@ -26,6 +26,10 @@ const browserGlobals = {
   getComputedStyle: 'readonly',
   localStorage: 'readonly',
   matchMedia: 'readonly',
+  TextDecoder: 'readonly',
+  TextEncoder: 'readonly',
+  DataView: 'readonly',
+  Uint8Array: 'readonly',
 };
 
 const nodeGlobals = {

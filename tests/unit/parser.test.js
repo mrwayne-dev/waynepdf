@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { md } from '@/App/Components/Previewer/Preview.jsx';
+import { readFileWithEncoding } from '@/App/Lib/readFile.js';
 
 // These assert against the SAME markdown-it instance the app renders with.
 
@@ -83,27 +84,42 @@ describe('markdown-it: core parsing', () => {
 // The assertions below deliberately encode CURRENTLY-BROKEN behaviour so the
 // bugs are pinned rather than forgotten. They are expected to be INVERTED in
 // later phases:
-//   - BOM handling      -> Phase 3
+//   - BOM handling      -> Phase 3  (DONE, inverted below)
 //   - math delimiters   -> Phase 4
 // If one of these starts failing, a fix landed early. Flip the assertion and
 // move the note, do not delete the test.
 // ---------------------------------------------------------------------------
 
-describe('BASELINE BUG (Phase 3): BOM-prefixed heading is not parsed', () => {
-  it('demotes a BOM-prefixed h1 to a paragraph', () => {
+describe('FIXED in Phase 3: BOM no longer breaks the first heading', () => {
+  it('still demotes a BOM-prefixed h1 at the PARSER level', () => {
+    // markdown-it is unchanged and this is not a markdown-it bug: U+FEFF is a
+    // legitimate character and a line starting with one is not an ATX heading.
+    // The fix belongs one layer up, in the file reader — pinned here so nobody
+    // "fixes" it again inside the parser.
     const html = md.render('﻿# Heading after BOM');
-
-    // BUG: should be <h1>, currently a paragraph carrying a literal '#'.
     expect(html).not.toContain('<h1>');
-    expect(html).toContain('<p>');
     expect(html).toContain('#');
   });
 
-  it('parses the same heading correctly once the BOM is stripped', () => {
-    // Confirms the BOM is the sole cause, not the heading syntax.
+  it('parses the heading correctly once the BOM is stripped', () => {
     expect(md.render('# Heading after BOM')).toContain(
       '<h1>Heading after BOM</h1>',
     );
+  });
+
+  it('renders an h1 end-to-end from a BOM-prefixed file', async () => {
+    // The real contract: a file with a BOM produces a heading. Piped through
+    // the reader, which is where Phase 3 put the fix.
+    const source = '# Heading after BOM\n\nParagraph.\n';
+    const withBom = new TextEncoder().encode('﻿' + source);
+    const file = {
+      name: 'bom.md',
+      arrayBuffer: async () => withBom.buffer,
+    };
+
+    const { text, wasBOM } = await readFileWithEncoding(file);
+    expect(wasBOM).toBe(true);
+    expect(md.render(text)).toContain('<h1>Heading after BOM</h1>');
   });
 });
 

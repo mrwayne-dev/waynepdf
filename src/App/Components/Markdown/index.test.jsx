@@ -5,7 +5,12 @@ import {
   waitForElementToBeRemoved,
 } from '@testing-library/react';
 import { Provider } from 'nonaction';
-import { TextContainer, ThemeContainer } from '../../Container';
+import {
+  TextContainer,
+  ThemeContainer,
+  LanguageContainer,
+  EncodingBannerContainer,
+} from '../../Container';
 import Markdown from './index.jsx';
 
 // Ported from the upstream project's src/App/Components/Markdown/index.test.js,
@@ -14,7 +19,14 @@ import Markdown from './index.jsx';
 describe('<Markdown />', () => {
   it('resolves the lazy Previewer and renders content', async () => {
     const { container } = render(
-      <Provider inject={[TextContainer, ThemeContainer]}>
+      <Provider
+        inject={[
+          TextContainer,
+          ThemeContainer,
+          LanguageContainer,
+          EncodingBannerContainer,
+        ]}
+      >
         <Markdown />
       </Provider>,
     );
@@ -30,7 +42,14 @@ describe('<Markdown />', () => {
 
   it('renders the initial document through markdown-it', async () => {
     const { container } = render(
-      <Provider inject={[TextContainer, ThemeContainer]}>
+      <Provider
+        inject={[
+          TextContainer,
+          ThemeContainer,
+          LanguageContainer,
+          EncodingBannerContainer,
+        ]}
+      >
         <Markdown />
       </Provider>,
     );

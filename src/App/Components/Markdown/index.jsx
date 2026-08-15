@@ -1,20 +1,36 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { useProvided } from 'nonaction';
-import { TextContainer } from '../../Container';
+import {
+  TextContainer,
+  LanguageContainer,
+  EncodingBannerContainer,
+} from '../../Container';
 import Previewer from '../Previewer/index.jsx';
 import Editor from '../Editor/index.jsx';
 import DragBar from '../DragBar.jsx';
 import useDrop from '../../Container/Hooks/useDrop.js';
-import uploadFile from '../../Lib/uploadFile.js';
+import loadDocument from '../../Lib/loadDocument.js';
 
 const Markdown = ({ className }) => {
   const [text, setText] = useProvided(TextContainer);
+  const [, { observeText, detectNow }] = useProvided(LanguageContainer);
+  const [, { showBanner }] = useProvided(EncodingBannerContainer);
   const [isDrag, setDrag] = useState(false);
   const [startX, setStartX] = useState(0);
   const [width, setWidth] = useState(window.innerWidth / 2);
   const markdownRef = useRef(null);
-  const [uploading, isOver] = useDrop(markdownRef, uploadFile);
+
+  const onDropFile = useCallback(
+    (file) => loadDocument(file, { showBanner, detectNow }),
+    [showBanner, detectNow],
+  );
+  const [uploading, isOver] = useDrop(markdownRef, onDropFile);
+
+  // Language detection follows the document, debounced inside the container.
+  useEffect(() => {
+    observeText(text);
+  }, [text, observeText]);
 
   useEffect(() => {
     const handleMouseUp = () => setDrag(false);

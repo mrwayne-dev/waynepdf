@@ -147,7 +147,7 @@ test.describe('theme selection', () => {
     await expect(
       page.locator('button.wp-swatch[data-theme="sepia"]'),
     ).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.locator('.wp-hint')).toHaveText('Sepia');
+    await expect(page.locator('.wp-theme-name')).toHaveText('Sepia');
   });
 });
 
@@ -246,7 +246,9 @@ test.describe('persistence', () => {
     await gear(page).click();
     await page.locator('button.wp-swatch[data-theme="sepia"]').click();
     const keys = await page.evaluate(() => Object.keys(localStorage).sort());
-    expect(keys).toEqual([STORAGE_KEY]);
+    // Phase 3 added a second key. Two is the expected total; the assertion is
+    // still exact so a stray third key would fail.
+    expect(keys).toEqual(['waynepdf.language.v1', STORAGE_KEY]);
   });
 
   test('reset returns every control to its default', async ({ page }) => {
@@ -262,7 +264,7 @@ test.describe('persistence', () => {
     await expect.poll(() => cssVar(page, '--wp-font-size-base')).toBe('16px');
     expect(await cssVar(page, '--wp-font-size-code')).toBe('14px');
     expect(await cssVar(page, '--wp-line-height-base')).toBe('1.6');
-    await expect(page.locator('.wp-hint')).toHaveText('System');
+    await expect(page.locator('.wp-theme-name')).toHaveText('System');
     await expect(page.getByLabel('Body size')).toHaveValue('16');
   });
 
@@ -329,5 +331,98 @@ test.describe('print output', () => {
     // Not transparent: the fill is still declared under print.
     expect(bg).not.toBe('rgba(0, 0, 0, 0)');
     await page.emulateMedia({ media: 'screen' });
+  });
+});
+
+test.describe('language section', () => {
+  test('renders the language select and direction pills', async ({ page }) => {
+    await boot(page);
+    await gear(page).click();
+    await expect(page.locator('select.wp-select')).toBeVisible();
+    await expect(page.getByRole('radio', { name: 'Auto' })).toHaveCount(1);
+    await expect(page.getByRole('radio', { name: 'LTR' })).toHaveCount(1);
+    await expect(page.getByRole('radio', { name: 'RTL' })).toHaveCount(1);
+  });
+
+  test('changing the language updates the preview container', async ({
+    page,
+  }) => {
+    await boot(page);
+    await gear(page).click();
+    await page.locator('select.wp-select').selectOption('ko');
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          document.querySelector('.markdown-body').getAttribute('lang'),
+        ),
+      )
+      .toBe('ko');
+  });
+
+  test('changing text direction updates the preview container', async ({
+    page,
+  }) => {
+    await boot(page);
+    await gear(page).click();
+    await page.locator('label.wp-pill', { hasText: /^RTL$/ }).click();
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          document.querySelector('.markdown-body').getAttribute('dir'),
+        ),
+      )
+      .toBe('rtl');
+  });
+
+  test('the detected-language caption only shows while Auto is selected', async ({
+    page,
+  }) => {
+    await boot(page);
+    await gear(page).click();
+    await expect(page.locator('.wp-detected-lang')).toHaveText(/^Detected: /);
+
+    await page.locator('select.wp-select').selectOption('ja');
+    await expect(page.locator('.wp-detected-lang')).toHaveCount(0);
+  });
+
+  test('language settings survive a reload alongside theme settings', async ({
+    page,
+  }) => {
+    await boot(page);
+    await gear(page).click();
+    await page.locator('button.wp-swatch[data-theme="sepia"]').click();
+    await page.locator('select.wp-select').selectOption('ar');
+    await page.locator('label.wp-pill', { hasText: /^LTR$/ }).click();
+
+    await page.reload();
+    await expect(page.locator('.preview')).toBeVisible();
+
+    await expect.poll(() => themeAttr(page)).toBe('sepia');
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          document.querySelector('.markdown-body').getAttribute('lang'),
+        ),
+      )
+      .toBe('ar');
+    expect(
+      await page.evaluate(() =>
+        document.querySelector('.markdown-body').getAttribute('dir'),
+      ),
+    ).toBe('ltr');
+  });
+
+  test('the panel is not visible in the printed PDF, language section included', async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(browserName !== 'chromium', 'page.pdf() is Chromium-only');
+    await boot(page);
+    await gear(page).click();
+    const buffer = await page.pdf({ format: 'A4', printBackground: true });
+    const text = buffer.toString('latin1');
+    for (const needle of ['Language', 'Text direction', 'Detected:']) {
+      expect(text).not.toContain(needle);
+    }
   });
 });

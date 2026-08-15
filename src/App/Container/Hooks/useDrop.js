@@ -30,13 +30,10 @@ function useDrop(ref, onLoad = () => {}) {
         /\.(md)$/i.test(files[0].name) &&
         !uploading
       ) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          setUploading(false);
-          onLoad(e.target.result);
-        };
-        reader.readAsText(files[0]);
         setUploading(true);
+        // onLoad owns decoding now (see Lib/loadDocument), so this hook only
+        // decides *whether* to load and tracks the in-flight flag.
+        Promise.resolve(onLoad(files[0])).finally(() => setUploading(false));
       }
     };
     const target = ref.current;

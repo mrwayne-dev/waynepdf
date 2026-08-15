@@ -1,0 +1,3 @@
+﻿# Heading after BOM
+
+Paragraph.

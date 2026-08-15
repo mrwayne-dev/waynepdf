@@ -9,6 +9,26 @@ import '@fontsource-variable/inter';
 import '@fontsource-variable/source-serif-4';
 import '@fontsource-variable/jetbrains-mono';
 
+// CJK / Arabic / Hebrew coverage, so output does not depend on which fonts the
+// host OS happens to have. Non-variable at weights 400 and 700 only: variable
+// axes buy little for these scripts and cost a great deal per subset.
+//
+// Each CJK face is split into ~100-125 unicode-range subsets, so a document
+// fetches only the two or three that contain its characters — a few hundred KB,
+// not the multi-megabyte family. See vite.config.js for how they are cached.
+import '@fontsource/noto-sans-tc/400.css';
+import '@fontsource/noto-sans-tc/700.css';
+import '@fontsource/noto-sans-sc/400.css';
+import '@fontsource/noto-sans-sc/700.css';
+import '@fontsource/noto-sans-jp/400.css';
+import '@fontsource/noto-sans-jp/700.css';
+import '@fontsource/noto-sans-kr/400.css';
+import '@fontsource/noto-sans-kr/700.css';
+import '@fontsource/noto-sans-arabic/400.css';
+import '@fontsource/noto-sans-arabic/700.css';
+import '@fontsource/noto-sans-hebrew/400.css';
+import '@fontsource/noto-sans-hebrew/700.css';
+
 import './styles/theme/index.css';
 import './styles/markdown/index.css';
 import './styles/app.css';

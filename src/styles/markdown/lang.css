@@ -1,0 +1,79 @@
+/*
+ * Per-language font stacks. Part of the forked markdown stylesheet; see
+ * index.css.
+ *
+ * Han unification means one codepoint has different correct glyphs in Chinese,
+ * Japanese and Korean typography — 直, 骨 and 门 all differ. Without a `lang`
+ * attribute the browser picks by OS locale, so the same document rendered
+ * "correctly" on two machines produces two different PDFs. These rules bind the
+ * glyph choice to the detected language instead of the host.
+ *
+ * The bundled Latin face stays first in every list. Inter has no CJK coverage,
+ * so the browser's per-character fallback keeps Latin runs in Inter and drops
+ * only the CJK characters through to Noto — which is what mixed documents want.
+ *
+ * Note --wp-font-family-lead, not --wp-font-family-body, in the first position.
+ * The body token ends in `sans-serif`, and a generic family always matches:
+ * anything after it is dead. Leading with the body token would mean Noto is
+ * never reached, the host's default font renders the script, and the face is
+ * not even downloaded — silently host-dependent output, which is the exact
+ * problem this file exists to solve. The full body stack is appended last so
+ * the ordinary Latin fallbacks still apply after the script face.
+ */
+
+.markdown-body:lang(zh-Hant) {
+  font-family:
+    var(--wp-font-family-lead), 'Noto Sans TC', 'PingFang TC',
+    'Microsoft JhengHei', 'Heiti TC', var(--wp-font-family-body);
+}
+
+.markdown-body:lang(zh-Hans) {
+  font-family:
+    var(--wp-font-family-lead), 'Noto Sans SC', 'PingFang SC',
+    'Microsoft YaHei', 'Heiti SC', var(--wp-font-family-body);
+}
+
+.markdown-body:lang(ja) {
+  font-family:
+    var(--wp-font-family-lead), 'Noto Sans JP', 'Hiragino Sans',
+    'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo',
+    var(--wp-font-family-body);
+}
+
+.markdown-body:lang(ko) {
+  font-family:
+    var(--wp-font-family-lead), 'Noto Sans KR', 'Apple SD Gothic Neo',
+    'Malgun Gothic', var(--wp-font-family-body);
+}
+
+.markdown-body:lang(ar) {
+  font-family:
+    var(--wp-font-family-lead), 'Noto Sans Arabic', 'Geeza Pro', 'Amiri',
+    var(--wp-font-family-body);
+}
+
+.markdown-body:lang(he) {
+  font-family:
+    var(--wp-font-family-lead), 'Noto Sans Hebrew', 'David', 'Frank Ruehl',
+    var(--wp-font-family-body);
+}
+
+/*
+ * Code keeps the mono stack whatever the document language. A CJK stack on a
+ * fenced block would break column alignment, since the CJK faces are duotype
+ * and their Latin glyphs are not fixed-width.
+ */
+.markdown-body:lang(zh-Hant) code,
+.markdown-body:lang(zh-Hans) code,
+.markdown-body:lang(ja) code,
+.markdown-body:lang(ko) code,
+.markdown-body:lang(ar) code,
+.markdown-body:lang(he) code,
+.markdown-body:lang(zh-Hant) pre,
+.markdown-body:lang(zh-Hans) pre,
+.markdown-body:lang(ja) pre,
+.markdown-body:lang(ko) pre,
+.markdown-body:lang(ar) pre,
+.markdown-body:lang(he) pre {
+  font-family: var(--wp-font-family-mono);
+}

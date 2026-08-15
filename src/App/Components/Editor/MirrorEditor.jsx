@@ -33,7 +33,10 @@ const Editor = ({ className, setText }) => {
 };
 
 export default styled(Editor)`
-  height: 100%;
+  /* Fills whatever the editor column has left after the encoding banner.
+     min-height:0 so a long document cannot push the flex item past the pane. */
+  flex: 1;
+  min-height: 0;
   .CodeMirror {
     height: 100%;
     line-height: 1.5;
