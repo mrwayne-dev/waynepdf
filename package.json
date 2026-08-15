@@ -1,0 +1,49 @@
+{
+  "name": "waynepdf",
+  "version": "0.1.0",
+  "description": "Amazing Markdown to PDF — offline, private, and yours to configure.",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:update": "playwright test --update-snapshots",
+    "lint": "eslint src tests",
+    "format": "prettier --write \"src/**/*.{js,jsx,json,css}\" \"tests/**/*.{js,jsx}\""
+  },
+  "dependencies": {
+    "codemirror": "^5.65.0",
+    "github-markdown-css": "5.5.1",
+    "highlight.js": "11.9.0",
+    "markdown-it": "14.1.0",
+    "nonaction": "^0.0.5",
+    "normalize.css": "^8.0.1",
+    "react": "^18.3.1",
+    "react-codemirror2": "^8.0.0",
+    "react-dom": "^18.3.1",
+    "styled-components": "^6.1.13"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.12.0",
+    "@playwright/test": "^1.48.0",
+    "@testing-library/jest-dom": "^6.5.0",
+    "@testing-library/react": "^16.0.1",
+    "@vitejs/plugin-react": "^4.3.2",
+    "eslint": "^9.12.0",
+    "eslint-plugin-react": "^7.37.1",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "jsdom": "^25.0.1",
+    "prettier": "^3.3.3",
+    "vite": "^5.4.8",
+    "vite-plugin-pwa": "^0.20.5",
+    "vitest": "^2.1.2",
+    "workbox-window": "^7.1.0"
+  }
+}
