@@ -56,7 +56,21 @@ const Markdown = ({ className }) => {
   useEffect(() => {
     if (!(import.meta.env.DEV || import.meta.env.MODE === 'test')) return;
     if (!ready) return;
-    window.__waynepdf_setText = setText;
+    /*
+     * Writes through CodeMirror rather than straight to the container.
+     *
+     * Setting the container directly leaves the editor's own buffer holding
+     * something else, and any later remount replays that stale buffer over the
+     * document — which showed up as tab tests losing a document's text at
+     * random. Going through setValue is also what a real file drop does
+     * (Lib/uploadFile.js), so tests exercise the path users take.
+     */
+    window.__waynepdf_setText = (value) => {
+      const nodes = document.querySelectorAll('.CodeMirror');
+      const live = nodes[nodes.length - 1]?.CodeMirror;
+      if (live) live.setValue(value);
+      else setText(value);
+    };
     return () => {
       delete window.__waynepdf_setText;
     };

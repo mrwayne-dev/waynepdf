@@ -106,15 +106,26 @@ const useDocuments = () => {
   const [status, setStatus] = useState('saved');
 
   /*
-   * Mirrored during render, not in an effect. The updaters below are called from
-   * DOM events and need the current array synchronously; a ref written in an
-   * effect would still hold the previous render's value when two updates land in
-   * the same tick.
+   * Synchronous mirrors of the two pieces of state the updaters read back.
+   *
+   * They are written by the setters below rather than during render, because
+   * updaters get called in sequence within one tick — the + button does
+   * `create()` then `open(id)` — and React has not re-rendered in between. A
+   * mirror that only caught up at render time would make `open` look up an id
+   * that, as far as it could tell, did not exist yet.
    */
   const docsRef = useRef(documents);
-  docsRef.current = documents;
   const activeIdRef = useRef(activeId);
-  activeIdRef.current = activeId;
+
+  const applyDocuments = useCallback((next) => {
+    docsRef.current = next;
+    setDocuments(next);
+  }, []);
+
+  const applyActiveId = useCallback((id) => {
+    activeIdRef.current = id;
+    setActiveId(id);
+  }, []);
 
   /** The record waiting on the debounce timer, if any. */
   const pendingRef = useRef(null);
@@ -183,8 +194,8 @@ const useDocuments = () => {
           });
         }
 
-        setDocuments(ordered);
-        setActiveId(active);
+        applyDocuments(ordered);
+        applyActiveId(active);
       } catch (err) {
         /*
          * Private-mode Firefox and some enterprise policies block IndexedDB
@@ -193,19 +204,19 @@ const useDocuments = () => {
          */
         console.error('Loading documents failed:', err);
         const doc = newDocument(initialText);
-        setDocuments([doc]);
-        setActiveId(doc.id);
+        applyDocuments([doc]);
+        applyActiveId(doc.id);
         setStatus('error');
       } finally {
         setReady(true);
       }
     })();
-  }, []);
+  }, [applyDocuments, applyActiveId]);
 
   const updaters = useMemo(() => {
     const commit = (docs, active = activeIdRef.current) => {
-      setDocuments(docs);
-      if (active !== activeIdRef.current) setActiveId(active);
+      applyDocuments(docs);
+      if (active !== activeIdRef.current) applyActiveId(active);
       persistMeta(docs, active);
     };
 
@@ -226,7 +237,7 @@ const useDocuments = () => {
         };
         const next = [...docs];
         next[index] = updated;
-        setDocuments(next);
+        applyDocuments(next);
 
         pendingRef.current = updated;
         setStatus('saving');
@@ -244,14 +255,24 @@ const useDocuments = () => {
         return doc.id;
       },
 
-      open: async (id) => {
-        if (id === activeIdRef.current) return;
-        if (!docsRef.current.some((doc) => doc.id === id)) return;
-        // Flush first: switching away must not leave the outgoing document's
-        // last second of typing sitting on a timer that the switch invalidates.
-        await flush();
-        setActiveId(id);
+      open: (id) => {
+        if (id === activeIdRef.current) return Promise.resolve();
+        if (!docsRef.current.some((doc) => doc.id === id)) {
+          return Promise.resolve();
+        }
+        /*
+         * The switch is synchronous and the flush runs behind it.
+         *
+         * Awaiting the flush first looks safer and is not: the active id would
+         * not change until an IndexedDB write had completed, so clicking "+"
+         * and immediately typing put those keystrokes into the *previous*
+         * document. flush() takes the pending record out of the ref
+         * synchronously, so nothing about the switch can affect what it writes.
+         */
+        const written = flush();
+        applyActiveId(id);
         persistMeta(docsRef.current, id);
+        return written;
       },
 
       rename: (id, title) => {
@@ -262,7 +283,7 @@ const useDocuments = () => {
         const updated = { ...docs[index], title: clean || UNTITLED };
         const next = [...docs];
         next[index] = updated;
-        setDocuments(next);
+        applyDocuments(next);
         write(updated);
       },
 
@@ -328,14 +349,14 @@ const useDocuments = () => {
       reset: () => {
         clearTimeout(timerRef.current);
         pendingRef.current = null;
-        setDocuments([]);
-        setActiveId(null);
+        applyDocuments([]);
+        applyActiveId(null);
         setStatus('saved');
       },
 
       flush,
     };
-  }, [flush, write, persistMeta]);
+  }, [flush, write, persistMeta, applyDocuments, applyActiveId]);
 
   useEffect(() => {
     registerReset('documents', updaters.reset);

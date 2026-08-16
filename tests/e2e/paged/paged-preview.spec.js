@@ -83,7 +83,7 @@ test.describe('mode switching', () => {
       (md) => window.__waynepdf_setText(md),
       read('paged-basic.md'),
     );
-    await page.getByRole('button', { name: 'Paged' }).click();
+    await page.getByRole('button', { name: 'Paged', exact: true }).click();
 
     await expect(page.locator('.pagedjs_page').first()).toBeVisible({
       timeout: 60_000,
@@ -97,7 +97,7 @@ test.describe('mode switching', () => {
     await loadAndPaginate(page, read('paged-basic.md'));
     expect(await pages(page).count()).toBeGreaterThan(1);
 
-    await page.getByRole('button', { name: 'Flowing' }).click();
+    await page.getByRole('button', { name: 'Flowing', exact: true }).click();
     await expect(page.locator('.flowing-preview')).toBeVisible();
     await expect(pages(page)).toHaveCount(0);
   });
@@ -106,7 +106,7 @@ test.describe('mode switching', () => {
     // No addInitScript seed here: it re-runs on every navigation, so it would
     // reset the very value the reload is supposed to have restored.
     await boot(page);
-    await page.getByRole('button', { name: 'Paged' }).click();
+    await page.getByRole('button', { name: 'Paged', exact: true }).click();
     await expect(page.locator('.preview-paged')).toBeVisible();
 
     await page.reload();
