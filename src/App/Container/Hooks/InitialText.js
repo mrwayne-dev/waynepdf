@@ -77,7 +77,11 @@ Currency works as expected — "$5.99" and "he owes $10" don't trigger math, bec
 | Unicode and encodings      | Ready        |
 | LaTeX math                 | Ready        |
 | Mermaid diagrams           | Coming soon  |
-| Page layout                | Coming soon  |
+| Page layout                | Ready        |
+
+## Page layout
+
+Switch to **Paged** mode in the top toolbar to see real page breaks, running headers and footers, and page numbers exactly as they'll print. Configure page size, margins, cover page, table of contents, and watermarks in Settings under **Layout**.
 
 ## Raw HTML
 

@@ -2,7 +2,14 @@
 # See https://pnpm.io/settings
 
 # esbuild ships a platform binary via a postinstall script; Vite needs it.
+#
+# core-js@2 and es5-ext arrive transitively under pagedjs. Their postinstall
+# scripts only print funding banners — nothing is built and nothing depends on
+# them running — so they stay off rather than executing arbitrary install-time
+# code for no benefit.
 allowBuilds:
+  core-js: false
+  es5-ext: false
   esbuild: true
 
 peerDependencyRules:

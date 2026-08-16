@@ -248,7 +248,12 @@ test.describe('persistence', () => {
     const keys = await page.evaluate(() => Object.keys(localStorage).sort());
     // Phase 3 added a second key. Two is the expected total; the assertion is
     // still exact so a stray third key would fail.
-    expect(keys).toEqual(['waynepdf.language.v1', STORAGE_KEY]);
+    // Phase 5 added a third key. Still exact, so a stray fourth would fail.
+    expect(keys).toEqual([
+      'waynepdf.language.v1',
+      'waynepdf.layout.v1',
+      STORAGE_KEY,
+    ]);
   });
 
   test('reset returns every control to its default', async ({ page }) => {
@@ -338,7 +343,7 @@ test.describe('language section', () => {
   test('renders the language select and direction pills', async ({ page }) => {
     await boot(page);
     await gear(page).click();
-    await expect(page.locator('select.wp-select')).toBeVisible();
+    await expect(page.locator('select.wp-select-language')).toBeVisible();
     await expect(page.getByRole('radio', { name: 'Auto' })).toHaveCount(1);
     await expect(page.getByRole('radio', { name: 'LTR' })).toHaveCount(1);
     await expect(page.getByRole('radio', { name: 'RTL' })).toHaveCount(1);
@@ -349,7 +354,7 @@ test.describe('language section', () => {
   }) => {
     await boot(page);
     await gear(page).click();
-    await page.locator('select.wp-select').selectOption('ko');
+    await page.locator('select.wp-select-language').selectOption('ko');
     await expect
       .poll(() =>
         page.evaluate(() =>
@@ -381,7 +386,7 @@ test.describe('language section', () => {
     await gear(page).click();
     await expect(page.locator('.wp-detected-lang')).toHaveText(/^Detected: /);
 
-    await page.locator('select.wp-select').selectOption('ja');
+    await page.locator('select.wp-select-language').selectOption('ja');
     await expect(page.locator('.wp-detected-lang')).toHaveCount(0);
   });
 
@@ -391,7 +396,7 @@ test.describe('language section', () => {
     await boot(page);
     await gear(page).click();
     await page.locator('button.wp-swatch[data-theme="sepia"]').click();
-    await page.locator('select.wp-select').selectOption('ar');
+    await page.locator('select.wp-select-language').selectOption('ar');
     await page.locator('label.wp-pill', { hasText: /^LTR$/ }).click();
 
     await page.reload();
@@ -424,5 +429,140 @@ test.describe('language section', () => {
     for (const needle of ['Language', 'Text direction', 'Detected:']) {
       expect(text).not.toContain(needle);
     }
+  });
+});
+
+test.describe('layout section', () => {
+  const layoutCSS = (page) =>
+    page.evaluate(
+      () => document.getElementById('wp-layout-styles')?.textContent ?? '',
+    );
+
+  test('renders the layout controls', async ({ page }) => {
+    await boot(page);
+    await gear(page).click();
+    await expect(page.locator('select.wp-select-page-size')).toBeVisible();
+    await expect(page.locator('select.wp-select-margins')).toBeVisible();
+    await expect(
+      page.locator('.wp-collapsible-head', { hasText: 'Header' }),
+    ).toBeVisible();
+    await expect(
+      page.locator('.wp-collapsible-head', { hasText: 'Cover page' }),
+    ).toBeVisible();
+    await expect(
+      page.locator('.wp-collapsible-head', { hasText: 'Watermark' }),
+    ).toBeVisible();
+    await expect(
+      page.locator('.wp-collapsible-head', { hasText: 'Table of contents' }),
+    ).toBeVisible();
+  });
+
+  test('collapsible sections start closed and open on click', async ({
+    page,
+  }) => {
+    await boot(page);
+    await gear(page).click();
+    const head = page.locator('.wp-collapsible-head', { hasText: 'Watermark' });
+    await expect(head).toHaveAttribute('aria-expanded', 'false');
+    await head.click();
+    await expect(head).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  test('page size rewrites the emitted stylesheet', async ({ page }) => {
+    await boot(page);
+    expect(await layoutCSS(page)).toContain('size: A4 portrait');
+
+    await gear(page).click();
+    await page.locator('select.wp-select-page-size').selectOption('legal');
+    await expect.poll(() => layoutCSS(page)).toContain('size: LEGAL portrait');
+  });
+
+  test('margins rewrite the emitted stylesheet', async ({ page }) => {
+    await boot(page);
+    expect(await layoutCSS(page)).toContain('margin: 25mm');
+
+    await gear(page).click();
+    await page.locator('select.wp-select-margins').selectOption('small');
+    await expect.poll(() => layoutCSS(page)).toContain('margin: 15mm');
+  });
+
+  test('a footer template is tokenised into the stylesheet', async ({
+    page,
+  }) => {
+    await boot(page);
+    await gear(page).click();
+    await page.locator('.wp-collapsible-head', { hasText: 'Footer' }).click();
+
+    const center = page.locator('.wp-collapsible-body input.wp-text').nth(1);
+    await center.fill('Sheet {page} of {pages}');
+
+    await expect
+      .poll(() => layoutCSS(page))
+      .toContain('"Sheet " counter(page) " of " counter(pages)');
+  });
+
+  test('enabling the watermark adds its rule', async ({ page }) => {
+    await boot(page);
+    expect(await layoutCSS(page)).not.toContain('pagedjs_page_content::before');
+
+    await gear(page).click();
+    await page
+      .locator('.wp-collapsible-head', { hasText: 'Watermark' })
+      .click();
+    await page
+      .locator('.wp-collapsible-body input.wp-text')
+      .first()
+      .fill('DRAFT');
+
+    await expect.poll(() => layoutCSS(page)).toContain('content: "DRAFT"');
+  });
+
+  test('enabling the TOC adds its rules', async ({ page }) => {
+    await boot(page);
+    expect(await layoutCSS(page)).not.toContain('.wp-toc');
+
+    await gear(page).click();
+    await page
+      .locator('.wp-collapsible-head', { hasText: 'Table of contents' })
+      .click();
+    await page
+      .locator('label.wp-check', { hasText: 'Generate a table of contents' })
+      .click();
+
+    await expect.poll(() => layoutCSS(page)).toContain('target-counter');
+  });
+
+  test('layout settings survive a reload', async ({ page }) => {
+    await boot(page);
+    await gear(page).click();
+    await page.locator('select.wp-select-page-size').selectOption('a5');
+    await page.locator('select.wp-select-margins').selectOption('wide');
+
+    await page.reload();
+    await expect(page.locator('.preview')).toBeVisible();
+
+    await expect.poll(() => layoutCSS(page)).toContain('size: A5 portrait');
+    expect(await layoutCSS(page)).toContain('margin: 35mm');
+    const stored = await page.evaluate(() =>
+      JSON.parse(localStorage.getItem('waynepdf.layout.v1')),
+    );
+    expect(stored).toMatchObject({ pageSize: 'a5', marginPreset: 'wide' });
+  });
+
+  test('Reset returns the layout to defaults', async ({ page }) => {
+    await boot(page);
+    await gear(page).click();
+    await page.locator('select.wp-select-page-size').selectOption('a3');
+    await expect.poll(() => layoutCSS(page)).toContain('size: A3');
+
+    await page.getByRole('button', { name: 'Reset to defaults' }).click();
+    // Layout lives in its own container, but one Reset button in one panel has
+    // to mean everything in that panel.
+    await expect.poll(() => layoutCSS(page)).toContain('size: A4 portrait');
+    expect(await layoutCSS(page)).toContain('margin: 25mm');
+    const stored = await page.evaluate(() =>
+      JSON.parse(localStorage.getItem('waynepdf.layout.v1')),
+    );
+    expect(stored.previewMode).toBe('flowing');
   });
 });

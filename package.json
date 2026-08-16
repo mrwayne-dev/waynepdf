@@ -38,6 +38,7 @@
     "markdown-it": "14.1.0",
     "nonaction": "^0.0.5",
     "normalize.css": "^8.0.1",
+    "pagedjs": "^0.4.3",
     "react": "^18.3.1",
     "react-codemirror2": "^8.0.0",
     "react-dom": "^18.3.1",

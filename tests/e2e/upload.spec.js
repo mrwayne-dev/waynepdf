@@ -96,7 +96,11 @@ test('Transform triggers the print dialog', async ({ page }) => {
   });
 
   await page.locator('p.button.download').click();
-  expect(await page.evaluate(() => window.__printed)).toBe(1);
+  // Transform is async since Phase 5: in Flowing mode it paginates on demand
+  // before printing, so the call is not synchronous with the click.
+  await expect
+    .poll(() => page.evaluate(() => window.__printed), { timeout: 60_000 })
+    .toBe(1);
 });
 
 test('Transform names the PDF after the first h1', async ({ page }) => {
@@ -104,14 +108,19 @@ test('Transform names the PDF after the first h1', async ({ page }) => {
   await page.evaluate(() => window.__waynepdf_setText('# My Resume\n\nbody'));
   await expect(page.locator('.preview h1')).toHaveText('My Resume');
 
-  const titleAtPrint = await page.evaluate(() => {
-    let seen = null;
+  // Recorded from a stub rather than read after the fact: Transform restores the
+  // original title immediately after print() returns. Async since Phase 5, so
+  // the stub is installed first and the result polled.
+  await page.evaluate(() => {
+    window.__titleAtPrint = null;
     window.print = () => {
-      seen = document.title;
+      window.__titleAtPrint = document.title;
     };
-    document.querySelector('p.button.download').click();
-    return seen;
   });
 
-  expect(titleAtPrint).toBe('My Resume');
+  await page.locator('p.button.download').click();
+
+  await expect
+    .poll(() => page.evaluate(() => window.__titleAtPrint), { timeout: 60_000 })
+    .toBe('My Resume');
 });

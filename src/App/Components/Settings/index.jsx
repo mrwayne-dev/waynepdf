@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useProvided } from 'nonaction';
-import { ThemeContainer } from '../../Container';
+import { ThemeContainer, LayoutContainer } from '../../Container';
 import { RANGES } from '../../Lib/settings.js';
 import SettingsButton from './SettingsButton.jsx';
 import ThemeSwatch from './ThemeSwatch.jsx';
 import FontPicker from './FontPicker.jsx';
 import LanguagePicker from './LanguagePicker.jsx';
+import LayoutPicker from './LayoutPicker.jsx';
 import Slider from './Slider.jsx';
 import './styles.css';
 
@@ -30,6 +31,7 @@ const labelFor = (id) =>
  */
 export default function Settings() {
   const [settings, updaters] = useProvided(ThemeContainer);
+  const [, layoutUpdaters] = useProvided(LayoutContainer);
   const [open, setOpen] = useState(false);
   const gearRef = useRef(null);
   const closeRef = useRef(null);
@@ -148,9 +150,23 @@ export default function Settings() {
             </label>
           </fieldset>
 
+          <fieldset className="wp-fieldset">
+            <legend className="wp-label wp-section-head">Layout</legend>
+            <LayoutPicker />
+          </fieldset>
+
           <hr className="wp-divider" />
 
-          <button type="button" className="wp-reset" onClick={updaters.reset}>
+          {/* Resets both containers: a user clicking one "Reset to defaults"
+              means everything in this panel, not just the theme half. */}
+          <button
+            type="button"
+            className="wp-reset"
+            onClick={() => {
+              updaters.reset();
+              layoutUpdaters.reset();
+            }}
+          >
             Reset to defaults
           </button>
         </div>

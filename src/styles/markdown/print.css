@@ -31,3 +31,115 @@
     text-decoration: underline;
   }
 }
+
+/*
+ * Paginated printing (Phase 5).
+ *
+ * Two paths reach the printer. In Paged mode the fragmented DOM is already on
+ * screen, so printing only needs the app chrome hidden. In Flowing mode the
+ * Transform handler builds pagination into #wp-print-target, which is hidden on
+ * screen and revealed only while `body.wp-printing` is set — so a user who
+ * never prints never sees it, and a print never shows the unpaginated preview
+ * underneath it.
+ */
+/*
+ * Off-screen, NOT display:none.
+ *
+ * paged.js fragments by measuring rendered element heights. Inside a
+ * display:none container every height is 0, so it either throws or spins
+ * forever — the Transform button appears to do nothing. Positioning it out of
+ * view keeps it measurable while invisible.
+ */
+#wp-print-target {
+  position: absolute;
+  top: 0;
+  left: -20000px;
+  width: 1200px;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+@media print {
+  body.wp-printing #wp-print-target {
+    position: static !important;
+    left: auto !important;
+    width: auto !important;
+    visibility: visible !important;
+  }
+
+  /* With an on-demand target present, the live preview must not also print. */
+  body.wp-printing .flowing-preview,
+  body.wp-printing .preview-paged:has(~ #wp-print-target) {
+    display: none !important;
+  }
+
+  /*
+   * paged.js writes its own page boxes; the flow container must not add
+   * scrolling, padding or a second background on top of them.
+   */
+  .pagedjs_pages {
+    display: block;
+  }
+
+  /* Phase 2's print-color-adjust is set on .markdown-body. Paginated output
+     nests .markdown-body *inside* .pagedjs_page_content, so the page box
+     itself — which is what carries the watermark and any page background —
+     needs the property in its own right. */
+  .pagedjs_page,
+  .pagedjs_page_content,
+  .pagedjs_page_content::before {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* The cover page owns its whole sheet. */
+  .wp-cover-page {
+    break-after: page;
+  }
+}
+
+/*
+ * Collapse the wrapper chain for print.
+ *
+ * The page boxes are fixed-size, so residual wrapper height — flex gaps, the
+ * scroll container's 100% height — would offset the sheets. Note this
+ * deliberately does NOT touch font-size or line-height: zeroing those on
+ * .pagedjs_pages distorts paged.js's own page-box sizing.
+ */
+@media print {
+  html,
+  body,
+  #waynepdf-app,
+  .preview-paged,
+  .paginator,
+  .paginator-output,
+  .pagedjs_pages,
+  #wp-print-target {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    overflow: visible !important;
+  }
+
+  /*
+   * One browser page per paged.js page, explicitly.
+   *
+   * Without this the browser flows the stack of fixed-height page boxes and
+   * breaks wherever its own page box happens to end. Any rounding difference
+   * accumulates and emits a blank sheet at the end. break-after pins the
+   * correspondence instead of relying on the heights dividing evenly. The last
+   * page is excluded, since a break after it is what creates the blank sheet.
+   */
+  .pagedjs_page {
+    margin: 0 !important;
+    break-after: page;
+  }
+
+  .pagedjs_page:last-of-type {
+    break-after: avoid;
+  }
+}

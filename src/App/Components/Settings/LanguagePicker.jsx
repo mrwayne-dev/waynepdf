@@ -31,7 +31,7 @@ export default function LanguagePicker() {
         </div>
         <select
           id={selectId}
-          className="wp-select"
+          className="wp-select wp-select-language"
           value={lang}
           onChange={(e) => setLang(e.target.value)}
         >

@@ -5,6 +5,7 @@ import {
   TextContainer,
   LanguageContainer,
   EncodingBannerContainer,
+  PageCountContainer,
 } from '../../Container';
 import Previewer from '../Previewer/index.jsx';
 import Editor from '../Editor/index.jsx';
@@ -16,6 +17,7 @@ const Markdown = ({ className }) => {
   const [text, setText] = useProvided(TextContainer);
   const [, { observeText, detectNow }] = useProvided(LanguageContainer);
   const [, { showBanner }] = useProvided(EncodingBannerContainer);
+  const [, { setPageCount }] = useProvided(PageCountContainer);
   const [isDrag, setDrag] = useState(false);
   const [startX, setStartX] = useState(0);
   const [width, setWidth] = useState(window.innerWidth / 2);
@@ -70,7 +72,7 @@ const Markdown = ({ className }) => {
         setDrag={setDrag}
         setStartX={setStartX}
       />
-      <Previewer>{text}</Previewer>
+      <Previewer onPagesReady={setPageCount}>{text}</Previewer>
     </div>
   );
 };

@@ -10,6 +10,8 @@ import {
   ThemeContainer,
   LanguageContainer,
   EncodingBannerContainer,
+  LayoutContainer,
+  PageCountContainer,
 } from '../../Container';
 import Markdown from './index.jsx';
 
@@ -25,6 +27,8 @@ describe('<Markdown />', () => {
           ThemeContainer,
           LanguageContainer,
           EncodingBannerContainer,
+          LayoutContainer,
+          PageCountContainer,
         ]}
       >
         <Markdown />
@@ -48,6 +52,8 @@ describe('<Markdown />', () => {
           ThemeContainer,
           LanguageContainer,
           EncodingBannerContainer,
+          LayoutContainer,
+          PageCountContainer,
         ]}
       >
         <Markdown />

@@ -197,7 +197,7 @@ test.describe('settings overrides win over detection', () => {
       .toBe('zh-Hant');
 
     await gear(page).click();
-    await page.locator('select.wp-select').selectOption('ja');
+    await page.locator('select.wp-select-language').selectOption('ja');
 
     await expect.poll(() => attr(page, 'lang')).toBe('ja');
     await expect.poll(() => fontFamily(page)).toContain('Noto Sans JP');
@@ -251,7 +251,7 @@ test.describe('settings overrides win over detection', () => {
   test('both language settings survive a reload', async ({ page }) => {
     await boot(page);
     await gear(page).click();
-    await page.locator('select.wp-select').selectOption('he');
+    await page.locator('select.wp-select-language').selectOption('he');
     await page.locator('label.wp-pill', { hasText: /^RTL$/ }).click();
     await expect.poll(() => attr(page, 'dir')).toBe('rtl');
 
@@ -270,10 +270,14 @@ test.describe('settings overrides win over detection', () => {
   test('theme and language use two separate storage keys', async ({ page }) => {
     await boot(page);
     await gear(page).click();
-    await page.locator('select.wp-select').selectOption('ja');
+    await page.locator('select.wp-select-language').selectOption('ja');
     await page.locator('button.wp-swatch[data-theme="dark"]').click();
 
     const keys = await page.evaluate(() => Object.keys(localStorage).sort());
-    expect(keys).toEqual(['waynepdf.language.v1', 'waynepdf.settings.v1']);
+    expect(keys).toEqual([
+      'waynepdf.language.v1',
+      'waynepdf.layout.v1',
+      'waynepdf.settings.v1',
+    ]);
   });
 });
