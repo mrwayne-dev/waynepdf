@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { preprocess } from '../../Lib/paginatorPreprocess.js';
 import { generateLayoutCSS } from '../../Lib/generateLayoutCSS.js';
+import LazyLoad from '../LazyLoad.jsx';
 import './paginator.css';
 
 /*
@@ -84,15 +85,19 @@ export default function Paginator({ sourceHtml, layout, onPagesReady }) {
 
   return (
     <div className="paginator">
-      {status !== 'ready' && (
+      {/* The module fetch carries a size estimate; pagination is pure compute,
+          so quoting a download figure for it would be a lie. */}
+      {status === 'loading' && (
+        <LazyLoad label="Loading paginator" estimatedKb={101} />
+      )}
+      {status === 'rendering' && <LazyLoad label="Paginating" />}
+      {status === 'error' && (
         <div
-          className={`paginator-status no-print${status === 'error' ? ' is-error' : ''}`}
+          className="paginator-status no-print is-error"
           role="status"
           aria-live="polite"
         >
-          {status === 'loading' && 'Loading paginator…'}
-          {status === 'rendering' && 'Paginating…'}
-          {status === 'error' && 'Pagination failed — see the console.'}
+          Pagination failed — see the console.
         </div>
       )}
       <div

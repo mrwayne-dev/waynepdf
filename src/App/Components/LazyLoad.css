@@ -1,0 +1,67 @@
+/* Shared loading state for lazily-loaded chunks. */
+
+.wp-lazyload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px 16px;
+  font-family: var(--wp-font-family-sans);
+  font-size: var(--wp-ui-font-size);
+  color: var(--wp-color-fg-muted);
+}
+
+.wp-lazyload-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--wp-color-border);
+  /* One coloured edge is what makes the rotation readable. */
+  border-top-color: var(--wp-color-accent);
+  border-radius: 50%;
+  animation: wp-lazyload-spin 700ms linear infinite;
+}
+
+@keyframes wp-lazyload-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wp-lazyload-spinner {
+    animation-duration: 2.5s;
+  }
+}
+
+.wp-lazyload-label {
+  color: var(--wp-color-fg);
+}
+
+.wp-lazyload-size {
+  font-family: var(--wp-font-family-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Inline variant: sits in a corner rather than owning the pane. */
+.wp-lazyload.is-inline {
+  flex-direction: row;
+  gap: 6px;
+  padding: 4px 8px;
+  background-color: var(--wp-color-canvas-subtle);
+  border: 1px solid var(--wp-color-border);
+  border-radius: var(--wp-ui-radius);
+}
+
+.wp-lazyload.is-inline .wp-lazyload-spinner {
+  width: 12px;
+  height: 12px;
+  border-width: 2px;
+}
+
+@media print {
+  .wp-lazyload {
+    display: none !important;
+  }
+}

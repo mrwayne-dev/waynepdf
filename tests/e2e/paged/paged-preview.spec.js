@@ -4,22 +4,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const FIXTURE_DIR = path.resolve(__dirname, '../fixtures');
+const FIXTURE_DIR = path.resolve(__dirname, '../../fixtures');
 const read = (name) => fs.readFileSync(path.join(FIXTURE_DIR, name), 'utf8');
 
 const LAYOUT_KEY = 'waynepdf.layout.v1';
-/*
- * Pagination is genuinely slow — paged.js re-fragments the whole document, and
- * Playwright runs these in parallel with every other spec, so several
- * multi-second paginations compete for the same CPU. The default 30s timeout
- * trips on machine load rather than on any real failure, and which test trips
- * varies run to run.
- *
- * Serial for the same reason: with the default 7 workers, seven paginations
- * compete for one CPU and the whole file times out even though every test
- * passes in isolation. One worker per paged spec keeps at most two running.
- */
-test.describe.configure({ timeout: 150_000, mode: 'serial' });
 
 export const baseLayout = {
   previewMode: 'flowing',
@@ -69,7 +57,11 @@ export async function loadAndPaginate(page, markdown) {
     timeout: 60_000,
   });
   await page.waitForFunction(
-    () => document.querySelector('.paginator-status') === null,
+    // Both states now render LazyLoad; .paginator-status is error-only, so
+    // waiting on it alone would report "settled" while still paginating.
+    () =>
+      document.querySelector('.wp-lazyload') === null &&
+      document.querySelector('.paginator-status') === null,
     { timeout: 60_000 },
   );
 }

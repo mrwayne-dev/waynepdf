@@ -15,6 +15,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:e2e:parallel": "playwright test --project=parallel",
+    "test:e2e:paged": "playwright test --project=paged",
     "test:e2e:update": "playwright test --update-snapshots",
     "lint": "eslint src tests scripts",
     "gen:icons": "node scripts/generate-icons.mjs",

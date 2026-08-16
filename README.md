@@ -86,7 +86,9 @@ pnpm dev              # dev server
 pnpm build            # production build
 pnpm preview          # preview production build
 pnpm test             # unit tests (Vitest)
-pnpm test:e2e         # browser tests (Playwright)
+pnpm test:e2e         # browser tests (Playwright), both projects
+pnpm test:e2e:parallel # everything except pagination, multi-worker
+pnpm test:e2e:paged   # pagination only, single worker
 pnpm lint             # ESLint
 pnpm format           # Prettier
 pnpm gen:icons        # regenerate favicon and PWA icons from public/favicon.svg
