@@ -52,6 +52,36 @@ awesome()
 Hello <span class="hljs-keyword">\textbf</span>{world}.
 <span class="hljs-keyword">\end</span>{document}
 </code></pre>
+<h2>Phase 5.0 additions</h2>
+<pre><code class="hljs language-makefile"><span class="hljs-meta"><span class="hljs-keyword">.PHONY</span>: all clean</span>
+CC := gcc
+<span class="hljs-section">all: demo</span>
+<span class="hljs-section">demo: main.o</span>
+	<span class="hljs-variable">$(CC)</span> -o <span class="hljs-variable">$@</span> <span class="hljs-variable">$^</span>
+<span class="hljs-section">clean:</span>
+	rm -f *.o demo
+</code></pre>
+<pre><code class="hljs language-cmake"><span class="hljs-keyword">cmake_minimum_required</span>(VERSION <span class="hljs-number">3.20</span>)
+<span class="hljs-keyword">project</span>(demo LANGUAGES C)
+<span class="hljs-keyword">add_executable</span>(demo main.c)
+</code></pre>
+<pre><code class="hljs language-vbnet"><span class="hljs-keyword">Imports</span> System
+
+<span class="hljs-keyword">Module</span> Greeter
+    <span class="hljs-keyword">Sub</span> Main()
+        Console.WriteLine(<span class="hljs-string">"Hello, world"</span>)
+    <span class="hljs-keyword">End</span> <span class="hljs-keyword">Sub</span>
+<span class="hljs-keyword">End</span> <span class="hljs-keyword">Module</span>
+</code></pre>
+<pre><code class="hljs language-julia"><span class="hljs-keyword">function</span> greet(name::<span class="hljs-built_in">String</span>)
+    <span class="hljs-keyword">return</span> <span class="hljs-string">"Hello, "</span> * name
+<span class="hljs-keyword">end</span>
+</code></pre>
+<h2>HCL has no highlight.js module, so it renders plain</h2>
+<pre><code class="hljs">resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+}
+</code></pre>
 <h2>Made-up language renders plain</h2>
 <pre><code class="hljs">this should render as plain escaped code
 &lt;not-a-tag&gt; stays literal

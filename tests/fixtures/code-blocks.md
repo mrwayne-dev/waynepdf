@@ -75,6 +75,48 @@ Hello \textbf{world}.
 \end{document}
 ```
 
+## Phase 5.0 additions
+
+```makefile
+.PHONY: all clean
+CC := gcc
+all: demo
+demo: main.o
+	$(CC) -o $@ $^
+clean:
+	rm -f *.o demo
+```
+
+```cmake
+cmake_minimum_required(VERSION 3.20)
+project(demo LANGUAGES C)
+add_executable(demo main.c)
+```
+
+```vbnet
+Imports System
+
+Module Greeter
+    Sub Main()
+        Console.WriteLine("Hello, world")
+    End Sub
+End Module
+```
+
+```julia
+function greet(name::String)
+    return "Hello, " * name
+end
+```
+
+## HCL has no highlight.js module, so it renders plain
+
+```hcl
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+}
+```
+
 ## Made-up language renders plain
 
 ```made-up-lang

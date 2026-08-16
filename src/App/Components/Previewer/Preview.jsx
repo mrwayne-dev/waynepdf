@@ -38,6 +38,7 @@ import 'katex/dist/contrib/mhchem.js';
 import bash from 'highlight.js/lib/languages/bash';
 import c from 'highlight.js/lib/languages/c';
 import clojure from 'highlight.js/lib/languages/clojure';
+import cmake from 'highlight.js/lib/languages/cmake';
 import cpp from 'highlight.js/lib/languages/cpp';
 import csharp from 'highlight.js/lib/languages/csharp';
 import css from 'highlight.js/lib/languages/css';
@@ -55,10 +56,12 @@ import ini from 'highlight.js/lib/languages/ini';
 import java from 'highlight.js/lib/languages/java';
 import javascript from 'highlight.js/lib/languages/javascript';
 import json from 'highlight.js/lib/languages/json';
+import julia from 'highlight.js/lib/languages/julia';
 import kotlin from 'highlight.js/lib/languages/kotlin';
 import latex from 'highlight.js/lib/languages/latex';
 import less from 'highlight.js/lib/languages/less';
 import lua from 'highlight.js/lib/languages/lua';
+import makefile from 'highlight.js/lib/languages/makefile';
 import markdown from 'highlight.js/lib/languages/markdown';
 import matlab from 'highlight.js/lib/languages/matlab';
 import nginx from 'highlight.js/lib/languages/nginx';
@@ -77,6 +80,7 @@ import scss from 'highlight.js/lib/languages/scss';
 import sql from 'highlight.js/lib/languages/sql';
 import swift from 'highlight.js/lib/languages/swift';
 import typescript from 'highlight.js/lib/languages/typescript';
+import vbnet from 'highlight.js/lib/languages/vbnet';
 import xml from 'highlight.js/lib/languages/xml';
 import yaml from 'highlight.js/lib/languages/yaml';
 
@@ -85,6 +89,7 @@ export const LANGUAGES = {
   bash,
   c,
   clojure,
+  cmake,
   cpp,
   csharp,
   css,
@@ -102,10 +107,12 @@ export const LANGUAGES = {
   java,
   javascript,
   json,
+  julia,
   kotlin,
   latex,
   less,
   lua,
+  makefile,
   markdown,
   matlab,
   nginx,
@@ -124,6 +131,7 @@ export const LANGUAGES = {
   sql,
   swift,
   typescript,
+  vbnet,
   xml,
   yaml,
 };
@@ -138,9 +146,12 @@ for (const [name, definition] of Object.entries(LANGUAGES)) {
  * objc, cs, c++, cxx, docker, text, toml, html. Only these two are missing —
  * highlight.js ships `shell` as a separate language (a console-session mode we
  * are not registering), so `shell` and `zsh` would otherwise fall through to
- * plain text.
+ * plain text. Julia declares no aliases of its own, so `jl` needs one too.
+ *
+ * Terraform/HCL is deliberately absent: highlight.js 11.9 has no module for it
+ * and there is no maintained package on npm, so `hcl`/`tf` fences render plain.
  */
-export const EXTRA_ALIASES = { bash: ['shell', 'zsh'] };
+export const EXTRA_ALIASES = { bash: ['shell', 'zsh'], julia: ['jl'] };
 
 for (const [languageName, aliases] of Object.entries(EXTRA_ALIASES)) {
   hljs.registerAliases(aliases, { languageName });

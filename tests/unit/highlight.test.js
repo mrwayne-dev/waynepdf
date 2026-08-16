@@ -18,6 +18,8 @@ import {
 const SAMPLES = {
   bash: '#!/usr/bin/env bash\nset -euo pipefail\nfor f in *.md; do\n  echo "$f"\ndone',
   c: '#include <stdio.h>\nint main(void) {\n  printf("hi\\n");\n  return 0;\n}',
+  cmake:
+    'cmake_minimum_required(VERSION 3.20)\nproject(demo LANGUAGES C)\nadd_executable(demo main.c)\ntarget_link_libraries(demo PRIVATE m)',
   clojure:
     '(ns app.core)\n(defn greet [name]\n  (str "Hello, " name))\n(greet "world")',
   cpp: '#include <vector>\nint main() {\n  std::vector<int> v{1, 2, 3};\n  return v.size();\n}',
@@ -46,12 +48,16 @@ const SAMPLES = {
   javascript:
     "const greet = (name) => `Hello, ${name}`;\nexport default function App() {\n  return greet('world');\n}",
   json: '{\n  "name": "waynepdf",\n  "version": "1.0.0",\n  "private": true\n}',
+  julia:
+    'function greet(name::String)\n    return "Hello, " * name\nend\n\nprintln(greet("world"))',
   kotlin:
     'fun greet(name: String): String = "Hello, $name"\nfun main() {\n  println(greet("world"))\n}',
   latex:
     '\\documentclass{article}\n\\begin{document}\n\\section{Intro}\nHello \\textbf{world}.\n\\end{document}',
   less: '@primary: #333;\n.button {\n  color: @primary;\n  &:hover { color: lighten(@primary, 10%); }\n}',
   lua: 'local function greet(name)\n  return "Hello, " .. name\nend\nprint(greet("world"))',
+  makefile:
+    '.PHONY: all clean\nCC := gcc\nall: demo\ndemo: main.o\n\t$(CC) -o $@ $^\nclean:\n\trm -f *.o demo',
   markdown:
     '# Heading\n\nSome **bold** and *italic* text.\n\n- item one\n- item two',
   matlab: 'function y = square(x)\n  y = x .^ 2;\nend\ndisp(square([1 2 3]));',
@@ -78,6 +84,8 @@ const SAMPLES = {
     'import Foundation\n\nfunc greet(_ name: String) -> String {\n    return "Hello, \\(name)"\n}',
   typescript:
     'interface User {\n  id: number;\n  name: string;\n}\nexport const greet = (u: User): string => `Hi ${u.name}`;',
+  vbnet:
+    'Imports System\n\nModule Greeter\n    Sub Main()\n        Dim name As String = "world"\n        Console.WriteLine($"Hello, {name}")\n    End Sub\nEnd Module',
   xml: '<?xml version="1.0"?>\n<root>\n  <item id="1">value</item>\n</root>',
   yaml: 'name: waynepdf\non:\n  push:\n    branches: [main]\njobs:\n  build:\n    runs-on: ubuntu-latest',
 };
@@ -85,9 +93,11 @@ const SAMPLES = {
 const NAMES = Object.keys(LANGUAGES);
 
 describe('registered language set', () => {
-  it('registers 44 language modules', () => {
-    // 45 names in the Phase 3.5 brief, but toml and ini are one module.
-    expect(NAMES).toHaveLength(44);
+  it('registers 48 language modules', () => {
+    // Phase 3.5 registered 44 (45 brief names, minus toml which is ini).
+    // Phase 5.0 added makefile, cmake, vbnet and julia. Terraform/HCL has no
+    // highlight.js module and no maintained npm package, so it is absent.
+    expect(NAMES).toHaveLength(48);
   });
 
   it('has a sample for every registered language', () => {
@@ -156,6 +166,11 @@ describe('aliases', () => {
     ['patch', 'diff'],
     ['pl', 'perl'],
     ['ps1', 'powershell'],
+    ['make', 'makefile'],
+    ['mk', 'makefile'],
+    ['mak', 'makefile'],
+    ['jl', 'julia'],
+    ['vb', 'vbnet'],
   ];
 
   it.each(CASES)('%s resolves to %s', (alias, canonical) => {
@@ -166,6 +181,18 @@ describe('aliases', () => {
     // `shell` is a separate console-session language in highlight.js that we do
     // not register, so without EXTRA_ALIASES these would fall through to plain.
     expect(EXTRA_ALIASES.bash).toEqual(['shell', 'zsh']);
+  });
+
+  it('registers jl explicitly, since julia declares no aliases', () => {
+    expect(EXTRA_ALIASES.julia).toEqual(['jl']);
+  });
+
+  it('terraform and hcl remain unregistered', () => {
+    // No highlight.js module exists for HCL. Pinned so the absence is a known
+    // fact rather than an oversight; hcl/tf fences render plain.
+    for (const name of ['terraform', 'hcl', 'tf']) {
+      expect(hljs.getLanguage(name)).toBeUndefined();
+    }
   });
 });
 
