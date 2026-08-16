@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { detectLanguage, RTL_LANGS } from '../../Lib/detectLanguage.js';
+import useOverrides from './useOverrides.js';
 
 /*
  * Document language and text direction.
@@ -78,6 +79,7 @@ export const directionForLang = (lang) => (RTL_LANGS.has(lang) ? 'rtl' : 'ltr');
  */
 const useLanguage = () => {
   const [settings, setSettings] = useState(loadLanguageSettings);
+  const overrides = useOverrides();
   const [detected, setDetected] = useState(() => ({
     lang: 'und',
     confidence: 0,
@@ -127,15 +129,25 @@ const useLanguage = () => {
     [updaters, observeText, detectNow],
   );
 
-  const resolvedLang = settings.lang === 'auto' ? detected.lang : settings.lang;
+  /*
+   * Precedence: frontmatter, then the user's explicit choice, then detection.
+   * The override is not written back to `settings`, so it never persists and
+   * removing the block restores the user's own value.
+   */
+  const effectiveLang = overrides.lang ?? settings.lang;
+  const effectiveDirection = overrides.direction ?? settings.direction;
+
+  const resolvedLang = effectiveLang === 'auto' ? detected.lang : effectiveLang;
   const resolvedDirection =
-    settings.direction === 'auto'
+    effectiveDirection === 'auto'
       ? directionForLang(resolvedLang)
-      : settings.direction;
+      : effectiveDirection;
 
   return [
     {
       ...settings,
+      lang: effectiveLang,
+      direction: effectiveDirection,
       detectedLang: detected.lang,
       detectedConfidence: detected.confidence,
       breakdown: detected.breakdown,

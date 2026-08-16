@@ -151,6 +151,22 @@ export default function Settings() {
           </fieldset>
 
           <fieldset className="wp-fieldset">
+            <legend className="wp-label">Security</legend>
+            <label className="wp-check">
+              <input
+                type="checkbox"
+                checked={settings.sanitizeHtml === true}
+                onChange={(e) => updaters.setSanitizeHtml(e.target.checked)}
+              />
+              Sanitize HTML output
+            </label>
+            <p className="wp-hint">
+              Strips &lt;script&gt; tags and event handlers from custom HTML.
+              Recommended if you paste Markdown from untrusted sources.
+            </p>
+          </fieldset>
+
+          <fieldset className="wp-fieldset">
             <legend className="wp-label wp-section-head">Layout</legend>
             <LayoutPicker />
           </fieldset>

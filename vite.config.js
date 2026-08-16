@@ -27,7 +27,10 @@ const stripLegacyFontFallbacks = {
       for (const format of LEGACY_FONT_FORMATS) {
         if (!new RegExp(`format\\(['"]${format}['"]\\)`).test(next)) continue;
         next = next.replace(
-          new RegExp(`,\\s*url\\([^)]*\\)\\s*format\\(['"]${format}['"]\\)`, 'g'),
+          new RegExp(
+            `,\\s*url\\([^)]*\\)\\s*format\\(['"]${format}['"]\\)`,
+            'g',
+          ),
           '',
         );
       }
@@ -71,6 +74,35 @@ export default defineConfig({
   css: {
     postcss: { plugins: [stripLegacyFontFallbacks] },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        /*
+         * Mermaid splits itself into ~64 lazy chunks, one per diagram type,
+         * totalling ~4.4 MB. Left in the default assets/ directory they all
+         * land in the Workbox precache, which pushed first-visit cost from
+         * 3.7 MB to 7.2 MB — force-downloading a diagram engine most documents
+         * never use, which is exactly the trap Phase 3 fixed for the CJK fonts.
+         *
+         * Routing them into assets/mermaid/ makes them globbable so the service
+         * worker can runtime-cache them instead. The per-diagram splitting is
+         * kept deliberately: merging them into one chunk would mean a flowchart
+         * downloads the Gantt, ER and C4 renderers too.
+         */
+        chunkFileNames(chunk) {
+          const ids = chunk.moduleIds ?? [];
+          const isMermaid = ids.some((id) =>
+            /node_modules\/(\.pnpm\/)?(mermaid|@mermaid-js|cytoscape|dagre-d3-es|elkjs|khroma)/.test(
+              id,
+            ),
+          );
+          return isMermaid
+            ? 'assets/mermaid/[name]-[hash].js'
+            : 'assets/[name]-[hash].js';
+        },
+      },
+    },
+  },
   plugins: [
     react(),
     dropLegacyFontAssets,
@@ -100,11 +132,25 @@ export default defineConfig({
          * works offline. Latin, Arabic and Hebrew stay precached — together
          * they are only ~690 KB.
          */
-        globIgnores: ['**/noto-sans-{tc,sc,jp,kr}-*.woff2'],
+        globIgnores: [
+          '**/noto-sans-{tc,sc,jp,kr}-*.woff2',
+          'assets/mermaid/**',
+        ],
         // The lazily-loaded Preview chunk carries all of highlight.js and is
         // over the 2 MiB default ceiling once source maps are off.
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         runtimeCaching: [
+          {
+            // Same reasoning as the CJK fonts: content-hashed and only fetched
+            // when a document actually contains a diagram of that type.
+            urlPattern: /\/assets\/mermaid\//,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'waynepdf-mermaid',
+              expiration: { maxEntries: 80, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
           {
             // Immutable, content-hashed filenames, so CacheFirst can never go
             // stale — a changed font is a changed URL.

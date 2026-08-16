@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import useOverrides from './useOverrides.js';
 
 /*
  * Page layout settings — everything that shapes the printed artefact rather
@@ -177,11 +178,39 @@ export function saveLayout(layout) {
 const useLayout = () => {
   // Synchronous init, as in useTheme: reading in an effect would paint one
   // frame of the default layout first.
-  const [layout, setLayout] = useState(loadLayout);
+  const [stored, setLayout] = useState(loadLayout);
+  const overrides = useOverrides();
+
+  /*
+   * Frontmatter overrides merge over the stored layout for this document only.
+   * The three nested groups merge rather than replace, so `toc: true` in a
+   * document keeps the user's chosen depth.
+   */
+  const layout = useMemo(() => {
+    const keys = Object.keys(overrides);
+    if (keys.length === 0) return stored;
+    const next = { ...stored };
+    for (const key of [
+      'pageSize',
+      'orientation',
+      'marginPreset',
+      'marginTop',
+      'marginRight',
+      'marginBottom',
+      'marginLeft',
+    ]) {
+      if (overrides[key] !== undefined) next[key] = overrides[key];
+    }
+    for (const group of ['toc', 'watermark', 'cover']) {
+      if (overrides[group])
+        next[group] = { ...stored[group], ...overrides[group] };
+    }
+    return normalizeLayout(next);
+  }, [stored, overrides]);
 
   useEffect(() => {
-    saveLayout(layout);
-  }, [layout]);
+    saveLayout(stored);
+  }, [stored]);
 
   const updaters = useMemo(() => {
     const patch = (key) => (value) =>

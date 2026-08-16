@@ -1,0 +1,18 @@
+<div><h1>Diagrams</h1>
+<h2>Flowchart</h2>
+<pre><code class="language-mermaid">graph LR
+    A[Start] --&gt; B{Decision}
+    B --&gt;|Yes| C[Do it]
+    B --&gt;|No| D[Skip]
+</code></pre>
+<h2>Sequence</h2>
+<pre><code class="language-mermaid">sequenceDiagram
+    Alice-&gt;&gt;Bob: Hello
+    Bob--&gt;&gt;Alice: Hi
+</code></pre>
+<h2>Entity relationship</h2>
+<pre><code class="language-mermaid">erDiagram
+    AUTHOR ||--o{ BOOK : writes
+    BOOK }o--|| PUBLISHER : published_by
+</code></pre>
+</div>

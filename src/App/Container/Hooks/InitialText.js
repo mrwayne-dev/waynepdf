@@ -76,8 +76,60 @@ Currency works as expected — "$5.99" and "he owes $10" don't trigger math, bec
 | Themes and fonts           | Ready        |
 | Unicode and encodings      | Ready        |
 | LaTeX math                 | Ready        |
-| Mermaid diagrams           | Coming soon  |
+| Mermaid diagrams           | Ready        |
 | Page layout                | Ready        |
+
+## Callouts
+
+:::note
+This is a note callout. Use it for asides, references, or supplementary information.
+:::
+
+:::tip
+Use tip for helpful suggestions and best practices.
+:::
+
+:::warning
+Warnings alert readers to potential issues.
+:::
+
+:::danger
+Danger callouts flag critical risks or breaking changes.
+:::
+
+## Task lists
+
+- [x] Ship a Markdown editor
+- [x] Add themes and fonts
+- [x] Add math rendering
+- [ ] Take over the world
+
+## Diagrams
+
+Mermaid diagrams render inline:
+
+\`\`\`mermaid
+graph LR
+    A[Write Markdown] --> B[Preview]
+    B --> C[Save as PDF]
+    C --> D[Done]
+\`\`\`
+
+## Frontmatter
+
+Add a YAML block at the very top of a document to configure that document:
+
+\`\`\`yaml
+---
+title: My Document
+author: Your Name
+theme: sepia
+pageSize: a5
+toc: true
+---
+\`\`\`
+
+Frontmatter is stripped from the output — it configures the document, it doesn't appear in it.
 
 ## Page layout
 

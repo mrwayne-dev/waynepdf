@@ -1,0 +1,163 @@
+/* Callouts. Part of the forked markdown stylesheet; see index.css. */
+
+/*
+ * Each type is a tinted panel with a coloured left rail and an icon. The tint is
+ * derived with color-mix from the type's own accent rather than hardcoded, which
+ * is what lets one rule set work across all five themes — a fixed pastel would
+ * be invisible on Dark and garish on Sepia.
+ */
+.markdown-body .callout {
+  --callout-accent: var(--wp-color-accent);
+  margin: 1em 0;
+  padding: 0.75em 1em;
+  border-left: 4px solid var(--callout-accent);
+  border-radius: 0 var(--wp-ui-radius) var(--wp-ui-radius) 0;
+  background-color: color-mix(
+    in srgb,
+    var(--callout-accent) 10%,
+    var(--wp-color-canvas)
+  );
+  /* Fragmentation: a three-line aside split across a page break reads as two
+     broken boxes, so keep them whole where they fit. */
+  break-inside: avoid;
+}
+
+.markdown-body .callout-title {
+  display: flex;
+  align-items: center;
+  gap: 0.45em;
+  margin-bottom: 0.35em;
+  font-family: var(--wp-font-family-sans);
+  font-weight: 600;
+  color: var(--callout-accent);
+}
+
+/* Icon as an inline mask so it inherits the accent colour rather than needing
+   one recoloured asset per type per theme. */
+.markdown-body .callout-title::before {
+  content: '';
+  flex-shrink: 0;
+  width: 1.05em;
+  height: 1.05em;
+  background-color: currentColor;
+  mask-image: var(--callout-icon);
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  -webkit-mask-image: var(--callout-icon);
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+}
+
+.markdown-body .callout-body > :first-child {
+  margin-top: 0;
+}
+
+.markdown-body .callout-body > :last-child {
+  margin-bottom: 0;
+}
+
+/* Nested code and quotes must not inherit the tint twice. */
+.markdown-body .callout-body pre,
+.markdown-body .callout-body blockquote {
+  background-color: var(--wp-color-canvas-subtle);
+}
+
+/* --- per type ------------------------------------------------------------- */
+
+/* Pencil */
+.markdown-body .callout-note {
+  --callout-accent: var(--wp-color-fg-muted);
+  --callout-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20h9'/%3E%3Cpath d='M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z'/%3E%3C/svg%3E");
+}
+
+/* Lightbulb */
+.markdown-body .callout-tip {
+  --callout-accent: var(--wp-color-success);
+  --callout-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 18h6'/%3E%3Cpath d='M10 22h4'/%3E%3Cpath d='M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14'/%3E%3C/svg%3E");
+}
+
+/* Warning triangle */
+.markdown-body .callout-warning {
+  --callout-accent: var(--wp-color-attention);
+  --callout-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z'/%3E%3Cpath d='M12 9v4'/%3E%3Cpath d='M12 17h.01'/%3E%3C/svg%3E");
+}
+
+/* Octagon */
+.markdown-body .callout-danger {
+  --callout-accent: var(--wp-color-danger);
+  --callout-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7.86 2h8.28L22 7.86v8.28L16.14 22H7.86L2 16.14V7.86L7.86 2Z'/%3E%3Cpath d='M12 8v4'/%3E%3Cpath d='M12 16h.01'/%3E%3C/svg%3E");
+}
+
+/* Info circle */
+.markdown-body .callout-info {
+  --callout-accent: var(--wp-color-accent);
+  --callout-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 16v-4'/%3E%3Cpath d='M12 8h.01'/%3E%3C/svg%3E");
+}
+
+/* --- task lists ---------------------------------------------------------- */
+
+/*
+ * markdown-it-task-lists adds .contains-task-list and .task-list-item. The
+ * upstream fork already styles .task-list-item; these rules cover the checkbox
+ * itself, which upstream expects GitHub's own CSS to handle.
+ */
+.markdown-body .contains-task-list {
+  list-style: none;
+  padding-left: 1.2em;
+}
+
+.markdown-body .task-list-item {
+  list-style: none;
+}
+
+.markdown-body .task-list-item-checkbox {
+  margin-right: 0.45em;
+  /* Non-interactive by design: the preview renders the document, it does not
+     edit it. `default` rather than `not-allowed` — nothing is broken. */
+  cursor: default;
+  vertical-align: middle;
+}
+
+.markdown-body .task-list-item-label {
+  cursor: default;
+}
+
+@media print {
+  /* Checkbox widgets print inconsistently across engines; the border makes the
+     box legible even when the native control is dropped. */
+  .markdown-body .task-list-item-checkbox {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+/* --- mermaid ------------------------------------------------------------- */
+
+.markdown-body .mermaid-diagram {
+  margin: 1em 0;
+  text-align: center;
+  break-inside: avoid;
+}
+
+.markdown-body .mermaid-diagram svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.markdown-body .mermaid-error {
+  margin: 1em 0;
+  padding: 0.75em 1em;
+  color: var(--wp-color-danger);
+  background-color: color-mix(
+    in srgb,
+    var(--wp-color-danger) 8%,
+    var(--wp-color-canvas)
+  );
+  border-left: 4px solid var(--wp-color-danger);
+  border-radius: 0 var(--wp-ui-radius) var(--wp-ui-radius) 0;
+  font-family: var(--wp-font-family-mono);
+  font-size: var(--wp-font-size-code);
+  white-space: pre-wrap;
+}

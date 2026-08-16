@@ -1,0 +1,10 @@
+<div><h1>XSS Fixture</h1>
+<script>window.__xssRan = true;</script>
+<img src="x" onerror="window.__xssImg = true">
+<p><a href="javascript:void(0)">javascript link</a></p>
+<iframe src="https://example.com"></iframe>
+<p>Inline math must survive: <span class="katex" data-latex="e^{i\pi} + 1 = 0"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.908em;vertical-align:-0.0833em;"></span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8247em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0359em;">iπ</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span></p>
+<div class="callout callout-warning"><div class="callout-title">Warning</div><div class="callout-body">
+<p>A callout must survive too.</p>
+</div></div>
+</div><div class="wp-mermaid-loading"><div class="wp-lazyload no-print" role="status" aria-live="polite"><span class="wp-lazyload-spinner" aria-hidden="true"></span><span class="wp-lazyload-label">Loading diagram engine</span><span class="wp-lazyload-size">≈ 280 KB</span></div></div>

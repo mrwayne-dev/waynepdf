@@ -9,6 +9,7 @@ import {
   normalizeSettings,
 } from '../../Lib/settings.js';
 import { applyTheme, resolveTheme } from '../../Lib/applyTheme.js';
+import useOverrides from './useOverrides.js';
 
 export { DEFAULTS, THEMES, FONT_FAMILIES, RANGES };
 
@@ -20,12 +21,29 @@ export { DEFAULTS, THEMES, FONT_FAMILIES, RANGES };
  * which reads as a flash of the wrong colours on every reload.
  */
 const useTheme = () => {
-  const [settings, setSettings] = useState(loadSettings);
+  const [stored, setSettings] = useState(loadSettings);
+  const overrides = useOverrides();
+
+  /*
+   * Frontmatter wins over the user's own choice, for this document only. The
+   * merged value is what everything downstream sees; `stored` is what gets
+   * persisted, so an override never leaks into localStorage.
+   */
+  const settings = useMemo(
+    () =>
+      overrides.theme && overrides.theme !== stored.theme
+        ? normalizeSettings({ ...stored, theme: overrides.theme })
+        : stored,
+    [stored, overrides.theme],
+  );
 
   // Persist + apply together. Both are idempotent, so running this on every
   // settings change (including the first) keeps a single code path.
   useEffect(() => {
-    saveSettings(settings);
+    saveSettings(stored);
+  }, [stored]);
+
+  useEffect(() => {
     applyTheme(settings);
   }, [settings]);
 
@@ -56,6 +74,7 @@ const useTheme = () => {
       setLineHeight: patch('lineHeight'),
       setCodeFontSize: patch('codeFontSize'),
       setMathCopyEnabled: patch('mathCopyEnabled'),
+      setSanitizeHtml: patch('sanitizeHtml'),
       reset: () => setSettings({ ...DEFAULTS }),
     };
   }, []);

@@ -3,7 +3,11 @@ import styled from 'styled-components';
 import { useProvided } from 'nonaction';
 import Loading from '../Loading.jsx';
 import ErrorBoundary from '../ErrorBoundary.jsx';
-import { LanguageContainer, LayoutContainer } from '../../Container';
+import {
+  LanguageContainer,
+  LayoutContainer,
+  ThemeContainer,
+} from '../../Container';
 
 const Wrapper = styled.div`
   overflow-y: scroll;
@@ -31,6 +35,8 @@ const LazyPagedPreview = lazy(() => import('./PagedPreview.jsx'));
 export default function Previewer({ children, onPagesReady }) {
   const [{ resolvedLang, resolvedDirection }] = useProvided(LanguageContainer);
   const [layout] = useProvided(LayoutContainer);
+  const [themeSettings] = useProvided(ThemeContainer);
+  const sanitizeHtml = themeSettings.sanitizeHtml === true;
   const isPaged = layout.previewMode === 'paged';
 
   /*
@@ -50,6 +56,7 @@ export default function Previewer({ children, onPagesReady }) {
             <LazyPagedPreview
               source={children}
               layout={layout}
+              sanitizeHtml={sanitizeHtml}
               onPagesReady={onPagesReady}
             />
           </PagedWrapper>
@@ -62,7 +69,12 @@ export default function Previewer({ children, onPagesReady }) {
             lang={resolvedLang === 'und' ? undefined : resolvedLang}
             dir={resolvedDirection}
           >
-            <LazyPreview>{children}</LazyPreview>
+            <LazyPreview
+              sanitizeHtml={sanitizeHtml}
+              theme={themeSettings.resolvedTheme}
+            >
+              {children}
+            </LazyPreview>
           </Wrapper>
         )}
       </Suspense>

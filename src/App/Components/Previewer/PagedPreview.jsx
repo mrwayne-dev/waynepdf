@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { md } from './Preview.jsx';
+import { renderDocument } from './Preview.jsx';
 import Paginator from './Paginator.jsx';
 
 /**
@@ -10,8 +10,18 @@ import Paginator from './Paginator.jsx';
  * directly would drag highlight.js and KaTeX into the main bundle and undo the
  * code-splitting from Phases 3.5 and 4.
  */
-export default function PagedPreview({ source, layout, onPagesReady }) {
-  const html = useMemo(() => md.render(source ?? ''), [source]);
+export default function PagedPreview({
+  source,
+  layout,
+  sanitizeHtml = false,
+  onPagesReady,
+}) {
+  // Same renderer as the flowing preview, so paginated output cannot drift from
+  // what the user was looking at before switching modes.
+  const html = useMemo(
+    () => renderDocument(source, { sanitizeHtml }).html,
+    [source, sanitizeHtml],
+  );
   return (
     <Paginator sourceHtml={html} layout={layout} onPagesReady={onPagesReady} />
   );

@@ -4,6 +4,7 @@ import { Header, Markdown } from './Components';
 import Toast from './Components/Toast.jsx';
 import MathCopyButton from './Components/Previewer/MathCopyButton.jsx';
 import LayoutStyles from './Components/LayoutStyles.jsx';
+import FrontmatterWatcher from './Components/FrontmatterWatcher.jsx';
 import {
   TextContainer,
   ThemeContainer,
@@ -33,6 +34,7 @@ const App = ({ className }) => {
         ]}
       >
         <LayoutStyles />
+        <FrontmatterWatcher />
         <HeaderWithPageCount />
         <Markdown />
         {/* Both are chrome, not document: they portal/fix outside the flow and

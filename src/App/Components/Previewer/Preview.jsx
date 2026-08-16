@@ -1,7 +1,12 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import MarkdownIt from 'markdown-it';
 import hljs from 'highlight.js/lib/core';
 import markdownItKatex from '@vscode/markdown-it-katex';
+import mdContainer from 'markdown-it-container';
+import mdTaskLists from 'markdown-it-task-lists';
+import { parseFrontmatter } from '../../Lib/parseFrontmatter.js';
+import { sanitize } from '../../Lib/sanitize.js';
+import MermaidRenderer from './MermaidRenderer.jsx';
 import 'katex/dist/katex.min.css';
 /*
  * mhchem, imported by its CJS path on purpose — do not "tidy" this to
@@ -164,6 +169,16 @@ const md = new MarkdownIt({
   linkify: true,
   typographer: false, // matches upstream
   highlight: (str, lang) => {
+    /*
+     * Mermaid is not a highlight.js language and must not be highlighted — the
+     * block is replaced wholesale by an SVG after render. It still needs the
+     * language-mermaid class, because that is how MermaidRenderer finds it;
+     * without this the fence falls through to the plain-text branch, loses the
+     * class, and no diagram ever renders.
+     */
+    if (lang === 'mermaid') {
+      return `<pre><code class="language-mermaid">${md.utils.escapeHtml(str)}</code></pre>`;
+    }
     if (lang && hljs.getLanguage(lang)) {
       try {
         // `lang` reached here only by matching a registered name or alias, so
@@ -260,11 +275,87 @@ for (const name of MATH_RENDER_RULES) {
   };
 }
 
+/*
+ * Callouts, via markdown-it-container.
+ *
+ * Five fixed types rather than an open-ended mechanism: each needs its own icon
+ * and colour, so an arbitrary `:::whatever` would render unstyled and look
+ * broken. The fence line's remainder becomes the title, so `:::warning Careful`
+ * reads naturally.
+ */
+export const CALLOUT_TYPES = ['note', 'tip', 'warning', 'danger', 'info'];
+
+const capitalise = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+for (const type of CALLOUT_TYPES) {
+  md.use(mdContainer, type, {
+    render(tokens, idx) {
+      const token = tokens[idx];
+      if (token.nesting !== 1) return '</div></div>\n';
+      // token.info is the whole fence line, e.g. "warning Careful".
+      const custom = token.info.trim().slice(type.length).trim();
+      const title = custom || capitalise(type);
+      return (
+        `<div class="callout callout-${type}">` +
+        `<div class="callout-title">${md.utils.escapeHtml(title)}</div>` +
+        `<div class="callout-body">\n`
+      );
+    },
+  });
+}
+
+/*
+ * Task lists. `enabled: false` keeps the checkboxes non-interactive: the preview
+ * is a rendering of the document, and a click that appeared to work but changed
+ * nothing in the source would be a lie.
+ */
+md.use(mdTaskLists, { enabled: false, label: true, labelAfter: true });
+
 // Exported so tests assert against the exact instance the app renders with,
 // rather than a second config that could silently drift.
 export { md, hljs };
 
-export default function Preview({ children }) {
-  const html = useMemo(() => md.render(children ?? ''), [children]);
-  return <div dangerouslySetInnerHTML={{ __html: html }} />;
+/**
+ * The one place a document becomes HTML.
+ *
+ * Frontmatter is stripped before rendering — it configures the document, it is
+ * never part of it. Shared with the paged preview and the export paths so all
+ * of them produce byte-identical output from the same input; two renderers
+ * would drift the moment one grew a plugin.
+ *
+ * @returns {{ html: string, frontmatter: object, error: string|null }}
+ */
+export function renderDocument(text, { sanitizeHtml = false } = {}) {
+  const { frontmatter, body, error } = parseFrontmatter(text ?? '');
+  const raw = md.render(body);
+  return {
+    html: sanitizeHtml ? sanitize(raw) : raw,
+    frontmatter,
+    error,
+  };
+}
+
+export default function Preview({
+  children,
+  sanitizeHtml = false,
+  theme = 'light',
+}) {
+  const hostRef = useRef(null);
+  const { html } = useMemo(
+    () => renderDocument(children, { sanitizeHtml }),
+    [children, sanitizeHtml],
+  );
+
+  /*
+   * MermaidRenderer lives here rather than in Previewer because it needs both
+   * the rendered HTML and a ref into it. Lifting the render up to Previewer to
+   * share the string would pull markdown-it, highlight.js and KaTeX into the
+   * main bundle and undo the code-splitting from Phases 3.5 and 4.
+   */
+  return (
+    <>
+      <div ref={hostRef} dangerouslySetInnerHTML={{ __html: html }} />
+      <MermaidRenderer containerRef={hostRef} html={html} theme={theme} />
+    </>
+  );
 }

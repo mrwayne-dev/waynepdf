@@ -227,6 +227,7 @@ describe('loadSettings', () => {
       lineHeight: 1.75,
       codeFontSize: 16,
       mathCopyEnabled: false,
+      sanitizeHtml: true,
     };
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
     expect(loadSettings()).toEqual(stored);
@@ -244,7 +245,13 @@ describe('loadSettings', () => {
       codeFontSize: 16,
     };
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(legacy));
-    expect(loadSettings()).toEqual({ ...legacy, mathCopyEnabled: true });
+    // Two fields have been added inside v1 now (Phase 4's mathCopyEnabled and
+    // Phase 6a's sanitizeHtml); both must appear with their defaults.
+    expect(loadSettings()).toEqual({
+      ...legacy,
+      mathCopyEnabled: true,
+      sanitizeHtml: false,
+    });
   });
 
   it('rejects a non-boolean mathCopyEnabled', () => {

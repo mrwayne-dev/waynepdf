@@ -27,6 +27,7 @@ export const DEFAULTS = {
   lineHeight: 1.6,
   codeFontSize: 14,
   mathCopyEnabled: true,
+  sanitizeHtml: false,
 };
 
 /** Slider bounds, also used to build the range inputs so the two cannot drift. */
@@ -70,6 +71,10 @@ export function normalizeSettings(input) {
       typeof raw.mathCopyEnabled === 'boolean'
         ? raw.mathCopyEnabled
         : DEFAULTS.mathCopyEnabled,
+    sanitizeHtml:
+      typeof raw.sanitizeHtml === 'boolean'
+        ? raw.sanitizeHtml
+        : DEFAULTS.sanitizeHtml,
   };
 }
 
