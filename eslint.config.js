@@ -25,6 +25,8 @@ const browserGlobals = {
   clearTimeout: 'readonly',
   getComputedStyle: 'readonly',
   CustomEvent: 'readonly',
+  Event: 'readonly',
+  indexedDB: 'readonly',
   performance: 'readonly',
   MutationObserver: 'readonly',
   localStorage: 'readonly',

@@ -73,11 +73,13 @@ installHljsThemes();
 // [Prevent] The redirect of file drop
 window.addEventListener('drop', (e) => e.preventDefault(), true);
 window.addEventListener('dragover', (e) => e.preventDefault(), true);
-// Ported verbatim from the upstream project's src/index.js:14-17
-window.addEventListener('beforeunload', (e) => {
-  const msg = 'Please check and backup the change before refresh or leave.';
-  return ((e || window.event).returnValue = msg);
-});
+/*
+ * The upstream project's beforeunload nag ("Please check and backup the change
+ * before refresh or leave.") is gone. It fired on every navigation, including
+ * ones that lost nothing, and the thing it warned about no longer happens:
+ * documents autosave to IndexedDB. useDocuments installs its own beforeunload
+ * listener, but that one writes and returns nothing — it never prompts.
+ */
 
 createRoot(rootElement).render(
   <React.StrictMode>

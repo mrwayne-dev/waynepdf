@@ -14,7 +14,7 @@ import useDrop from '../../Container/Hooks/useDrop.js';
 import loadDocument from '../../Lib/loadDocument.js';
 
 const Markdown = ({ className }) => {
-  const [text, setText] = useProvided(TextContainer);
+  const [text, setText, { ready }] = useProvided(TextContainer);
   const [, { observeText, detectNow }] = useProvided(LanguageContainer);
   const [, { showBanner }] = useProvided(EncodingBannerContainer);
   const [, { setPageCount }] = useProvided(PageCountContainer);
@@ -44,15 +44,23 @@ const Markdown = ({ className }) => {
   // The state `isDrag` must be false, when mouse up!
   // So we listen it in window! (Seems ugly, but it just works ha.)
 
-  // Test-only hook: lets Playwright drive the preview without touching
-  // CodeMirror's DOM. Compiled out of production builds.
+  /*
+   * Test-only hook: lets Playwright drive the preview without touching
+   * CodeMirror's DOM. Compiled out of production builds.
+   *
+   * Gated on `ready` so it doubles as the app's settle signal. Documents load
+   * from IndexedDB asynchronously now, so a test that seeds text the moment the
+   * hook appears would otherwise race the active document arriving and be
+   * overwritten by it.
+   */
   useEffect(() => {
     if (!(import.meta.env.DEV || import.meta.env.MODE === 'test')) return;
+    if (!ready) return;
     window.__waynepdf_setText = setText;
     return () => {
       delete window.__waynepdf_setText;
     };
-  }, [setText]);
+  }, [setText, ready]);
 
   return (
     <div

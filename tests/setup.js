@@ -1,4 +1,8 @@
 import '@testing-library/jest-dom/vitest';
+// jsdom ships no IndexedDB. Without this every component that mounts the
+// document store would exercise its blocked-storage fallback instead of the
+// path real browsers take.
+import 'fake-indexeddb/auto';
 
 // CodeMirror 5 reaches for this legacy IE API during init; jsdom does not
 // provide it. Ported from the upstream project's src/setupTests.js.

@@ -1,4 +1,4 @@
-import { Container } from 'nonaction';
+import { Container, useProvided } from 'nonaction';
 import useText from './Hooks/useText.js';
 import useTheme from './Hooks/useTheme.js';
 import useLanguage from './Hooks/useLanguage.js';
@@ -12,3 +12,12 @@ export const LanguageContainer = Container(useLanguage);
 export const EncodingBannerContainer = Container(useEncodingBanner);
 export const LayoutContainer = Container(useLayout);
 export const PageCountContainer = Container(usePageCount);
+
+/**
+ * The document store, which lives inside TextContainer's third slot.
+ *
+ * Not its own container: nonaction calls every container hook in one component,
+ * so two containers over the same hook would be two independent stores rather
+ * than one shared one. See the note at the top of Hooks/useDocuments.js.
+ */
+export const useDocumentsApi = () => useProvided(TextContainer)[2];

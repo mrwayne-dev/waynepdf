@@ -3,8 +3,26 @@ import styled from 'styled-components';
 import { useProvided } from 'nonaction';
 import UploadButton from '../Upload.jsx';
 import Settings from '../Settings/index.jsx';
-import { LayoutContainer, TextContainer } from '../../Container';
+import {
+  LayoutContainer,
+  TextContainer,
+  useDocumentsApi,
+} from '../../Container';
 import { deriveTitle } from '../../Lib/paginatorPreprocess.js';
+
+/**
+ * Autosave state, in words.
+ *
+ * "Unsaved changes" is reserved for a save that actually failed — a blocked or
+ * full IndexedDB. During normal typing the work is either pending or written,
+ * and calling that "unsaved" would train users to ignore the one message that
+ * means something.
+ */
+const SAVE_LABELS = {
+  saving: 'Saving…',
+  saved: 'Saved',
+  error: 'Unsaved changes',
+};
 
 const MODES = [
   { id: 'flowing', label: 'Flowing' },
@@ -14,6 +32,7 @@ const MODES = [
 const Header = ({ className, pageCount }) => {
   const [layout, { setPreviewMode }] = useProvided(LayoutContainer);
   const [text] = useProvided(TextContainer);
+  const { status, ready } = useDocumentsApi();
   const [printing, setPrinting] = useState(false);
 
   /*
@@ -105,6 +124,16 @@ const Header = ({ className, pageCount }) => {
         </p>
       )}
 
+      {ready && (
+        <p
+          className={`save-status is-${status}`}
+          data-save-status={status}
+          aria-live="polite"
+        >
+          {SAVE_LABELS[status] ?? SAVE_LABELS.saved}
+        </p>
+      )}
+
       <Settings />
 
       <div className="menu">
@@ -183,6 +212,18 @@ export default styled(Header)`
     margin: 0 0 0 10px;
     color: var(--wp-color-fg-muted);
     font-variant-numeric: tabular-nums;
+  }
+  p.save-status {
+    flex-shrink: 0;
+    margin: 0 0 0 12px;
+    color: var(--wp-color-fg-muted);
+    /* Fixed width: "Saved" and "Saving…" alternate constantly while typing, and
+       a reflowing header is far more distracting than the word itself. */
+    min-width: 9ch;
+  }
+  p.save-status.is-error {
+    color: var(--wp-color-danger);
+    font-weight: 600;
   }
   div.menu {
     width: 100%;
