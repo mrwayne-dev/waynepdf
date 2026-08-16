@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { detectLanguage, RTL_LANGS } from '../../Lib/detectLanguage.js';
+import { registerReset, unregisterReset } from '../../Lib/resetAll.js';
 import useOverrides from './useOverrides.js';
 
 /*
@@ -105,6 +106,15 @@ const useLanguage = () => {
     }),
     [],
   );
+
+  /*
+   * Language was one of the two things the old hand-rolled Reset button forgot,
+   * which is the whole argument for the registry.
+   */
+  useEffect(() => {
+    registerReset('language', updaters.reset);
+    return () => unregisterReset('language');
+  }, [updaters]);
 
   /** Debounced: typing must not re-scan the document on every keystroke. */
   const observeText = useCallback((text) => {

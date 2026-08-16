@@ -52,3 +52,31 @@ export const setText = (page, text) =>
   page.evaluate((t) => window.__waynepdf_setText(t), text);
 
 export const loadFixture = (page, name) => setText(page, readFixture(name));
+
+/**
+ * Clicks Settings' Reset, accepts the confirmation, and waits out the reload.
+ *
+ * The reload needs an unambiguous settle signal, not a timeout: a marker planted
+ * on `window` before the click is gone once — and only once — the new document
+ * has replaced the old one.
+ */
+export async function resetEverything(page) {
+  const MARKER = '__waynepdf_pre_reset';
+  await page.evaluate((k) => {
+    window[k] = true;
+  }, MARKER);
+
+  page.once('dialog', (dialog) => dialog.accept());
+  await page.getByRole('button', { name: 'Reset everything' }).click();
+
+  await page.waitForFunction((k) => window[k] === undefined, MARKER, {
+    timeout: 30_000,
+  });
+  await page.waitForFunction(
+    () => typeof window.__waynepdf_setText === 'function',
+    { timeout: 30_000 },
+  );
+  await expect(page.locator('#suspense-loading')).toHaveCount(0, {
+    timeout: 30_000,
+  });
+}

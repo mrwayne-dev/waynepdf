@@ -2,11 +2,17 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import useTheme from '../../src/App/Container/Hooks/useTheme.js';
 import { DEFAULTS, STORAGE_KEY } from '../../src/App/Lib/settings.js';
+import {
+  __registeredResetNames,
+  __getRegisteredReset as getRegisteredReset,
+  __resetRegistryForTests,
+} from '../../src/App/Lib/resetAll.js';
 
 beforeEach(() => {
   window.localStorage.clear();
   delete document.documentElement.dataset.theme;
   document.documentElement.removeAttribute('style');
+  __resetRegistryForTests();
 });
 
 const read = () => JSON.parse(window.localStorage.getItem(STORAGE_KEY));
@@ -90,5 +96,23 @@ describe('useTheme', () => {
     const first = result.current[1];
     rerender();
     expect(result.current[1]).toBe(first);
+  });
+
+  it('registers its reset with the central registry on mount', () => {
+    const { unmount } = renderHook(() => useTheme());
+    expect(__registeredResetNames()).toContain('theme');
+    unmount();
+    expect(__registeredResetNames()).not.toContain('theme');
+  });
+
+  it('registers the reset that actually resets, not some other function', () => {
+    const { result } = renderHook(() => useTheme());
+    act(() => result.current[1].setTheme('dark'));
+
+    // Invoke through the registry, the way resetAll will, so the wiring is
+    // covered and not just the fact that something was registered.
+    const registered = getRegisteredReset('theme');
+    act(() => registered());
+    expect(result.current[0]).toMatchObject(DEFAULTS);
   });
 });

@@ -13,6 +13,8 @@
  * straight back.
  */
 
+import { registerReset } from './resetAll.js';
+
 let overrides = {};
 const listeners = new Set();
 
@@ -67,6 +69,17 @@ function shallowEqualJSON(a, b) {
     return false;
   }
 }
+
+/*
+ * Registered at module scope, not from a mount effect.
+ *
+ * The store is a singleton with no component lifecycle to hang a registration
+ * off — `useOverrides` has three simultaneous consumers, so registering there
+ * would mean three registrations and an unregister-on-unmount that pulls the
+ * entry out from under the other two. Module scope makes it exactly as long-lived
+ * as the thing it resets.
+ */
+registerReset('frontmatter-overrides', clearOverrides);
 
 /** Test-only reset so suites do not leak overrides into each other. */
 export function __resetOverridesForTests() {

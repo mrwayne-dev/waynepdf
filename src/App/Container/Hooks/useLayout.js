@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { registerReset, unregisterReset } from '../../Lib/resetAll.js';
 import useOverrides from './useOverrides.js';
 
 /*
@@ -244,6 +245,11 @@ const useLayout = () => {
       reset: () => setLayout(normalizeLayout(null)),
     };
   }, []);
+
+  useEffect(() => {
+    registerReset('layout', updaters.reset);
+    return () => unregisterReset('layout');
+  }, [updaters]);
 
   return [layout, updaters];
 };

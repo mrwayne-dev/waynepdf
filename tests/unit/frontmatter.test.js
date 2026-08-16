@@ -9,6 +9,10 @@ import {
   clearOverrides,
   subscribeOverrides,
 } from '@/App/Lib/frontmatterOverrides.js';
+import {
+  __registeredResetNames,
+  __getRegisteredReset as getRegisteredReset,
+} from '@/App/Lib/resetAll.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const read = (name) =>
@@ -233,6 +237,19 @@ describe('override store', () => {
   it('coerces a non-object to empty', () => {
     clearOverrides();
     setOverrides('nope');
+    expect(getOverrides()).toEqual({});
+  });
+
+  it('registers its reset at module scope, with no component involved', () => {
+    // Importing the store is enough — there is no hook that owns it (three
+    // useOverrides consumers share it), so the registration cannot hang off a
+    // mount effect.
+    expect(__registeredResetNames()).toContain('frontmatter-overrides');
+  });
+
+  it('the registered reset clears active overrides', () => {
+    setOverrides({ theme: 'dark', pageSize: 'a5' });
+    getRegisteredReset('frontmatter-overrides')();
     expect(getOverrides()).toEqual({});
   });
 });

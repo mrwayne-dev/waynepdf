@@ -9,9 +9,15 @@ import useLayout, {
   resolvePageSize,
   loadLayout,
 } from '@/App/Container/Hooks/useLayout.js';
+import {
+  __registeredResetNames,
+  __getRegisteredReset as getRegisteredReset,
+  __resetRegistryForTests,
+} from '@/App/Lib/resetAll.js';
 
 beforeEach(() => {
   window.localStorage.clear();
+  __resetRegistryForTests();
 });
 
 const stored = () =>
@@ -266,5 +272,19 @@ describe('useLayout', () => {
     const first = result.current[1];
     rerender();
     expect(result.current[1]).toBe(first);
+  });
+
+  it('registers its reset with the central registry on mount', () => {
+    const { unmount } = renderHook(() => useLayout());
+    expect(__registeredResetNames()).toContain('layout');
+    unmount();
+    expect(__registeredResetNames()).not.toContain('layout');
+  });
+
+  it('registers the reset that actually resets', () => {
+    const { result } = renderHook(() => useLayout());
+    act(() => result.current[1].setPageSize('a5'));
+    act(() => getRegisteredReset('layout')());
+    expect(result.current[0]).toEqual(DEFAULTS);
   });
 });

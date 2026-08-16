@@ -9,6 +9,11 @@ import useLanguage, {
   normalizeLanguageSettings,
   directionForLang,
 } from '../../src/App/Container/Hooks/useLanguage.js';
+import {
+  __registeredResetNames,
+  __getRegisteredReset as getRegisteredReset,
+  __resetRegistryForTests,
+} from '../../src/App/Lib/resetAll.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const read = (name) =>
@@ -16,6 +21,7 @@ const read = (name) =>
 
 beforeEach(() => {
   window.localStorage.clear();
+  __resetRegistryForTests();
 });
 afterEach(() => {
   vi.useRealTimers();
@@ -194,5 +200,20 @@ describe('useLanguage: detection', () => {
     const first = result.current[1];
     rerender();
     expect(result.current[1]).toBe(first);
+  });
+
+  it('registers its reset with the central registry on mount', () => {
+    // Language was silently missing from the old hand-rolled Reset button.
+    const { unmount } = renderHook(() => useLanguage());
+    expect(__registeredResetNames()).toContain('language');
+    unmount();
+    expect(__registeredResetNames()).not.toContain('language');
+  });
+
+  it('registers the reset that actually resets', () => {
+    const { result } = renderHook(() => useLanguage());
+    act(() => result.current[1].setLang('ja'));
+    act(() => getRegisteredReset('language')());
+    expect(result.current[0]).toMatchObject(DEFAULT_LANG_SETTINGS);
   });
 });

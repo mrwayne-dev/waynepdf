@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { resetEverything } from './_helpers.js';
 
 /**
  * Settings panel behaviour: open/close, theme application, live typography
@@ -264,13 +265,57 @@ test.describe('persistence', () => {
     await page.getByLabel('Code size').fill('20');
     await expect.poll(() => cssVar(page, '--wp-font-size-base')).toBe('23px');
 
-    await page.getByRole('button', { name: 'Reset to defaults' }).click();
+    // Reset now confirms and reloads, so the panel's open state does not survive
+    // it — the gear has to be clicked again to read the controls back.
+    await resetEverything(page);
 
     await expect.poll(() => cssVar(page, '--wp-font-size-base')).toBe('16px');
     expect(await cssVar(page, '--wp-font-size-code')).toBe('14px');
     expect(await cssVar(page, '--wp-line-height-base')).toBe('1.6');
+    await gear(page).click();
     await expect(page.locator('.wp-theme-name')).toHaveText('System');
     await expect(page.getByLabel('Body size')).toHaveValue('16');
+  });
+
+  test('cancelling the reset confirmation changes nothing', async ({
+    page,
+  }) => {
+    await boot(page);
+    await gear(page).click();
+    await page.getByLabel('Body size').fill('23');
+    await expect.poll(() => cssVar(page, '--wp-font-size-base')).toBe('23px');
+
+    page.once('dialog', (dialog) => dialog.dismiss());
+    await page.getByRole('button', { name: 'Reset everything' }).click();
+
+    // No reload, no clearing — the panel is even still open.
+    await expect(panel(page)).toHaveClass(/is-open/);
+    expect(await cssVar(page, '--wp-font-size-base')).toBe('23px');
+    expect(
+      await page.evaluate((k) => localStorage.getItem(k), STORAGE_KEY),
+    ).not.toBeNull();
+  });
+
+  test('reset also clears language settings, which it used to miss', async ({
+    page,
+  }) => {
+    await boot(page);
+    await gear(page).click();
+    await page.locator('select.wp-select-language').selectOption('ja');
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () => JSON.parse(localStorage.getItem('waynepdf.language.v1')).lang,
+        ),
+      )
+      .toBe('ja');
+
+    await resetEverything(page);
+
+    const lang = await page.evaluate(() =>
+      JSON.parse(localStorage.getItem('waynepdf.language.v1')),
+    );
+    expect(lang.lang).toBe('auto');
   });
 
   test('a malformed stored value falls back to defaults without breaking', async ({
@@ -302,7 +347,7 @@ test.describe('print output', () => {
     const buffer = await page.pdf({ format: 'A4', printBackground: true });
     const text = buffer.toString('latin1');
     // The panel is no-print, so none of its copy can reach the page.
-    for (const needle of ['Settings', 'Reset to defaults', 'Line height']) {
+    for (const needle of ['Settings', 'Reset everything', 'Line height']) {
       expect(text).not.toContain(needle);
     }
   });
@@ -555,9 +600,10 @@ test.describe('layout section', () => {
     await page.locator('select.wp-select-page-size').selectOption('a3');
     await expect.poll(() => layoutCSS(page)).toContain('size: A3');
 
-    await page.getByRole('button', { name: 'Reset to defaults' }).click();
+    await resetEverything(page);
     // Layout lives in its own container, but one Reset button in one panel has
-    // to mean everything in that panel.
+    // to mean everything in that panel — now via the registry rather than a
+    // hand-written list of container resets.
     await expect.poll(() => layoutCSS(page)).toContain('size: A4 portrait');
     expect(await layoutCSS(page)).toContain('margin: 25mm');
     const stored = await page.evaluate(() =>

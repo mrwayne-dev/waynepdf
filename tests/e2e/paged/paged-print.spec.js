@@ -328,7 +328,7 @@ test.describe('paginated print output', () => {
     for (const chrome of [
       'WaynePDF',
       'Transform',
-      'Reset to defaults',
+      'Reset everything',
       'Page size',
       'Show copy button on math',
       'Table of contents',

@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useProvided } from 'nonaction';
-import { ThemeContainer, LayoutContainer } from '../../Container';
+import { ThemeContainer } from '../../Container';
 import { RANGES } from '../../Lib/settings.js';
+import { resetAll } from '../../Lib/resetAll.js';
 import SettingsButton from './SettingsButton.jsx';
 import ThemeSwatch from './ThemeSwatch.jsx';
 import FontPicker from './FontPicker.jsx';
@@ -31,7 +32,6 @@ const labelFor = (id) =>
  */
 export default function Settings() {
   const [settings, updaters] = useProvided(ThemeContainer);
-  const [, layoutUpdaters] = useProvided(LayoutContainer);
   const [open, setOpen] = useState(false);
   const gearRef = useRef(null);
   const closeRef = useRef(null);
@@ -173,17 +173,11 @@ export default function Settings() {
 
           <hr className="wp-divider" />
 
-          {/* Resets both containers: a user clicking one "Reset to defaults"
-              means everything in this panel, not just the theme half. */}
-          <button
-            type="button"
-            className="wp-reset"
-            onClick={() => {
-              updaters.reset();
-              layoutUpdaters.reset();
-            }}
-          >
-            Reset to defaults
+          {/* One call. Enumerating containers here is how language settings and
+              the frontmatter overrides got left out of Reset in the first place;
+              resetAll asks the registry instead. */}
+          <button type="button" className="wp-reset" onClick={() => resetAll()}>
+            Reset everything
           </button>
         </div>
       </aside>

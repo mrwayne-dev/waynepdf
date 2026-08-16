@@ -35,6 +35,52 @@ async function renderFixture(page, markdown) {
   await expect(page.locator('.preview')).toBeVisible();
 }
 
+/**
+ * Waits until this document's mermaid work is finished, whether or not it has
+ * any diagrams.
+ *
+ * Both halves are needed. The badge belongs to the *previous* document — the
+ * default document contains a diagram, so every fixture starts with the engine
+ * loading — and it clears the moment the engine resolves, before any diagram has
+ * been drawn. So: badge gone, *and* one node per fence.
+ *
+ * Without this the snapshot captures whatever happened to be in flight, which is
+ * how three committed snapshots ended up containing a loading badge for fixtures
+ * that have no diagrams at all.
+ */
+async function settleMermaid(page, markdown) {
+  const fences = markdown.match(/^```mermaid[ \t]*\r?$/gm) ?? [];
+  await expect(page.locator('.wp-mermaid-loading')).toHaveCount(0, {
+    timeout: 30_000,
+  });
+  await expect(
+    page.locator('.preview .mermaid-diagram, .preview .mermaid-error'),
+  ).toHaveCount(fences.length, { timeout: 30_000 });
+}
+
+/**
+ * Canonicalises the two families of generated id that make rendered HTML differ
+ * from run to run: mermaid derives every id inside a diagram's SVG from a
+ * `Date.now()` root, and markdown-it-task-lists numbers checkboxes with
+ * `Math.random()`. Neither snapshot could ever have matched twice.
+ *
+ * Mapped through a table rather than blanked, so each distinct id keeps a
+ * distinct canonical form — an `<input id>` that stopped matching its
+ * `<label for>` would still show up as a diff.
+ */
+function stableHtml(html) {
+  const canonicalise = (prefix) => {
+    const seen = new Map();
+    return (match) => {
+      if (!seen.has(match)) seen.set(match, `${prefix}-${seen.size}`);
+      return seen.get(match);
+    };
+  };
+  return html
+    .replace(/wp-mermaid-\d+-\d+/g, canonicalise('wp-mermaid'))
+    .replace(/task-item-\d+/g, canonicalise('task-item'));
+}
+
 test.describe('fixture rendering', () => {
   for (const fixture of fixtures) {
     test(`renders ${fixture}`, async ({ page }) => {
@@ -50,7 +96,9 @@ test.describe('fixture rendering', () => {
         );
       }
 
-      const html = await page.locator('.preview').innerHTML();
+      await settleMermaid(page, markdown);
+
+      const html = stableHtml(await page.locator('.preview').innerHTML());
       expect(html.length).toBeGreaterThan(0);
       expect(html).toMatchSnapshot(`${fixture}.html`);
     });

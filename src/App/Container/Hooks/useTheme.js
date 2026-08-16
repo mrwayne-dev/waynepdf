@@ -9,6 +9,7 @@ import {
   normalizeSettings,
 } from '../../Lib/settings.js';
 import { applyTheme, resolveTheme } from '../../Lib/applyTheme.js';
+import { registerReset, unregisterReset } from '../../Lib/resetAll.js';
 import useOverrides from './useOverrides.js';
 
 export { DEFAULTS, THEMES, FONT_FAMILIES, RANGES };
@@ -78,6 +79,12 @@ const useTheme = () => {
       reset: () => setSettings({ ...DEFAULTS }),
     };
   }, []);
+
+  // Reset is centralised; this container only has to say how to reset itself.
+  useEffect(() => {
+    registerReset('theme', updaters.reset);
+    return () => unregisterReset('theme');
+  }, [updaters]);
 
   // The concrete theme in effect, which is what the editor and the swatch ring
   // need — 'system' is never a real palette.
