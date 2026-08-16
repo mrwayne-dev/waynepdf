@@ -25,10 +25,14 @@ describe('markdown-it: core parsing', () => {
     expect(html).toContain('hljs-keyword');
   });
 
-  it('parses unlabeled fences via highlightAuto', () => {
+  it('renders unlabeled fences as plain escaped code', () => {
+    // Phase 3.5 removed highlightAuto: this content used to be detected as SQL.
+    // The old assertion still passed after the change but its name had become a
+    // lie, so it now pins the behaviour it actually describes.
     const html = md.render('```\nSELECT 1;\n```');
     expect(html).toContain('<pre>');
     expect(html).toContain('class="hljs"');
+    expect(html).not.toContain('class="hljs-');
   });
 
   it('parses GFM tables', () => {

@@ -26,7 +26,63 @@ awesome()
 + Try Offline Web App!
 ```
 
-## Unlabeled fence (exercises highlightAuto)
+## Diverse labeled fences
+
+```rust
+fn main() {
+    let items: Vec<i32> = vec![1, 2, 3];
+    println!("{}", items.len());
+}
+```
+
+```sql
+SELECT id, name
+FROM users
+WHERE active = 1
+ORDER BY created_at DESC;
+```
+
+```dockerfile
+FROM node:22-alpine
+WORKDIR /app
+COPY . .
+RUN npm ci
+CMD ["node", "index.js"]
+```
+
+```yaml
+name: ci
+on:
+  push:
+    branches: [main]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+```
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+for f in *.md; do
+  echo "$f"
+done
+```
+
+```tex
+\documentclass{article}
+\begin{document}
+Hello \textbf{world}.
+\end{document}
+```
+
+## Made-up language renders plain
+
+```made-up-lang
+this should render as plain escaped code
+<not-a-tag> stays literal
+```
+
+## Unlabeled fence (no highlightAuto since Phase 3.5)
 
 ```
 SELECT id, name FROM users WHERE active = 1 ORDER BY created_at DESC;

@@ -16,8 +16,48 @@ awesome()
 <pre><code class="hljs language-diff"><span class="hljs-deletion">- Online? Upload resume.md to stranger server?</span>
 <span class="hljs-addition">+ Try Offline Web App!</span>
 </code></pre>
-<h2>Unlabeled fence (exercises highlightAuto)</h2>
-<pre><code class="hljs"><span class="hljs-keyword">SELECT</span> id, <span class="hljs-type">name</span> <span class="hljs-keyword">FROM</span> users <span class="hljs-keyword">WHERE</span> active = <span class="hljs-number">1</span> <span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> created_at <span class="hljs-keyword">DESC</span>;
+<h2>Diverse labeled fences</h2>
+<pre><code class="hljs language-rust"><span class="hljs-keyword">fn</span> <span class="hljs-title function_">main</span>() {
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">items</span>: <span class="hljs-type">Vec</span>&lt;<span class="hljs-type">i32</span>&gt; = <span class="hljs-built_in">vec!</span>[<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>];
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">"{}"</span>, items.<span class="hljs-title function_ invoke__">len</span>());
+}
+</code></pre>
+<pre><code class="hljs language-sql"><span class="hljs-keyword">SELECT</span> id, name
+<span class="hljs-keyword">FROM</span> users
+<span class="hljs-keyword">WHERE</span> active <span class="hljs-operator">=</span> <span class="hljs-number">1</span>
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> created_at <span class="hljs-keyword">DESC</span>;
+</code></pre>
+<pre><code class="hljs language-dockerfile"><span class="hljs-keyword">FROM</span> node:<span class="hljs-number">22</span>-alpine
+<span class="hljs-keyword">WORKDIR</span><span class="language-bash"> /app</span>
+<span class="hljs-keyword">COPY</span><span class="language-bash"> . .</span>
+<span class="hljs-keyword">RUN</span><span class="language-bash"> npm ci</span>
+<span class="hljs-keyword">CMD</span><span class="language-bash"> [<span class="hljs-string">"node"</span>, <span class="hljs-string">"index.js"</span>]</span>
+</code></pre>
+<pre><code class="hljs language-yaml"><span class="hljs-attr">name:</span> <span class="hljs-string">ci</span>
+<span class="hljs-attr">on:</span>
+  <span class="hljs-attr">push:</span>
+    <span class="hljs-attr">branches:</span> [<span class="hljs-string">main</span>]
+<span class="hljs-attr">jobs:</span>
+  <span class="hljs-attr">build:</span>
+    <span class="hljs-attr">runs-on:</span> <span class="hljs-string">ubuntu-latest</span>
+</code></pre>
+<pre><code class="hljs language-bash"><span class="hljs-meta">#!/usr/bin/env bash</span>
+<span class="hljs-built_in">set</span> -euo pipefail
+<span class="hljs-keyword">for</span> f <span class="hljs-keyword">in</span> *.md; <span class="hljs-keyword">do</span>
+  <span class="hljs-built_in">echo</span> <span class="hljs-string">"<span class="hljs-variable">$f</span>"</span>
+<span class="hljs-keyword">done</span>
+</code></pre>
+<pre><code class="hljs language-tex"><span class="hljs-keyword">\documentclass</span>{article}
+<span class="hljs-keyword">\begin</span>{document}
+Hello <span class="hljs-keyword">\textbf</span>{world}.
+<span class="hljs-keyword">\end</span>{document}
+</code></pre>
+<h2>Made-up language renders plain</h2>
+<pre><code class="hljs">this should render as plain escaped code
+&lt;not-a-tag&gt; stays literal
+</code></pre>
+<h2>Unlabeled fence (no highlightAuto since Phase 3.5)</h2>
+<pre><code class="hljs">SELECT id, name FROM users WHERE active = 1 ORDER BY created_at DESC;
 </code></pre>
 <h2>Indented code block</h2>
 <pre><code>plain indented code
