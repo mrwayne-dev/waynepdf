@@ -6,7 +6,7 @@
   left: 50%;
   z-index: 200;
   padding: 8px 14px;
-  font-family: var(--wp-font-family-sans);
+  font-family: var(--wp-font-family-ui);
   font-size: var(--wp-ui-font-size);
   color: var(--wp-color-canvas);
   background-color: var(--wp-color-fg);

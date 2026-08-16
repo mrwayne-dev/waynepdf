@@ -7,7 +7,7 @@
   justify-content: center;
   gap: 8px;
   padding: 24px 16px;
-  font-family: var(--wp-font-family-sans);
+  font-family: var(--wp-font-family-ui);
   font-size: var(--wp-ui-font-size);
   color: var(--wp-color-fg-muted);
 }

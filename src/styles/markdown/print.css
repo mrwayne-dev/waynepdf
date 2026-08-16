@@ -92,6 +92,31 @@
     print-color-adjust: exact !important;
   }
 
+  /*
+   * The sheet carries the theme colour itself.
+   *
+   * It used to inherit it by accident: in Paged mode the pages sit inside
+   * .preview-paged, which is also a .markdown-body and paints the canvas
+   * behind them. The Transform path builds its pages in #wp-print-target
+   * instead, which has no such ancestor — so a Dark or Sepia document printed
+   * a themed band of body text on an unpainted white sheet, with the running
+   * header and the whole margin area the wrong colour.
+   *
+   * Setting it on the page box makes both paths identical and does not depend
+   * on what happens to be behind the pages.
+   */
+  .pagedjs_page {
+    background-color: var(--wp-color-canvas) !important;
+  }
+
+  /* Margin boxes hold the running header and footer. They are grid cells of
+     the page box and paint nothing of their own, so they show whatever is
+     behind them — which is now the sheet. Stated explicitly so a future
+     background on an ancestor cannot show through instead. */
+  .pagedjs_margin {
+    background-color: transparent;
+  }
+
   /* The cover page owns its whole sheet. */
   .wp-cover-page {
     break-after: page;
@@ -110,6 +135,7 @@
   html,
   body,
   #waynepdf-app,
+  .wp-split,
   .preview-paged,
   .paginator,
   .paginator-output,

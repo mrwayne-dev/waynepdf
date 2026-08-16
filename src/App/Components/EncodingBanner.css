@@ -6,7 +6,7 @@
   align-items: center;
   gap: 8px;
   padding: 6px 8px 6px 10px;
-  font-family: var(--wp-font-family-sans);
+  font-family: var(--wp-font-family-ui);
   font-size: 12px;
   line-height: 1.4;
   color: var(--wp-color-fg);

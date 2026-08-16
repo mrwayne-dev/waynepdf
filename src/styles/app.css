@@ -18,6 +18,15 @@ body,
 body {
   background-color: var(--wp-color-canvas);
   color: var(--wp-color-fg);
+  /*
+   * Chrome face, at the root. normalize.css sets no font-family, so anything
+   * that does not name one itself inherits the browser default — Times. Every
+   * chrome component happens to set its own today, which is the only reason
+   * that has never shown; the next one to forget would render in Times with
+   * nothing to explain why. Note this is the UI token, never the body token:
+   * the document face must not leak out of .markdown-body.
+   */
+  font-family: var(--wp-font-family-ui);
 }
 
 ::selection {

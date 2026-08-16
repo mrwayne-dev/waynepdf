@@ -10,7 +10,7 @@
   flex-shrink: 0;
   border-bottom: 1px solid var(--wp-color-border);
   background-color: var(--wp-color-canvas-subtle);
-  font-family: var(--wp-font-family-sans);
+  font-family: var(--wp-font-family-ui);
   font-size: var(--wp-ui-font-size);
   user-select: none;
 }

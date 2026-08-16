@@ -50,13 +50,22 @@ export default styled(App)`
   height: 100%;
   display: flex;
   flex-direction: column;
-  font-family: var(--wp-font-family-sans);
+  font-family: var(--wp-font-family-ui);
   @media print {
-    &,
-    div {
+    /*
+     * Only the shell itself. This used to read "&, div", ported from upstream
+     * to flatten the flex layout for Firefox — but styled-components scopes it
+     * to *every* div in the app, and paged.js builds its page geometry out of
+     * nested divs. .pagedjs_sheet and .pagedjs_pagebox are CSS grids whose
+     * columns ARE the page margins, so forcing them to display:block dropped
+     * every margin and printed the text flush to the paper edge.
+     *
+     * The wrappers that genuinely need flattening are listed by name in
+     * styles/markdown/print.css instead.
+     */
+    & {
       display: block;
       height: auto;
-      /* Reset to normalize for FireFox */
     }
     .no-print,
     .no-print * {

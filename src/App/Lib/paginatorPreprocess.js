@@ -1,3 +1,8 @@
+import {
+  resolvePageSize,
+  resolveMargins,
+} from '../Container/Hooks/useLayout.js';
+
 /*
  * DOM preparation for pagination.
  *
@@ -144,6 +149,60 @@ export function deriveTitle(layout, root) {
   return text || 'Document';
 }
 
+/*
+ * Oversized unbreakable blocks.
+ *
+ * Phase 5 gave pre and blockquote `break-inside: avoid`, which is right for the
+ * common case — a short listing should not be sliced across a page turn. It is
+ * wrong for a block taller than the page: paged.js honours the request as far
+ * as it can and the surplus renders straight past the bottom of the page box.
+ * A 90-line listing overflowed by 588px, printing over the footer and off the
+ * paper.
+ *
+ * CSS cannot express "avoid unless you cannot", so the decision is made here,
+ * where the layout is known: count the block's own lines, work out how many
+ * fit, and hand back the ones that cannot the ability to split.
+ */
+
+/** github-markdown-css sets pre/code to 1.45; blockquotes follow body leading. */
+const CODE_LINE_HEIGHT_PX = 20;
+const BLOCK_PADDING_PX = 32;
+const MM_TO_PX = 96 / 25.4;
+
+/** Usable content height of one page, in px. */
+export function contentHeightPx(layout) {
+  const size = resolvePageSize(layout ?? {});
+  const margins = resolveMargins(layout ?? {});
+  const portrait = (layout?.orientation ?? 'portrait') !== 'landscape';
+  const heightMm = portrait ? size.height : size.width;
+  return (heightMm - margins.top - margins.bottom) * MM_TO_PX;
+}
+
+/**
+ * Lets any pre or blockquote that cannot fit on one page break across pages.
+ *
+ * Line counting rather than measurement: the container is detached, so every
+ * height would read 0 — the same trap that makes paged.js hang inside a
+ * display:none parent.
+ */
+export function relaxOversizedBlocks(root, layout) {
+  const budget = contentHeightPx(layout);
+  if (!Number.isFinite(budget) || budget <= 0) return;
+  const maxLines = Math.floor(
+    (budget - BLOCK_PADDING_PX) / CODE_LINE_HEIGHT_PX,
+  );
+  if (maxLines <= 0) return;
+
+  for (const block of root.querySelectorAll('pre, blockquote')) {
+    const lines = (block.textContent ?? '').split('\n').length;
+    if (lines > maxLines) {
+      // Inline, so it beats the stylesheet's blanket rule for this block only.
+      block.style.breakInside = 'auto';
+      block.dataset.wpOversized = String(lines);
+    }
+  }
+}
+
 /**
  * Produces the DOM paged.js will fragment.
  *
@@ -159,6 +218,7 @@ export function preprocess(sourceHtml, layout, doc = document) {
   body.innerHTML = sourceHtml ?? '';
 
   ensureHeadingIds(body);
+  relaxOversizedBlocks(body, layout);
 
   // Cover first, then TOC, then the document — the order they print in.
   if (layout?.cover?.enabled) {

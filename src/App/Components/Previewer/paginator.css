@@ -9,7 +9,7 @@
 
 .paginator-status {
   padding: 10px 14px;
-  font-family: var(--wp-font-family-sans);
+  font-family: var(--wp-font-family-ui);
   font-size: var(--wp-ui-font-size);
   color: var(--wp-color-fg-muted);
   background-color: var(--wp-color-canvas-subtle);
@@ -43,6 +43,30 @@
 
 .paginator-output .pagedjs_page_content {
   position: relative;
+}
+
+/*
+ * Fragments of a split element.
+ *
+ * paged.js tags the halves of anything it breaks across a page. Each half keeps
+ * the whole element's padding and border, so the first half's bottom padding
+ * renders past the end of the page box — 10px for a code block, 7px for a
+ * table. Small, but it is the element spilling into the bottom margin, and on a
+ * tight margin it collides with the footer.
+ *
+ * Dropping the inner edges also makes the break read as continuous rather than
+ * as two separate boxes, which is what a split code listing should look like.
+ */
+[data-split-to] {
+  padding-bottom: 0 !important;
+  border-bottom: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+[data-split-from] {
+  padding-top: 0 !important;
+  border-top: 0 !important;
+  margin-top: 0 !important;
 }
 
 /* Cover page. Styled here rather than in the markdown fork: it is generated
@@ -105,9 +129,11 @@
     gap: 0;
   }
 
-  /* The on-screen sheet treatment must not reach paper. */
+  /* The on-screen sheet treatment must not reach paper — but the background
+     does, and is set on .pagedjs_page in markdown/print.css so that both the
+     Paged and the Transform path get it. Clearing it here would leave the
+     Paged path's sheets unpainted. */
   .paginator-output .pagedjs_page {
     box-shadow: none;
-    background: none;
   }
 }

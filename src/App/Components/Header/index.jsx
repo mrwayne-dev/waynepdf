@@ -161,7 +161,7 @@ export default styled(Header)`
   color: var(--wp-color-fg);
   background-color: var(--wp-color-canvas-subtle);
   border-bottom: 1px solid var(--wp-color-border);
-  font-family: var(--wp-font-family-sans);
+  font-family: var(--wp-font-family-ui);
   font-size: var(--wp-ui-font-size);
   display: flex;
   align-items: center;

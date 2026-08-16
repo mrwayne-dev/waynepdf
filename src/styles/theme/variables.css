@@ -35,6 +35,17 @@
   --wp-font-family-serif-lead: 'Source Serif 4 Variable', 'Source Serif 4';
   --wp-font-family-mono-lead: 'JetBrains Mono Variable', 'JetBrains Mono';
 
+  /*
+   * App chrome face. Never user-configurable, and deliberately a token of its
+   * own rather than a second reference to --wp-font-family-sans: the two mean
+   * different things. --wp-font-family-sans is "the sans stack", a raw
+   * ingredient the user can select as their document face; --wp-font-family-ui
+   * is "what the application furniture is set in", which is a fixed decision.
+   * Chrome that reads the ingredient token works today only because nothing has
+   * made it dynamic yet.
+   */
+  --wp-font-family-ui: var(--wp-font-family-sans);
+
   /* Active body face. ThemeContainer rewrites both to the selected family. */
   --wp-font-family-body: var(--wp-font-family-sans);
   --wp-font-family-lead: var(--wp-font-family-sans-lead);

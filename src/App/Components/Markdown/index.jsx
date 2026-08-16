@@ -80,7 +80,9 @@ const Markdown = ({ className }) => {
     <div
       ref={markdownRef}
       style={{ opacity: isOver || uploading ? 0.5 : 1 }}
-      className={className}
+      /* wp-split is a stable hook for the print reset; `className` alone is a
+         styled-components hash that CSS files cannot name. */
+      className={`${className} wp-split`}
       onMouseMove={(e) => {
         if (!isDrag) return;
         const pageX = e.nativeEvent.pageX;
