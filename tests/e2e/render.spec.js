@@ -98,6 +98,7 @@ test.describe('theming does not change the DOM, only the paint', () => {
     'rtl-arabic.md',
     'rtl-hebrew.md',
     'mixed-directional.md',
+    'math.md',
   ];
 
   for (const fixture of CROSS_THEME_FIXTURES) {
@@ -158,15 +159,16 @@ test.describe('baseline bugs are still present in the browser', () => {
     expect(html).toContain('#');
   });
 
-  test('math delimiters render as literal text (Phase 4)', async ({ page }) => {
+  test('$ math renders, \\( stays literal (Phase 4)', async ({ page }) => {
     await renderFixture(
       page,
       'Inline $e^{i\\pi}+1=0$ and \\(a^2+b^2=c^2\\) here.',
     );
     const html = await page.locator('.preview').innerHTML();
-    expect(html).toContain('$e^{i\\pi}+1=0$');
+    // Flipped in Phase 4: the $ form now renders.
+    expect(html).toContain('class="katex"');
+    expect(html).not.toContain('$e^{i\\pi}+1=0$');
+    // Still literal, by design — see the note in tests/unit/parser.test.js.
     expect(html).toContain('(a^2+b^2=c^2)');
-    expect(html).not.toContain('<math');
-    expect(html).not.toContain('katex');
   });
 });

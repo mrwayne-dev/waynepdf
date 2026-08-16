@@ -54,8 +54,7 @@ const SAMPLES = {
   lua: 'local function greet(name)\n  return "Hello, " .. name\nend\nprint(greet("world"))',
   markdown:
     '# Heading\n\nSome **bold** and *italic* text.\n\n- item one\n- item two',
-  matlab:
-    'function y = square(x)\n  y = x .^ 2;\nend\ndisp(square([1 2 3]));',
+  matlab: 'function y = square(x)\n  y = x .^ 2;\nend\ndisp(square([1 2 3]));',
   nginx:
     'server {\n  listen 80;\n  server_name example.com;\n  location / {\n    root /usr/share/nginx/html;\n  }\n}',
   nix: '{ pkgs ? import <nixpkgs> {} }:\npkgs.mkShell {\n  buildInputs = [ pkgs.nodejs_22 ];\n}',

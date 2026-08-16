@@ -1,0 +1,72 @@
+/* KaTeX integration. Part of the forked markdown stylesheet; see index.css. */
+
+/*
+ * KaTeX hardcodes its own colour and a 1.21em size. The colour has to become a
+ * token or math stays black on a dark canvas; the size is dialled back because
+ * 1.21em was chosen for standalone equations, not for inline math in prose.
+ */
+.markdown-body .katex {
+  color: var(--wp-color-fg);
+  font-size: 1.05em;
+}
+
+.markdown-body .katex-display {
+  margin: 1em 0;
+  /* Wide equations scroll rather than forcing the whole page wide. overflow-y
+     stays hidden so the scrollbar does not clip descenders. */
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.25em 0;
+}
+
+/*
+ * Malformed math. KaTeX applies the errorColor option inline, so this only
+ * needs the layout — but !important is required to beat that inline style if a
+ * theme's danger colour should win.
+ */
+.markdown-body .katex-error {
+  color: var(--wp-color-danger) !important;
+  background: var(--wp-color-neutral-muted);
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+  font-family: var(--wp-font-family-mono);
+  font-size: 0.9em;
+}
+
+/* Copy affordance. Positioned inline by the component; this is the skin. */
+.math-copy-button {
+  padding: 0.15em 0.45em;
+  font-family: var(--wp-font-family-sans);
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--wp-color-fg-muted);
+  background: var(--wp-color-canvas-subtle);
+  border: 1px solid var(--wp-color-border);
+  border-radius: 3px;
+  cursor: pointer;
+  opacity: 0.9;
+  transition: opacity 0.15s;
+  z-index: 10;
+}
+
+.math-copy-button:hover {
+  opacity: 1;
+  color: var(--wp-color-fg);
+}
+
+.math-copy-button:focus-visible {
+  outline: 2px solid var(--wp-color-accent);
+  outline-offset: 1px;
+}
+
+@media print {
+  .math-copy-button {
+    display: none !important;
+  }
+
+  /* Equations must not be cut across a page break. */
+  .markdown-body .katex-display {
+    break-inside: avoid;
+    overflow-x: visible;
+  }
+}

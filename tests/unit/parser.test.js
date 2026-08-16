@@ -127,32 +127,44 @@ describe('FIXED in Phase 3: BOM no longer breaks the first heading', () => {
   });
 });
 
-describe('BASELINE BUG (Phase 4): math delimiters are unsupported', () => {
-  it('mangles \\(...\\) by consuming the backslashes', () => {
-    const html = md.render('Pythagoras: \\(a^2 + b^2 = c^2\\) here');
+describe('FIXED in Phase 4: math renders through KaTeX', () => {
+  it('renders $...$ inline math', () => {
+    const html = md.render('Euler: $e^{i\\pi} + 1 = 0$ end');
+    expect(html).toContain('class="katex"');
+    expect(html).not.toContain('$e^{i\\pi} + 1 = 0$');
+  });
 
-    // BUG: backslash-paren is treated as an escape, so the delimiters vanish
-    // and what remains is indistinguishable from ordinary parenthesised text.
+  it('renders $$...$$ as display math', () => {
+    const html = md.render('$$\\int_{0}^{1} x^2 dx = \\frac{1}{3}$$');
+    expect(html).toContain('class="katex-display"');
+    expect(html).not.toContain('$$');
+  });
+
+  it('renders a ```math fence as display math, not a code block', () => {
+    const html = md.render('```math\nE = mc^2\n```');
+    expect(html).toContain('class="katex-display"');
+    expect(html).not.toContain('<pre>');
+  });
+
+  /*
+   * NOT fixed, and not a bug: \(...\) stays unsupported by design.
+   *
+   * WaynePDF's delimiters are $ and $$. Backslash-paren is a CommonMark escape
+   * sequence first — the parser consumes the backslashes long before any math
+   * plugin sees them — so supporting it would mean overriding CommonMark escape
+   * handling for two specific characters. The delimiter choice is documented in
+   * InitialText and in tests/fixtures/math.md.
+   */
+  it('leaves \\(...\\) as literal parentheses, by design', () => {
+    const html = md.render('Pythagoras: \\(a^2 + b^2 = c^2\\) here');
     expect(html).toContain('(a^2 + b^2 = c^2)');
     expect(html).not.toContain('\\(');
+    expect(html).not.toContain('class="katex');
   });
 
-  it('leaves $...$ inline math as literal text', () => {
-    const html = md.render('Euler: $e^{i\\pi} + 1 = 0$ end');
-    expect(html).toContain('$e^{i\\pi} + 1 = 0$');
-    expect(html).not.toContain('katex');
-    expect(html).not.toContain('<math');
-  });
-
-  it('leaves $$...$$ block math as literal text', () => {
-    const html = md.render('$$\\int_{0}^{1} x^2 dx = \\frac{1}{3}$$');
-    expect(html).toContain('$$');
-    expect(html).not.toContain('<math');
-  });
-
-  it('renders a ```math fence as a code block, not math', () => {
-    const html = md.render('```math\nE = mc^2\n```');
-    expect(html).toContain('<pre>');
-    expect(html).not.toContain('<math');
+  it('leaves \\[...\\] as literal brackets, by design', () => {
+    const html = md.render('\\[E = mc^2\\]');
+    expect(html).toContain('[E = mc^2]');
+    expect(html).not.toContain('class="katex');
   });
 });

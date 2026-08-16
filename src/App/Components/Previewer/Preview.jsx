@@ -1,6 +1,24 @@
 import { useMemo } from 'react';
 import MarkdownIt from 'markdown-it';
 import hljs from 'highlight.js/lib/core';
+import markdownItKatex from '@vscode/markdown-it-katex';
+import 'katex/dist/katex.min.css';
+/*
+ * mhchem, imported by its CJS path on purpose — do not "tidy" this to
+ * 'katex/contrib/mhchem'.
+ *
+ * KaTeX ships conditional exports: `import` resolves to dist/katex.mjs,
+ * `require` to dist/katex.js. The bare specifier would pull mhchem.mjs, which
+ * registers \ce on the ESM instance — while @vscode/markdown-it-katex is CJS
+ * and renders with the require() instance. Two module objects, two macro
+ * registries, and \ce silently renders as an unknown command in errorColor.
+ *
+ * Pointing at the CJS file puts the macros on the instance that actually does
+ * the rendering. Note this cannot be caught by a unit test: Vitest's resolution
+ * collapses the two instances into one, so it only reproduces in a real build.
+ * tests/e2e/math.spec.js covers it.
+ */
+import 'katex/dist/contrib/mhchem.js';
 
 /*
  * Curated highlight.js registration.
@@ -157,6 +175,79 @@ const md = new MarkdownIt({
     return `<pre><code class="hljs">${md.utils.escapeHtml(str)}</code></pre>`;
   },
 });
+
+/*
+ * Math.
+ *
+ * `enableFencedBlocks` and `enableBareBlocks` both default to OFF in the
+ * plugin and are not optional for us: without the first, ```math fences render
+ * as ordinary code blocks; without the second, a $$...$$ block that is not
+ * separated by blank lines stays inline. Neither failure is loud.
+ */
+md.use(markdownItKatex.default ?? markdownItKatex, {
+  throwOnError: false,
+  errorColor: 'var(--wp-color-danger)',
+  strict: 'ignore',
+  trust: false, // no \href etc. — matches the Phase 6 sanitisation posture
+  output: 'html',
+  enableFencedBlocks: true,
+  enableBareBlocks: true,
+  macros: {
+    '\\RR': '\\mathbb{R}',
+    '\\NN': '\\mathbb{N}',
+    '\\ZZ': '\\mathbb{Z}',
+    '\\QQ': '\\mathbb{Q}',
+    '\\CC': '\\mathbb{C}',
+  },
+});
+
+/*
+ * Expose each equation's LaTeX source as data-latex, for the copy button.
+ *
+ * Done by wrapping the plugin's own renderer rules, whose token.content *is*
+ * the source. The alternative — scraping <annotation encoding="application/
+ * x-tex"> out of the rendered HTML — cannot work here at all: that element only
+ * exists in KaTeX's MathML output, and we render `output: 'html'`, so there is
+ * no MathML to scrape. Reading the token is also exact rather than regex-shaped.
+ *
+ * `fence` is in the list because the plugin routes ```math through it; for any
+ * other language the injection is a no-op, since the output has no .katex.
+ */
+const MATH_RENDER_RULES = [
+  'math_inline',
+  'math_inline_block',
+  'math_inline_bare_block',
+  'math_block',
+  'fence',
+];
+
+const KATEX_OPEN_TAG = '<span class="katex">';
+
+function injectLatex(html, latex) {
+  if (!html.includes(KATEX_OPEN_TAG)) return html;
+  const attr = md.utils.escapeHtml(latex.trim());
+  // String pattern: replaces the first occurrence only, which is the one
+  // .katex this token produced.
+  return html.replace(
+    KATEX_OPEN_TAG,
+    `<span class="katex" data-latex="${attr}">`,
+  );
+}
+
+for (const name of MATH_RENDER_RULES) {
+  const original = md.renderer.rules[name];
+  if (!original) continue;
+  md.renderer.rules[name] = function withLatex(
+    tokens,
+    idx,
+    options,
+    env,
+    self,
+  ) {
+    const html = original.call(this, tokens, idx, options, env, self);
+    return injectLatex(html, tokens[idx].content ?? '');
+  };
+}
 
 // Exported so tests assert against the exact instance the app renders with,
 // rather than a second config that could silently drift.

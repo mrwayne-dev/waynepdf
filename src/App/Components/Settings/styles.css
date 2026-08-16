@@ -280,6 +280,31 @@
   white-space: nowrap;
 }
 
+/* -------------------------------------------------------------- checkbox */
+
+.wp-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: var(--wp-ui-font-size);
+  color: var(--wp-color-fg);
+  cursor: pointer;
+}
+
+.wp-check input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: var(--wp-color-accent);
+  cursor: pointer;
+}
+
+.wp-check input:focus-visible {
+  outline: 2px solid var(--wp-color-accent);
+  outline-offset: 1px;
+}
+
 /* --------------------------------------------------------------- footer */
 
 .wp-divider {

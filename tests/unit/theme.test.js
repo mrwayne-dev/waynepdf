@@ -226,9 +226,34 @@ describe('loadSettings', () => {
       fontSize: 18,
       lineHeight: 1.75,
       codeFontSize: 16,
+      mathCopyEnabled: false,
     };
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
     expect(loadSettings()).toEqual(stored);
+  });
+
+  it('fills in a field added after the payload was written', () => {
+    // Schema evolution within v1: mathCopyEnabled arrived in Phase 4, so any
+    // payload written before it must come back with the default rather than
+    // undefined. This is why the key does not need a v2 bump.
+    const legacy = {
+      theme: 'dark',
+      fontFamily: 'mono',
+      fontSize: 18,
+      lineHeight: 1.75,
+      codeFontSize: 16,
+    };
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(legacy));
+    expect(loadSettings()).toEqual({ ...legacy, mathCopyEnabled: true });
+  });
+
+  it('rejects a non-boolean mathCopyEnabled', () => {
+    expect(normalizeSettings({ mathCopyEnabled: 'yes' }).mathCopyEnabled).toBe(
+      true,
+    );
+    expect(normalizeSettings({ mathCopyEnabled: false }).mathCopyEnabled).toBe(
+      false,
+    );
   });
 
   it('returns defaults for malformed JSON, and overwrites the bad value', () => {

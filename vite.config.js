@@ -4,50 +4,61 @@ import { VitePWA } from 'vite-plugin-pwa';
 import { fileURLToPath, URL } from 'node:url';
 
 /**
- * Strips the legacy `.woff` source from every @font-face.
+ * Legacy @font-face formats we refuse to ship.
  *
- * The non-variable fontsource packages list `woff2` then `woff`. Every browser
- * that can run this app — service workers, CSS custom properties, :lang() —
- * has supported woff2 for years, so the fallback is never fetched. Vite still
- * copies each referenced file into the build, and across ~910 CJK subsets that
- * is ~26 MB of dead weight in the deployed artifact.
+ * The non-variable fontsource packages list `woff2` then `woff`; KaTeX lists
+ * `woff2`, `woff`, then `truetype`. Every browser that can run this app —
+ * service workers, CSS custom properties, :lang() — has supported woff2 for
+ * years, so neither fallback is ever fetched. Vite still copies each
+ * referenced file into the build: ~26 MB across the CJK subsets, plus another
+ * ~0.5 MB of KaTeX .ttf.
  */
-const stripWoffFallback = {
-  postcssPlugin: 'wp-strip-woff-fallback',
+const LEGACY_FONT_FORMATS = ['woff', 'truetype'];
+const LEGACY_FONT_EXTENSIONS = ['.woff', '.ttf'];
+
+const stripLegacyFontFallbacks = {
+  postcssPlugin: 'wp-strip-legacy-font-fallbacks',
   Declaration: {
-    // Matched on format('woff') rather than the file extension: by the time
-    // postcss runs, Vite has already rewritten every url() to a
+    // Matched on the format() keyword rather than the file extension: by the
+    // time postcss runs, Vite has already rewritten every url() to a
     // __VITE_ASSET__<hash>__ placeholder, so the extension is long gone.
     src: (decl) => {
-      if (!/format\(['"]woff['"]\)/.test(decl.value)) return;
-      const next = decl.value
-        .replace(/,\s*url\([^)]*\)\s*format\(['"]woff['"]\)/g, '')
-        .trim();
-      if (next) decl.value = next;
+      let next = decl.value;
+      for (const format of LEGACY_FONT_FORMATS) {
+        if (!new RegExp(`format\\(['"]${format}['"]\\)`).test(next)) continue;
+        next = next.replace(
+          new RegExp(`,\\s*url\\([^)]*\\)\\s*format\\(['"]${format}['"]\\)`, 'g'),
+          '',
+        );
+      }
+      next = next.trim();
+      if (next && next !== decl.value) decl.value = next;
     },
   },
 };
 
 /**
- * Drops the .woff assets themselves. Removing the CSS reference above is not
- * enough — Vite registered the asset when it created the placeholder, so
- * Rollup would still emit ~26 MB of files nothing points at.
+ * Drops the legacy font assets themselves. Removing the CSS reference above is
+ * not enough — Vite registered the asset when it created the placeholder, so
+ * Rollup would still emit the files with nothing pointing at them.
  */
-const dropWoffAssets = {
-  name: 'wp-drop-woff-assets',
+const dropLegacyFontAssets = {
+  name: 'wp-drop-legacy-font-assets',
   apply: 'build',
   generateBundle(_options, bundle) {
     let dropped = 0;
     let bytes = 0;
     for (const [fileName, asset] of Object.entries(bundle)) {
-      if (!fileName.endsWith('.woff')) continue;
+      if (!LEGACY_FONT_EXTENSIONS.some((ext) => fileName.endsWith(ext))) {
+        continue;
+      }
       bytes += asset.source?.length ?? 0;
       delete bundle[fileName];
       dropped++;
     }
     if (dropped) {
       this.info(
-        `dropped ${dropped} legacy .woff assets (${(bytes / 1e6).toFixed(1)} MB)`,
+        `dropped ${dropped} legacy font assets (${(bytes / 1e6).toFixed(1)} MB)`,
       );
     }
   },
@@ -58,11 +69,11 @@ const dropWoffAssets = {
 export default defineConfig({
   base: './',
   css: {
-    postcss: { plugins: [stripWoffFallback] },
+    postcss: { plugins: [stripLegacyFontFallbacks] },
   },
   plugins: [
     react(),
-    dropWoffAssets,
+    dropLegacyFontAssets,
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: [

@@ -33,6 +33,7 @@
 /* lang and rtl come after the concern files: both override physical properties
    the earlier rules set, and both match at equal specificity, so they win by
    order. print.css stays last for its !important rules. */
+@import './math.css';
 @import './lang.css';
 @import './rtl.css';
 @import './print.css';

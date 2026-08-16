@@ -26,6 +26,7 @@ export const DEFAULTS = {
   fontSize: 16,
   lineHeight: 1.6,
   codeFontSize: 14,
+  mathCopyEnabled: true,
 };
 
 /** Slider bounds, also used to build the range inputs so the two cannot drift. */
@@ -64,6 +65,11 @@ export function normalizeSettings(input) {
     codeFontSize: inRange(raw.codeFontSize, RANGES.codeFontSize)
       ? raw.codeFontSize
       : DEFAULTS.codeFontSize,
+    // Booleans have no range to clamp; anything non-boolean is the default.
+    mathCopyEnabled:
+      typeof raw.mathCopyEnabled === 'boolean'
+        ? raw.mathCopyEnabled
+        : DEFAULTS.mathCopyEnabled,
   };
 }
 

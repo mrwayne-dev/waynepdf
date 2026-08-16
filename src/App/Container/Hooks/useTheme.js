@@ -55,6 +55,7 @@ const useTheme = () => {
       setFontSize: patch('fontSize'),
       setLineHeight: patch('lineHeight'),
       setCodeFontSize: patch('codeFontSize'),
+      setMathCopyEnabled: patch('mathCopyEnabled'),
       reset: () => setSettings({ ...DEFAULTS }),
     };
   }, []);

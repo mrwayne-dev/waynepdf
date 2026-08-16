@@ -46,6 +46,26 @@ def greet(name):
     return f"Hello, {name}"
 \`\`\`
 
+## Math
+
+Inline math with single dollars: $e^{i\\pi} + 1 = 0$.
+
+Display math with double dollars:
+
+$$
+\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx = \\sqrt{\\pi}
+$$
+
+Fenced math blocks:
+
+\`\`\`math
+\\sum_{n=1}^{\\infty} \\frac{1}{n^2} = \\frac{\\pi^2}{6}
+\`\`\`
+
+Chemistry via mhchem: $\\ce{H2O + Fe -> Fe2O3}$.
+
+Currency works as expected — "$5.99" and "he owes $10" don't trigger math, because a digit straight after a \`$\` stops it closing a math span.
+
 ## Tables
 
 | Feature                    | Status       |
@@ -55,7 +75,7 @@ def greet(name):
 | Unicode and emoji          | Ready        |
 | Themes and fonts           | Ready        |
 | Unicode and encodings      | Ready        |
-| LaTeX math                 | Coming soon  |
+| LaTeX math                 | Ready        |
 | Mermaid diagrams           | Coming soon  |
 | Page layout                | Coming soon  |
 

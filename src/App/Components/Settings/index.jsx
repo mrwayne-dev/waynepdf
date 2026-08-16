@@ -136,6 +136,18 @@ export default function Settings() {
             format={(v) => `${v}px`}
           />
 
+          <fieldset className="wp-fieldset">
+            <legend className="wp-label">Math</legend>
+            <label className="wp-check">
+              <input
+                type="checkbox"
+                checked={settings.mathCopyEnabled !== false}
+                onChange={(e) => updaters.setMathCopyEnabled(e.target.checked)}
+              />
+              Show copy button on math
+            </label>
+          </fieldset>
+
           <hr className="wp-divider" />
 
           <button type="button" className="wp-reset" onClick={updaters.reset}>

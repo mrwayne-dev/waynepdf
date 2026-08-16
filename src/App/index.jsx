@@ -1,6 +1,8 @@
 import styled from 'styled-components';
 import { Provider } from 'nonaction';
 import { Header, Markdown } from './Components';
+import Toast from './Components/Toast.jsx';
+import MathCopyButton from './Components/Previewer/MathCopyButton.jsx';
 import {
   TextContainer,
   ThemeContainer,
@@ -21,6 +23,10 @@ const App = ({ className }) => {
       >
         <Header />
         <Markdown />
+        {/* Both are chrome, not document: they portal/fix outside the flow and
+            carry no-print, so they never reach the PDF. */}
+        <MathCopyButton />
+        <Toast />
       </Provider>
     </div>
   );

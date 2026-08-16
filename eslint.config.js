@@ -24,6 +24,7 @@ const browserGlobals = {
   setTimeout: 'readonly',
   clearTimeout: 'readonly',
   getComputedStyle: 'readonly',
+  CustomEvent: 'readonly',
   localStorage: 'readonly',
   matchMedia: 'readonly',
   TextDecoder: 'readonly',

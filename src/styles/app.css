@@ -36,4 +36,14 @@ body {
     height: auto;
     background: none;
   }
+
+  /*
+   * Global no-print guard. The app shell has its own scoped version, but
+   * portalled chrome can be mounted outside that subtree; this catches it
+   * wherever it lands.
+   */
+  .no-print,
+  .no-print * {
+    display: none !important;
+  }
 }
