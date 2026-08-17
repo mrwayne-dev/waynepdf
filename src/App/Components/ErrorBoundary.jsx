@@ -24,10 +24,12 @@ class ErrorBoundary extends React.Component {
               window.location.reload();
             }}
             style={{
-              background: 'none',
-              padding: '5px',
-              borderRadius: '5px',
-              boxShadow: '1px 1px 1px grey',
+              font: 'inherit',
+              color: 'var(--wp-color-fg)',
+              background: 'var(--wp-color-canvas)',
+              padding: 'var(--wp-space-2) var(--wp-space-3)',
+              border: '1px solid var(--wp-color-border)',
+              borderRadius: 'var(--wp-radius)',
               outline: 'none',
               cursor: 'pointer',
             }}

@@ -154,48 +154,54 @@ export default styled(Header)`
   overflow: auto;
   -webkit-overflow-scrolling: touch;
   user-select: none;
-  padding-left: 5px;
-  padding-right: 5px;
+  display: flex;
+  align-items: center;
+  /* Fixed height, so the horizontal padding is the only padding — vertical
+     padding on a fixed-height flex row just fights the height. */
+  height: 52px;
+  padding: 0 var(--wp-space-4);
+  gap: var(--wp-space-3);
   /* Theme tokens, not literals: the header sits outside .markdown-body, so
      without these it stays light grey in Dark and Sepia. */
   color: var(--wp-color-fg);
-  background-color: var(--wp-color-canvas-subtle);
+  background-color: var(--wp-color-canvas);
   border-bottom: 1px solid var(--wp-color-border);
   font-family: var(--wp-font-family-ui);
-  font-size: var(--wp-ui-font-size);
-  display: flex;
-  align-items: center;
-  height: 40px;
+  font-size: var(--wp-text-base);
+
   .project {
-    font-weight: bold;
-    margin: 5px;
     flex-shrink: 0;
-    height: 20px;
+    margin: 0;
+    font-size: var(--wp-text-lg);
+    font-weight: 600;
+    line-height: var(--wp-leading-tight);
+    color: var(--wp-color-fg);
   }
+
   div.modes {
     display: flex;
     flex-shrink: 0;
-    margin-left: 8px;
     .mode {
       font-family: inherit;
-      font-size: inherit;
+      font-size: var(--wp-text-sm);
+      height: var(--wp-h-control-sm);
+      padding: 0 var(--wp-space-3);
       color: var(--wp-color-fg);
       background-color: var(--wp-color-canvas);
       border: 1px solid var(--wp-color-border);
-      padding: 4px 10px;
       cursor: pointer;
       transition: background-color var(--wp-ui-transition);
     }
     /* Connected pill: only the outer edges are rounded. */
     .mode:first-child {
-      border-radius: var(--wp-ui-radius) 0 0 var(--wp-ui-radius);
+      border-radius: var(--wp-radius) 0 0 var(--wp-radius);
     }
     .mode:last-child {
-      border-radius: 0 var(--wp-ui-radius) var(--wp-ui-radius) 0;
+      border-radius: 0 var(--wp-radius) var(--wp-radius) 0;
       border-left: 0;
     }
     .mode:hover {
-      background-color: var(--wp-color-neutral-muted);
+      background-color: var(--wp-color-canvas-subtle);
     }
     .mode.is-active {
       color: var(--wp-color-canvas);
@@ -207,15 +213,19 @@ export default styled(Header)`
       outline-offset: 1px;
     }
   }
+
   p.page-count {
     flex-shrink: 0;
-    margin: 0 0 0 10px;
+    margin: 0;
+    font-size: var(--wp-text-sm);
     color: var(--wp-color-fg-muted);
     font-variant-numeric: tabular-nums;
   }
+
   p.save-status {
     flex-shrink: 0;
-    margin: 0 0 0 12px;
+    margin: 0;
+    font-size: var(--wp-text-sm);
     color: var(--wp-color-fg-muted);
     /* Fixed width: "Saved" and "Saving…" alternate constantly while typing, and
        a reflowing header is far more distracting than the word itself. */
@@ -223,38 +233,49 @@ export default styled(Header)`
   }
   p.save-status.is-error {
     color: var(--wp-color-danger);
-    font-weight: 600;
+    font-weight: 500;
   }
+
   div.menu {
-    width: 100%;
-    height: 100%;
+    /* Takes the slack so the buttons sit hard right; the gap on the header
+       handles the spacing between everything else. */
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    gap: var(--wp-space-2);
     .button {
-      height: 80%;
-      margin: 0;
       display: flex;
       align-items: center;
-      margin-left: 3px;
-      border-radius: var(--wp-ui-radius);
+      margin: 0;
+      height: var(--wp-h-control);
+      padding: 0 var(--wp-space-4);
+      font-size: var(--wp-text-sm);
+      font-weight: 500;
+      border-radius: var(--wp-radius);
       border: 1px solid var(--wp-color-border);
       background-color: var(--wp-color-canvas);
-      padding: 10px;
       cursor: pointer;
-      transition: background-color var(--wp-ui-transition);
+      transition:
+        background-color var(--wp-ui-transition),
+        border-color var(--wp-ui-transition);
     }
     .button:hover {
-      background-color: var(--wp-color-neutral-muted);
+      background-color: var(--wp-color-canvas-subtle);
     }
-  }
-
-  @keyframes dance {
-    0% {
-      transform: rotate(3deg);
+    /* Transform is the primary action of the whole app. */
+    .button.download {
+      color: var(--wp-color-canvas);
+      background-color: var(--wp-color-accent);
+      border-color: var(--wp-color-accent);
     }
-    100% {
-      transform: rotate(-2deg);
+    .button.download:hover {
+      background-color: var(--wp-color-accent-emphasis);
+      border-color: var(--wp-color-accent-emphasis);
+    }
+    .button:focus-visible {
+      outline: 2px solid var(--wp-color-accent);
+      outline-offset: 1px;
     }
   }
 `;

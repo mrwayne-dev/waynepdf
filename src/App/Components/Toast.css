@@ -2,26 +2,32 @@
 
 .wp-toast {
   position: fixed;
-  bottom: 24px;
+  bottom: var(--wp-space-6);
   left: 50%;
   z-index: 200;
-  padding: 8px 14px;
+  padding: var(--wp-space-3) var(--wp-space-4);
   font-family: var(--wp-font-family-ui);
-  font-size: var(--wp-ui-font-size);
-  color: var(--wp-color-canvas);
-  background-color: var(--wp-color-fg);
-  border-radius: var(--wp-ui-radius);
+  font-size: var(--wp-text-sm);
+  line-height: var(--wp-leading-tight);
+  /* A bordered panel on the canvas rather than an inverted pill. The inverted
+     form read as an error in Dark, where "dark background, light text" is what
+     everything else already looks like. */
+  color: var(--wp-color-fg);
+  background-color: var(--wp-color-canvas);
+  border: 1px solid var(--wp-color-border);
+  border-radius: var(--wp-radius-lg);
+  box-shadow: var(--wp-shadow-panel);
   /* translateX is on the element, so the animation must carry it too or the
      toast jumps half its width on the first frame. */
   transform: translateX(-50%);
-  animation: wp-toast-in 120ms ease-out;
+  animation: wp-toast-in 200ms ease-out;
   pointer-events: none;
 }
 
 @keyframes wp-toast-in {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(6px);
+    transform: translateX(-50%) translateY(var(--wp-space-2));
   }
   to {
     opacity: 1;

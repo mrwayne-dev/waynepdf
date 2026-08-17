@@ -49,8 +49,12 @@ export default defineConfig({
        * 7 GB machine the default over-subscribes memory and Chromium starts
        * dying mid-test with "Protocol error … session closed" — a crash, not a
        * test failure, and one that moves around between runs.
+       *
+       * Dropped from 4 to 3 in 6.5b. At 4 the cross-theme render specs
+       * intermittently timed out at 34s against a 3.8s solo runtime — never an
+       * assertion failure, always the clock, and only under full-suite load.
        */
-      workers: 4,
+      workers: 3,
       use: { ...devices['Desktop Chrome'] },
     },
     {

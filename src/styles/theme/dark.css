@@ -18,4 +18,9 @@
   --wp-color-attention: #d29922;
   --wp-color-blockquote-fg: #9198a1;
   --wp-color-blockquote-border: #3d444d;
+
+  /* Heavier than the light default: 8% black over #0d1117 is not visible, so a
+     panel would read as floating with no edge at all. */
+  --wp-shadow-panel: 0 4px 12px rgb(0 0 0 / 40%);
+  --wp-shadow-menu: 0 4px 16px rgb(0 0 0 / 55%);
 }

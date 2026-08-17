@@ -11,14 +11,14 @@
   border-bottom: 1px solid var(--wp-color-border);
   background-color: var(--wp-color-canvas-subtle);
   font-family: var(--wp-font-family-ui);
-  font-size: var(--wp-ui-font-size);
+  font-size: var(--wp-text-sm);
   user-select: none;
 }
 
 .wp-tabs-list {
   display: flex;
   align-items: stretch;
-  height: 32px;
+  height: 34px;
   /* Past roughly ten tabs the strip scrolls rather than shrinking tabs to
      illegibility. No cap on how many documents a user may keep. */
   overflow-x: auto;
@@ -43,7 +43,8 @@
   align-items: center;
   flex: 0 0 auto;
   max-width: 180px;
-  padding: 0 4px 0 10px;
+  padding: 0 var(--wp-space-3);
+  gap: var(--wp-space-1);
   background-color: var(--wp-color-canvas-subtle);
   border-right: 1px solid var(--wp-color-border);
   /* Reserved so the active tab's accent does not change the tab's height. */
@@ -53,8 +54,10 @@
   transition: background-color var(--wp-ui-transition);
 }
 
+/* Half-strength canvas, so hover reads as "on the way to active" rather than as
+   a third state with a colour of its own. */
 .wp-tab:hover {
-  background-color: var(--wp-color-neutral-muted);
+  background-color: color-mix(in srgb, var(--wp-color-canvas) 50%, transparent);
 }
 
 .wp-tab.is-active {
@@ -74,10 +77,11 @@
 
 .wp-tab-label {
   font: inherit;
+  font-weight: 400;
   color: inherit;
   background: none;
   border: 0;
-  padding: 0 4px 0 0;
+  padding: 0;
   cursor: inherit;
   white-space: nowrap;
   overflow: hidden;
@@ -85,13 +89,19 @@
 }
 
 .wp-tab-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--wp-space-4);
+  height: var(--wp-space-4);
+  padding: 0;
   font: inherit;
   line-height: 1;
   color: var(--wp-color-fg-muted);
   background: none;
   border: 0;
-  border-radius: var(--wp-ui-radius);
-  padding: 2px 5px;
+  border-radius: var(--wp-radius-sm);
   cursor: pointer;
   /* Hidden until the tab is hovered or active, so a row of tabs is titles
      rather than a row of × marks. Kept in the layout so nothing shifts. */
@@ -114,22 +124,29 @@
   color: var(--wp-color-fg);
   background-color: var(--wp-color-canvas);
   border: 1px solid var(--wp-color-accent);
-  border-radius: var(--wp-ui-radius);
+  border-radius: var(--wp-radius-sm);
   /* Sized to match the label it replaces, so the strip does not jump. */
   width: 150px;
-  padding: 2px 4px;
-  margin: 2px 0;
+  height: var(--wp-h-control-sm);
+  padding: 0 var(--wp-space-1);
 }
 
 .wp-tab-new {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: var(--wp-h-control);
+  height: var(--wp-h-control);
+  padding: 0;
+  margin: 0 var(--wp-space-1);
   font: inherit;
-  font-size: 16px;
+  font-size: var(--wp-text-lg);
   line-height: 1;
   color: var(--wp-color-fg-muted);
   background: none;
   border: 0;
-  padding: 0 12px;
-  flex: 0 0 auto;
+  border-radius: var(--wp-radius-sm);
   cursor: pointer;
 }
 
@@ -151,11 +168,11 @@
   min-width: 140px;
   display: flex;
   flex-direction: column;
-  padding: 4px;
+  padding: var(--wp-space-1);
   background-color: var(--wp-color-canvas);
   border: 1px solid var(--wp-color-border);
-  border-radius: var(--wp-ui-radius);
-  box-shadow: 0 4px 16px var(--wp-color-neutral-muted);
+  border-radius: var(--wp-radius-lg);
+  box-shadow: var(--wp-shadow-menu);
 }
 
 .wp-tab-menu button {
@@ -164,8 +181,8 @@
   color: var(--wp-color-fg);
   background: none;
   border: 0;
-  border-radius: var(--wp-ui-radius);
-  padding: 6px 10px;
+  border-radius: var(--wp-radius-sm);
+  padding: var(--wp-space-2) var(--wp-space-3);
   cursor: pointer;
 }
 

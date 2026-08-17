@@ -9,12 +9,15 @@
 .markdown-body .callout {
   --callout-accent: var(--wp-color-accent);
   margin: 1em 0;
-  padding: 0.75em 1em;
-  border-left: 4px solid var(--callout-accent);
-  border-radius: 0 var(--wp-ui-radius) var(--wp-ui-radius) 0;
+  /* Chrome tokens for the box, em for nothing: the callout frame is furniture
+     and should not grow when the reader turns up the document font size. The
+     body inside it still scales, because that is document text. */
+  padding: var(--wp-space-3) var(--wp-space-4);
+  border-left: 3px solid var(--callout-accent);
+  border-radius: var(--wp-radius);
   background-color: color-mix(
     in srgb,
-    var(--callout-accent) 10%,
+    var(--callout-accent) 8%,
     var(--wp-color-canvas)
   );
   /* Fragmentation: a three-line aside split across a page break reads as two
@@ -25,10 +28,12 @@
 .markdown-body .callout-title {
   display: flex;
   align-items: center;
-  gap: 0.45em;
-  margin-bottom: 0.35em;
-  font-family: var(--wp-font-family-sans);
+  gap: var(--wp-space-2);
+  margin-bottom: var(--wp-space-1);
+  font-family: var(--wp-font-family-ui);
+  font-size: var(--wp-text-lg);
   font-weight: 600;
+  line-height: var(--wp-leading-tight);
   color: var(--callout-accent);
 }
 
@@ -37,8 +42,8 @@
 .markdown-body .callout-title::before {
   content: '';
   flex-shrink: 0;
-  width: 1.05em;
-  height: 1.05em;
+  width: 20px;
+  height: 20px;
   background-color: currentColor;
   mask-image: var(--callout-icon);
   mask-repeat: no-repeat;

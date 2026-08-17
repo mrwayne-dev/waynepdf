@@ -36,6 +36,40 @@ const reload = async (page) => {
   );
 };
 
+/**
+ * Waits for a tab switch to finish re-seeding the editor.
+ *
+ * Switching tabs remounts CodeMirror with the incoming document's body. Until
+ * that lands there are two live instances holding different text, and a
+ * programmatic setText in that window writes to one of them while the pending
+ * remount then re-seeds the document from the other — silently blanking it.
+ * (Pre-existing; see PHASE_6.5b_SUMMARY.md. Not this phase's to fix, but the
+ * tests must not race it.)
+ *
+ * The signal has to be every instance holding the *incoming* document's text.
+ * "All instances agree" is not enough: before the remount they agree on the
+ * OUTGOING document, which reads as settled and is exactly the window the race
+ * lives in.
+ */
+const settleEditorTo = (page, expected) =>
+  page.waitForFunction(
+    (want) => {
+      const nodes = [...document.querySelectorAll('.CodeMirror')];
+      return (
+        nodes.length > 0 &&
+        nodes.every((n) => n.CodeMirror?.getValue() === want)
+      );
+    },
+    expected,
+    { timeout: 15_000 },
+  );
+
+/** Creates a tab and waits for the editor to show the new empty document. */
+async function addTab(page) {
+  await newTab(page).click();
+  await settleEditorTo(page, '');
+}
+
 /** Drags a tab horizontally onto another tab's slot. */
 async function dragTabOnto(page, fromIndex, toIndex) {
   const from = tabs(page).nth(fromIndex);
@@ -43,13 +77,23 @@ async function dragTabOnto(page, fromIndex, toIndex) {
   const a = await from.boundingBox();
   const b = await to.boundingBox();
 
+  /*
+   * Land a quarter into the target rather than dead centre. The drop slot is
+   * chosen by which side of a tab's midpoint the cursor is on, so aiming at the
+   * midpoint itself aims at the decision boundary and lets sub-pixel rounding
+   * of boundingBox() pick the answer — which made this flaky roughly one run in
+   * four. A user dragging a tab aims at the tab, not at one pixel of it.
+   */
+  const landing =
+    toIndex < fromIndex ? b.x + b.width * 0.25 : b.x + b.width * 0.75;
+
   await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2);
   await page.mouse.down();
   // Two moves: the first crosses the click/drag threshold, the second lands.
   await page.mouse.move(a.x + a.width / 2 + 12, a.y + a.height / 2, {
     steps: 4,
   });
-  await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 8 });
+  await page.mouse.move(landing, b.y + b.height / 2, { steps: 8 });
   await page.mouse.up();
 }
 
@@ -61,7 +105,7 @@ test('a fresh visit shows exactly one tab', async ({ page }) => {
 
 test('the + button creates a document and activates it', async ({ page }) => {
   await boot(page);
-  await newTab(page).click();
+  await addTab(page);
 
   await expect(tabs(page)).toHaveCount(2);
   await expect(activeTab(page).locator('.wp-tab-label')).toHaveText('Untitled');
@@ -73,7 +117,7 @@ test('each tab keeps its own text', async ({ page }) => {
   await setText(page, '# One');
   await expect(saveStatus(page)).toHaveText('Saved');
 
-  await newTab(page).click();
+  await addTab(page);
   await setText(page, '# Two');
   await expect(page.locator('.preview h1')).toHaveText('Two');
 
@@ -86,7 +130,7 @@ test('each tab keeps its own text', async ({ page }) => {
 
 test('switching tabs force-saves the outgoing document', async ({ page }) => {
   await boot(page);
-  await newTab(page).click();
+  await addTab(page);
 
   // No wait for the debounce: only the flush on switch can save this.
   await setText(page, '# Not Yet Debounced');
@@ -120,7 +164,7 @@ test('closing a tab removes it from the strip and from IndexedDB', async ({
   page,
 }) => {
   await boot(page);
-  await newTab(page).click();
+  await addTab(page);
   await setText(page, '# Doomed Tab');
   await expect(saveStatus(page)).toHaveText('Saved');
   await expect(tabs(page)).toHaveCount(2);
@@ -139,9 +183,9 @@ test('closing the active tab activates its right-hand neighbour', async ({
   page,
 }) => {
   await boot(page);
-  await newTab(page).click();
+  await addTab(page);
   await setText(page, '# Middle');
-  await newTab(page).click();
+  await addTab(page);
   await setText(page, '# Right');
 
   await tabs(page).nth(1).locator('.wp-tab-label').click();
@@ -232,7 +276,7 @@ test('Duplicate copies the body and sits next to the original', async ({
   await boot(page);
   await setText(page, '# Original Doc\n\nshared body');
   await expect(saveStatus(page)).toHaveText('Saved');
-  await newTab(page).click();
+  await addTab(page);
 
   await tabs(page).nth(0).click({ button: 'right' });
   await page.locator('.wp-tab-menu button', { hasText: 'Duplicate' }).click();
@@ -252,9 +296,9 @@ test('dragging a tab reorders it, and the order survives a reload', async ({
 }) => {
   await boot(page);
   await setText(page, '# Alpha');
-  await newTab(page).click();
+  await addTab(page);
   await setText(page, '# Beta');
-  await newTab(page).click();
+  await addTab(page);
   await setText(page, '# Gamma');
   await expect(saveStatus(page)).toHaveText('Saved');
   await expect(tabLabels(page)).toHaveText(['Alpha', 'Beta', 'Gamma']);
@@ -271,7 +315,7 @@ test('a click on a tab still activates it after a drag has happened', async ({
 }) => {
   await boot(page);
   await setText(page, '# Alpha');
-  await newTab(page).click();
+  await addTab(page);
   await setText(page, '# Beta');
 
   await dragTabOnto(page, 1, 0);
@@ -286,9 +330,9 @@ test('a click on a tab still activates it after a drag has happened', async ({
 test('tabs and the active document survive a reload', async ({ page }) => {
   await boot(page);
   await setText(page, '# First');
-  await newTab(page).click();
+  await addTab(page);
   await setText(page, '# Second');
-  await newTab(page).click();
+  await addTab(page);
   await setText(page, '# Third');
   await tabs(page).nth(1).locator('.wp-tab-label').click();
   await expect(page.locator('.preview h1')).toHaveText('Second');
@@ -305,7 +349,7 @@ test('beyond ten tabs the strip scrolls rather than shrinking them', async ({
   page,
 }) => {
   await boot(page);
-  for (let i = 0; i < 11; i += 1) await newTab(page).click();
+  for (let i = 0; i < 11; i += 1) await addTab(page);
   await expect(tabs(page)).toHaveCount(12);
 
   const { scrollWidth, clientWidth } = await strip(page).evaluate((el) => ({

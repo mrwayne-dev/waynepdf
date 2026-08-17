@@ -5,21 +5,21 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 24px 16px;
+  gap: var(--wp-space-3);
+  padding: var(--wp-space-4);
   font-family: var(--wp-font-family-ui);
-  font-size: var(--wp-ui-font-size);
+  font-size: var(--wp-text-base);
   color: var(--wp-color-fg-muted);
 }
 
 .wp-lazyload-spinner {
-  width: 18px;
-  height: 18px;
+  width: var(--wp-space-6);
+  height: var(--wp-space-6);
   border: 2px solid var(--wp-color-border);
   /* One coloured edge is what makes the rotation readable. */
   border-top-color: var(--wp-color-accent);
   border-radius: 50%;
-  animation: wp-lazyload-spin 700ms linear infinite;
+  animation: wp-lazyload-spin 1s linear infinite;
 }
 
 @keyframes wp-lazyload-spin {
@@ -35,29 +35,39 @@
 }
 
 .wp-lazyload-label {
+  font-size: var(--wp-text-base);
   color: var(--wp-color-fg);
 }
 
 .wp-lazyload-size {
+  /* The gap token on the container is 12px, which is the label offset; the size
+     caption wants 4px from the label, so it pulls itself back up. */
+  margin-top: calc(var(--wp-space-1) - var(--wp-space-3));
   font-family: var(--wp-font-family-mono);
-  font-size: 11px;
+  font-size: var(--wp-text-sm);
+  color: var(--wp-color-fg-subtle);
   font-variant-numeric: tabular-nums;
 }
 
 /* Inline variant: sits in a corner rather than owning the pane. */
 .wp-lazyload.is-inline {
   flex-direction: row;
-  gap: 6px;
-  padding: 4px 8px;
+  gap: var(--wp-space-2);
+  padding: var(--wp-space-1) var(--wp-space-2);
   background-color: var(--wp-color-canvas-subtle);
   border: 1px solid var(--wp-color-border);
-  border-radius: var(--wp-ui-radius);
+  border-radius: var(--wp-radius);
+  font-size: var(--wp-text-sm);
 }
 
 .wp-lazyload.is-inline .wp-lazyload-spinner {
-  width: 12px;
-  height: 12px;
+  width: var(--wp-space-3);
+  height: var(--wp-space-3);
   border-width: 2px;
+}
+
+.wp-lazyload.is-inline .wp-lazyload-size {
+  margin-top: 0;
 }
 
 @media print {

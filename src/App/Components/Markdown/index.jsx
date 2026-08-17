@@ -66,10 +66,20 @@ const Markdown = ({ className }) => {
      * (Lib/uploadFile.js), so tests exercise the path users take.
      */
     window.__waynepdf_setText = (value) => {
-      const nodes = document.querySelectorAll('.CodeMirror');
-      const live = nodes[nodes.length - 1]?.CodeMirror;
-      if (live) live.setValue(value);
-      else setText(value);
+      /*
+       * Every instance, not the last one.
+       *
+       * StrictMode leaves two connected .CodeMirror nodes, and a tab switch
+       * remounts the live one — after which the survivor is not reliably last
+       * in DOM order. Writing to the wrong one is silent: react-codemirror2's
+       * change handler early-returns once its component has unmounted, so the
+       * text simply never reaches the store. Writing to all of them is
+       * deterministic, and the dead instances ignore it.
+       */
+      const nodes = [...document.querySelectorAll('.CodeMirror')];
+      const editors = nodes.map((n) => n.CodeMirror).filter(Boolean);
+      if (editors.length === 0) setText(value);
+      else for (const editor of editors) editor.setValue(value);
     };
     return () => {
       delete window.__waynepdf_setText;

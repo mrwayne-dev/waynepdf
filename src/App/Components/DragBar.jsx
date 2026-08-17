@@ -1,7 +1,5 @@
 import styled from 'styled-components';
 
-const width = 15;
-
 const UnwrappedDragBar = ({ className, setDrag, setStartX }) => {
   const dragStart = (e) => {
     const { nativeEvent } = e;
@@ -20,15 +18,17 @@ const UnwrappedDragBar = ({ className, setDrag, setStartX }) => {
 };
 
 export default styled(UnwrappedDragBar)`
-  width: ${width + 'px'};
+  /* A hairline rule, not a gutter. The 15px handle inherited from upstream read
+     as an empty third column between the panes. */
+  width: 4px;
   flex-shrink: 0;
-  background-color: ${(props) =>
-    props.isDrag ? 'var(--wp-color-accent)' : 'var(--wp-color-canvas-subtle)'};
-  border-left: 1px solid var(--wp-color-border);
-  border-right: 1px solid var(--wp-color-border);
   height: 100%;
-  color: white;
-  text-align: center;
+  background-color: ${(props) =>
+    props.isDrag ? 'var(--wp-color-accent)' : 'var(--wp-color-border)'};
   cursor: col-resize;
   user-select: none;
+  transition: background-color var(--wp-ui-transition);
+  &:hover {
+    background-color: var(--wp-color-accent);
+  }
 `;

@@ -13,7 +13,27 @@ const Wrapper = styled.div`
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
   width: 100%;
-  padding: 10px;
+  /*
+   * The measure is capped at 800px and centred in the pane.
+   *
+   * This div IS the .markdown-body, so the cap goes on the element itself and
+   * the surplus shows the app canvas behind it — which is the same colour in
+   * every theme (app.css paints body with --wp-color-canvas), so the seam is
+   * invisible rather than a visible column.
+   *
+   * Percentage padding was the obvious alternative and is wrong here: a
+   * percentage resolves against the containing block, which for this flex item
+   * is the full split row, not the pane it gets shrunk into. On a 1600px window
+   * that computed 400px of padding onto an 800px pane and collapsed the text to
+   * one character per line.
+   */
+  box-sizing: border-box;
+  max-width: calc(800px + var(--wp-space-8) * 2);
+  margin-inline: auto;
+  padding: var(--wp-space-6) var(--wp-space-8);
+  @media (max-width: 900px) {
+    padding: var(--wp-space-4);
+  }
   @media print {
     padding: 0;
     overflow-y: hidden;

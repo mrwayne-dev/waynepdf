@@ -13,10 +13,17 @@ import { useCallback, useRef, useState } from 'react';
 /** Pixels of travel before a mousedown counts as a drag rather than a click. */
 const DRAG_THRESHOLD = 4;
 
-/** Which slot the cursor is over, by midpoint. */
+/**
+ * Which slot the cursor is over, by midpoint.
+ *
+ * Inclusive of the midpoint itself: with a strict `<`, dropping a tab exactly on
+ * the centre of the leftmost one fell through to the slot after it. Tab widths
+ * happened to make that landing unreachable until the 6.5b spacing pass changed
+ * them, which is a poor reason for the behaviour to be undefined.
+ */
 function indexForX(boxes, x) {
   for (let i = 0; i < boxes.length; i += 1) {
-    if (x < boxes[i].left + boxes[i].width / 2) return i;
+    if (x <= boxes[i].left + boxes[i].width / 2) return i;
   }
   return boxes.length - 1;
 }

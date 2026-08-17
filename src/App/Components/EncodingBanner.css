@@ -4,13 +4,17 @@
   display: flex;
   flex-shrink: 0;
   align-items: center;
-  gap: 8px;
-  padding: 6px 8px 6px 10px;
+  gap: var(--wp-space-2);
+  padding: var(--wp-space-2) var(--wp-space-4);
   font-family: var(--wp-font-family-ui);
-  font-size: 12px;
-  line-height: 1.4;
+  font-size: var(--wp-text-sm);
+  line-height: var(--wp-leading-normal);
   color: var(--wp-color-fg);
-  background-color: var(--wp-color-canvas-subtle);
+  background-color: color-mix(
+    in srgb,
+    var(--wp-color-accent) 12%,
+    var(--wp-color-canvas)
+  );
   /* The accent rail is the only thing separating info from warning, so it is
      3px rather than 1px — a hairline reads as decoration, not as a signal. */
   border-bottom: 1px solid var(--wp-color-border);
@@ -21,8 +25,8 @@
   border-left-color: var(--wp-color-attention);
   background-color: color-mix(
     in srgb,
-    var(--wp-color-attention) 12%,
-    var(--wp-color-canvas-subtle)
+    var(--wp-color-attention) 15%,
+    var(--wp-color-canvas)
   );
 }
 
@@ -32,15 +36,18 @@
 
 .wp-encoding-banner-close {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 20px;
   height: 20px;
   padding: 0;
-  font-size: 16px;
+  font-size: var(--wp-text-lg);
   line-height: 1;
   color: var(--wp-color-fg-muted);
   background: none;
   border: 1px solid transparent;
-  border-radius: var(--wp-ui-radius);
+  border-radius: var(--wp-radius-sm);
   cursor: pointer;
 }
 

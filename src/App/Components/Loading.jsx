@@ -18,9 +18,9 @@ export default styled(unWrappedLoading)`
   justify-content: center;
 
   & > p {
-    margin: 5px;
-    width: 5px;
-    height: 15px;
+    margin: var(--wp-space-1);
+    width: var(--wp-space-1);
+    height: var(--wp-space-4);
     border-radius: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     animation-iteration-count: infinite;

@@ -56,9 +56,61 @@
 
   /* Chrome (header, settings panel, editor gutter) reads these rather than the
      document palette, so app furniture stays legible in every theme. */
-  --wp-ui-font-size: 13px;
-  --wp-ui-radius: 6px;
   --wp-ui-transition: 180ms ease;
+
+  /*
+   * Spacing: an 8px grid with 4px half-steps, and nothing else.
+   *
+   * The gaps are the point. There is no --wp-space-5 because 20px is not on the
+   * grid, so reaching for one forces a choice between 16 and 24 rather than
+   * inventing a third value. Every hardcoded padding in app chrome before this
+   * (5px, 6px, 10px, 14px) came from making that choice ad hoc, component by
+   * component.
+   */
+  --wp-space-0: 0;
+  --wp-space-1: 4px;
+  --wp-space-2: 8px;
+  --wp-space-3: 12px;
+  --wp-space-4: 16px;
+  --wp-space-6: 24px;
+  --wp-space-8: 32px;
+  --wp-space-12: 48px;
+
+  /* Type scale for app chrome. Document typography is user-configurable and
+     lives in --wp-font-size-base; nothing here touches it. */
+  --wp-text-xs: 12px; /* fine print, badges, meta */
+  --wp-text-sm: 13px; /* secondary labels, most controls */
+  --wp-text-base: 14px; /* primary chrome text */
+  --wp-text-lg: 16px; /* headings, primary labels */
+  --wp-text-xl: 18px; /* panel titles */
+
+  --wp-leading-tight: 1.35;
+  --wp-leading-normal: 1.5;
+
+  --wp-radius-sm: 4px;
+  --wp-radius: 6px;
+  --wp-radius-lg: 8px;
+
+  /* Interactive heights. Two sizes only — a third would need a reason. */
+  --wp-h-control: 32px;
+  --wp-h-control-sm: 28px;
+
+  /*
+   * Retained as aliases. Phase 2 shipped these and they are referenced from the
+   * generated print stylesheet as well as from chrome; pointing them at the new
+   * scale keeps one source of truth without a rename sweep across the print
+   * pipeline, which 6.5 just stabilised and this phase must not disturb.
+   */
+  --wp-ui-font-size: var(--wp-text-sm);
+  --wp-ui-radius: var(--wp-radius);
+
+  /*
+   * Elevation. Two stops, because a dark canvas needs a much heavier shadow to
+   * read as lift at all — the same alpha that looks right on white is invisible
+   * on #0d1117. Overridden in dark.css.
+   */
+  --wp-shadow-panel: 0 4px 12px rgb(0 0 0 / 8%);
+  --wp-shadow-menu: 0 4px 16px rgb(0 0 0 / 12%);
 }
 
 /*
