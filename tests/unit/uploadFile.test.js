@@ -36,25 +36,60 @@ describe('uploadFile', () => {
     expect(setValue).toHaveBeenCalledWith('');
   });
 
-  it('throws when no CodeMirror element is mounted (documents the coupling)', () => {
+  it('reports rather than throws when no CodeMirror element is mounted', () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
     document.body.innerHTML = '';
-    expect(() => uploadFile('x')).toThrow();
+    expect(() => uploadFile('x')).not.toThrow();
+    // Silence here would make a dropped file simply vanish.
+    expect(error).toHaveBeenCalled();
   });
 
-  // REGRESSION: React 18 StrictMode + react-codemirror2 v8 leave two connected
-  // .CodeMirror nodes, and only the last is wired to onChange. Writing to the
-  // first (upstream's querySelector) silently broke upload and drag-and-drop.
-  it('writes to the LAST CodeMirror instance when several are mounted', () => {
-    const staleSetValue = vi.fn();
-    const stale = document.createElement('div');
-    stale.className = 'CodeMirror';
-    stale.CodeMirror = { setValue: staleSetValue };
-    // Insert the stale instance BEFORE the live one from beforeEach.
-    document.body.insertBefore(stale, document.body.firstChild);
+  it('ignores a .CodeMirror node with no editor attached', () => {
+    const bare = document.createElement('div');
+    bare.className = 'CodeMirror';
+    document.body.appendChild(bare);
+    expect(() => uploadFile('# ok')).not.toThrow();
+    expect(setValue).toHaveBeenCalledWith('# ok');
+  });
+
+  /*
+   * REGRESSION (Phase 6.5c). StrictMode + react-codemirror2 v8 leave two
+   * connected .CodeMirror nodes. Phase 0 wrote to the LAST one, reasoning that
+   * the live instance is the newest — true at first mount, and false after
+   * Phase 6b.2 made a tab switch remount the editor. Which node survives is not
+   * deterministic, so neither "first" nor "last" is a safe choice and dropping a
+   * file after switching tabs silently did nothing.
+   *
+   * Writing to all of them is what makes it deterministic. Unmounted instances
+   * accept the value and emit no change event, so exactly one dispatch reaches
+   * the store however the nodes happen to be ordered.
+   */
+  it('writes to EVERY mounted CodeMirror instance, not one chosen by position', () => {
+    const otherSetValue = vi.fn();
+    const other = document.createElement('div');
+    other.className = 'CodeMirror';
+    other.CodeMirror = { setValue: otherSetValue };
+    document.body.insertBefore(other, document.body.firstChild);
 
     uploadFile('# live');
 
-    expect(staleSetValue).not.toHaveBeenCalled();
+    expect(otherSetValue).toHaveBeenCalledWith('# live');
     expect(setValue).toHaveBeenCalledWith('# live');
+  });
+
+  it('writes to all three when a third turns up', () => {
+    const calls = [];
+    for (const tag of ['a', 'b']) {
+      const el = document.createElement('div');
+      el.className = 'CodeMirror';
+      el.CodeMirror = { setValue: (v) => calls.push([tag, v]) };
+      document.body.appendChild(el);
+    }
+    uploadFile('# all');
+    expect(calls).toEqual([
+      ['a', '# all'],
+      ['b', '# all'],
+    ]);
+    expect(setValue).toHaveBeenCalledWith('# all');
   });
 });
