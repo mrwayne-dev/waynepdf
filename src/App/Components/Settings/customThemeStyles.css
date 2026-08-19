@@ -1,0 +1,335 @@
+/*
+ * Custom theme manager and editor.
+ *
+ * Every value here is a 6.5b token. The modal is the first surface in the app
+ * with a backdrop, so it is also the first to need a z-index above the settings
+ * panel's 100.
+ */
+
+/* ------------------------------------------------------- list in the panel */
+
+.wp-custom-themes {
+  margin-top: var(--wp-space-3);
+}
+
+.wp-custom-themes-head {
+  border: 1px solid var(--wp-color-border);
+  border-radius: var(--wp-radius);
+}
+
+.wp-custom-themes-count {
+  margin-left: auto;
+  color: var(--wp-color-fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.wp-custom-themes-body {
+  padding: var(--wp-space-3) 0 0;
+}
+
+.wp-custom-theme-row {
+  display: flex;
+  align-items: center;
+  gap: var(--wp-space-2);
+  padding: var(--wp-space-1) 0;
+}
+
+.wp-custom-theme-chip {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  width: var(--wp-h-control);
+  height: var(--wp-h-control);
+  overflow: hidden;
+  border: 1px solid var(--wp-color-border);
+  border-radius: var(--wp-radius-sm);
+}
+
+.wp-custom-theme-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.wp-new-theme {
+  width: 100%;
+  height: var(--wp-h-control);
+  margin-top: var(--wp-space-2);
+  font: inherit;
+  font-size: var(--wp-text-sm);
+  color: var(--wp-color-accent);
+  background: none;
+  border: 1px dashed var(--wp-color-border);
+  border-radius: var(--wp-radius);
+  cursor: pointer;
+}
+
+.wp-new-theme:hover:not(:disabled) {
+  background-color: var(--wp-color-canvas-subtle);
+}
+
+.wp-new-theme:disabled {
+  color: var(--wp-color-fg-subtle);
+  cursor: not-allowed;
+}
+
+/* -------------------------------------------------------------- buttons */
+
+.wp-btn-ghost,
+.wp-btn-primary {
+  height: var(--wp-h-control);
+  padding: 0 var(--wp-space-4);
+  font: inherit;
+  font-size: var(--wp-text-sm);
+  font-weight: 500;
+  border-radius: var(--wp-radius);
+  cursor: pointer;
+}
+
+.wp-btn-ghost {
+  color: var(--wp-color-fg);
+  background: none;
+  border: 1px solid var(--wp-color-border);
+}
+
+.wp-btn-ghost:hover {
+  background-color: var(--wp-color-canvas-subtle);
+}
+
+.wp-btn-ghost.is-danger {
+  color: var(--wp-color-danger);
+}
+
+.wp-btn-tiny {
+  height: var(--wp-h-control-sm);
+  padding: 0 var(--wp-space-2);
+  font-size: var(--wp-text-xs);
+}
+
+.wp-btn-primary {
+  color: var(--wp-color-canvas);
+  background-color: var(--wp-color-accent);
+  border: 1px solid var(--wp-color-accent);
+}
+
+.wp-btn-primary:hover:not(:disabled) {
+  background-color: var(--wp-color-accent-emphasis);
+  border-color: var(--wp-color-accent-emphasis);
+}
+
+.wp-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.wp-btn-ghost:focus-visible,
+.wp-btn-primary:focus-visible,
+.wp-new-theme:focus-visible {
+  outline: 2px solid var(--wp-color-accent);
+  outline-offset: 1px;
+}
+
+/* ---------------------------------------------------------------- modal */
+
+.wp-modal-overlay {
+  position: fixed;
+  inset: 0;
+  /* Above the settings panel, which sits at 100. */
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--wp-space-6);
+  background-color: rgb(0 0 0 / 50%);
+}
+
+.wp-modal {
+  display: flex;
+  flex-direction: column;
+  width: 480px;
+  max-width: 100%;
+  max-height: 80vh;
+  padding: var(--wp-space-6);
+  gap: var(--wp-space-6);
+  font-family: var(--wp-font-family-ui);
+  font-size: var(--wp-text-sm);
+  color: var(--wp-color-fg);
+  background-color: var(--wp-color-canvas);
+  border: 1px solid var(--wp-color-border);
+  border-radius: var(--wp-radius-lg);
+  box-shadow: var(--wp-shadow-panel);
+}
+
+.wp-modal-head {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.wp-modal-title {
+  margin: 0;
+  font-size: var(--wp-text-xl);
+  font-weight: 600;
+  line-height: var(--wp-leading-tight);
+}
+
+.wp-modal-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--wp-space-6);
+}
+
+.wp-modal-label {
+  display: block;
+  margin-bottom: var(--wp-space-2);
+  font-size: var(--wp-text-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--wp-color-fg-muted);
+}
+
+.wp-modal-section {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.wp-modal-error {
+  margin: 0;
+  color: var(--wp-color-danger);
+  font-size: var(--wp-text-sm);
+}
+
+.wp-modal-foot {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: space-between;
+  gap: var(--wp-space-3);
+}
+
+/* ---------------------------------------------------------- colour rows */
+
+.wp-color-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wp-space-3);
+  padding: var(--wp-space-1) 0;
+}
+
+.wp-color-label {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.wp-color-state {
+  font-size: var(--wp-text-xs);
+  color: var(--wp-color-fg-subtle);
+}
+
+.wp-color-state.is-custom {
+  color: var(--wp-color-accent);
+}
+
+.wp-color-controls {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--wp-space-2);
+}
+
+.wp-color-swatch {
+  width: var(--wp-h-control);
+  height: var(--wp-h-control-sm);
+  padding: 0;
+  background: none;
+  border: 1px solid var(--wp-color-border);
+  border-radius: var(--wp-radius-sm);
+  cursor: pointer;
+}
+
+.wp-color-hex {
+  width: 10ch;
+  height: var(--wp-h-control-sm);
+  padding: 0 var(--wp-space-2);
+  font-family: var(--wp-font-family-mono);
+  font-size: var(--wp-text-xs);
+  color: var(--wp-color-fg);
+  background-color: var(--wp-color-canvas);
+  border: 1px solid var(--wp-color-border);
+  border-radius: var(--wp-radius-sm);
+}
+
+.wp-color-reset {
+  width: var(--wp-h-control-sm);
+  height: var(--wp-h-control-sm);
+  padding: 0;
+  font-size: var(--wp-text-sm);
+  color: var(--wp-color-fg-muted);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--wp-radius-sm);
+  cursor: pointer;
+}
+
+.wp-color-reset:disabled {
+  /* Kept in the layout so the rows do not reflow as tokens are customised. */
+  opacity: 0;
+  cursor: default;
+}
+
+.wp-color-reset:hover:not(:disabled) {
+  color: var(--wp-color-fg);
+  background-color: var(--wp-color-canvas-subtle);
+}
+
+.wp-color-hex:focus-visible,
+.wp-color-swatch:focus-visible,
+.wp-color-reset:focus-visible {
+  outline: 2px solid var(--wp-color-accent);
+  outline-offset: 1px;
+}
+
+/* -------------------------------------------------------- live preview */
+
+.wp-theme-preview {
+  padding: var(--wp-space-4);
+  overflow: hidden;
+  background-color: var(--wp-color-canvas);
+  border: 1px solid var(--wp-color-border);
+  border-radius: var(--wp-radius);
+}
+
+/*
+ * Scaled by type size, not by transform.
+ *
+ * The spec asked for transform: scale(0.6). A transformed element still reserves
+ * its untransformed box, so the preview needs a negative margin to reclaim the
+ * space — and a percentage margin resolves against WIDTH, which silently clipped
+ * the blockquote and code block off the bottom.
+ *
+ * Overriding the font-size token instead shrinks the sample the way the document
+ * itself shrinks: everything inside .markdown-body is em-relative, so the
+ * proportions are identical and the box is the size it looks.
+ */
+.wp-theme-preview-body {
+  --wp-font-size-base: 11px;
+  --wp-font-size-code: 10px;
+  pointer-events: none;
+}
+
+.wp-theme-preview-body > :first-child {
+  margin-top: 0;
+}
+
+.wp-theme-preview-body > :last-child {
+  margin-bottom: 0;
+}

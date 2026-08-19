@@ -5,6 +5,7 @@ import { RANGES } from '../../Lib/settings.js';
 import { resetAll } from '../../Lib/resetAll.js';
 import SettingsButton from './SettingsButton.jsx';
 import ThemeSwatch from './ThemeSwatch.jsx';
+import CustomThemeList from './CustomThemeList.jsx';
 import {
   customThemeId,
   isCustomTheme,
@@ -144,6 +145,8 @@ export default function Settings() {
             <p className="wp-hint wp-theme-name">
               {activeThemeLabel(settings.theme, customById)}
             </p>
+
+            <CustomThemeList />
           </fieldset>
 
           <FontPicker
