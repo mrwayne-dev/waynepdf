@@ -1,3 +1,5 @@
+import { basePresetFor } from './generateCustomThemeCSS.js';
+
 /*
  * The one place that writes theme state to the DOM.
  *
@@ -26,6 +28,13 @@ const CM_THEME_BY_THEME = {
   'print-optimized': 'default',
 };
 
+/*
+ * Custom themes have no highlight.js or CodeMirror theme of their own, so both
+ * lookups go through the base preset the custom theme was built on. Without
+ * this a Dark-based custom theme paints a dark page and a light code block.
+ */
+const forLookup = (theme) => basePresetFor(theme);
+
 const prefersDark = () => {
   // matchMedia is missing in some jsdom configurations and in SSR.
   if (typeof window === 'undefined' || !window.matchMedia) return false;
@@ -42,7 +51,7 @@ export function resolveTheme(theme) {
 }
 
 export function codeMirrorTheme(resolvedTheme) {
-  return CM_THEME_BY_THEME[resolvedTheme] ?? 'default';
+  return CM_THEME_BY_THEME[forLookup(resolvedTheme)] ?? 'default';
 }
 
 /**
@@ -53,7 +62,7 @@ export function codeMirrorTheme(resolvedTheme) {
  * round-trip on every theme change and a flash of unhighlighted code.
  */
 export function toggleHljsTheme(resolvedTheme) {
-  const active = HLJS_THEME_BY_THEME[resolvedTheme] ?? 'hljs-github';
+  const active = HLJS_THEME_BY_THEME[forLookup(resolvedTheme)] ?? 'hljs-github';
   document.querySelectorAll('link[data-hljs-theme]').forEach((link) => {
     link.disabled = link.id !== active;
   });

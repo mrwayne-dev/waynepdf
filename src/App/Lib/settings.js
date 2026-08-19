@@ -18,6 +18,21 @@ export const THEMES = [
   'system',
 ];
 
+/**
+ * A stored theme is one of the presets, 'system', or `custom-{uuid}`.
+ *
+ * The custom id is not checked against the stored custom themes here: the two
+ * live in separate localStorage keys and either can be read first, so rejecting
+ * an id whose theme has not loaded yet would silently reset the user's choice on
+ * every boot. A `custom-*` value pointing at a deleted theme resolves to its
+ * base preset at apply time instead.
+ */
+export function isValidTheme(value) {
+  if (typeof value !== 'string') return false;
+  if (THEMES.includes(value)) return true;
+  return /^custom-[0-9a-f-]{36}$/i.test(value);
+}
+
 export const FONT_FAMILIES = ['sans', 'serif', 'mono'];
 
 export const DEFAULTS = {
@@ -53,7 +68,7 @@ const inRange = (value, { min, max }) =>
 export function normalizeSettings(input) {
   const raw = input && typeof input === 'object' ? input : {};
   return {
-    theme: THEMES.includes(raw.theme) ? raw.theme : DEFAULTS.theme,
+    theme: isValidTheme(raw.theme) ? raw.theme : DEFAULTS.theme,
     fontFamily: FONT_FAMILIES.includes(raw.fontFamily)
       ? raw.fontFamily
       : DEFAULTS.fontFamily,

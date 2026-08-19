@@ -12,6 +12,7 @@ import {
   EncodingBannerContainer,
   LayoutContainer,
   PageCountContainer,
+  CustomThemesContainer,
 } from './Container';
 
 /** Bridges the page count from PageCountContainer into the Header. */
@@ -31,6 +32,7 @@ const App = ({ className }) => {
           EncodingBannerContainer,
           LayoutContainer,
           PageCountContainer,
+          CustomThemesContainer,
         ]}
       >
         <LayoutStyles />

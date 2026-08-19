@@ -8,12 +8,19 @@
  * this element rather than the document — so each swatch paints itself in its
  * own palette with no duplicated colour values anywhere in the JS.
  */
-export default function ThemeSwatch({ theme, label, active, onSelect }) {
+export default function ThemeSwatch({
+  theme,
+  label,
+  active,
+  onSelect,
+  custom = false,
+}) {
   return (
     <button
       type="button"
-      className={`wp-swatch${active ? ' is-active' : ''}`}
+      className={`wp-swatch${active ? ' is-active' : ''}${custom ? ' is-custom' : ''}`}
       data-theme={theme === 'system' ? undefined : theme}
+      data-swatch-theme={theme}
       onClick={() => onSelect(theme)}
       aria-pressed={active}
       aria-label={label}

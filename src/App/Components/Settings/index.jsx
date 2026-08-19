@@ -1,10 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useProvided } from 'nonaction';
-import { ThemeContainer } from '../../Container';
+import { ThemeContainer, CustomThemesContainer } from '../../Container';
 import { RANGES } from '../../Lib/settings.js';
 import { resetAll } from '../../Lib/resetAll.js';
 import SettingsButton from './SettingsButton.jsx';
 import ThemeSwatch from './ThemeSwatch.jsx';
+import {
+  customThemeId,
+  isCustomTheme,
+} from '../../Lib/generateCustomThemeCSS.js';
 import FontPicker from './FontPicker.jsx';
 import LanguagePicker from './LanguagePicker.jsx';
 import LayoutPicker from './LayoutPicker.jsx';
@@ -20,8 +24,22 @@ const THEME_OPTIONS = [
   { id: 'system', label: 'System' },
 ];
 
-const labelFor = (id) =>
+const presetLabelFor = (id) =>
   THEME_OPTIONS.find((t) => t.id === id)?.label ?? 'Light';
+
+/**
+ * The caption under the swatch row.
+ *
+ * A `custom-*` value whose theme has been deleted still shows a name rather than
+ * blank — the two live in separate storage keys and the theme choice outlives the
+ * theme, so it falls back to the base preset's label the same way the palette
+ * itself does.
+ */
+function activeThemeLabel(theme, customById) {
+  if (!isCustomTheme(theme)) return presetLabelFor(theme);
+  const custom = customById.get(theme.slice('custom-'.length));
+  return custom ? custom.name : presetLabelFor('light');
+}
 
 /**
  * The settings surface: gear button plus the slide-out panel it controls.
@@ -32,6 +50,9 @@ const labelFor = (id) =>
  */
 export default function Settings() {
   const [settings, updaters] = useProvided(ThemeContainer);
+  const [{ themes: customThemes, byId: customById }] = useProvided(
+    CustomThemesContainer,
+  );
   const [open, setOpen] = useState(false);
   const gearRef = useRef(null);
   const closeRef = useRef(null);
@@ -103,8 +124,26 @@ export default function Settings() {
                   onSelect={updaters.setTheme}
                 />
               ))}
+
+              {/* The user's own palettes sit on the same row, after a rule, so
+                  the six presets stay recognisable as a fixed set. */}
+              {customThemes.length > 0 && (
+                <span className="wp-swatch-divider" aria-hidden="true" />
+              )}
+              {customThemes.map((theme) => (
+                <ThemeSwatch
+                  key={theme.id}
+                  custom
+                  theme={customThemeId(theme.id)}
+                  label={theme.name}
+                  active={settings.theme === customThemeId(theme.id)}
+                  onSelect={updaters.setTheme}
+                />
+              ))}
             </div>
-            <p className="wp-hint wp-theme-name">{labelFor(settings.theme)}</p>
+            <p className="wp-hint wp-theme-name">
+              {activeThemeLabel(settings.theme, customById)}
+            </p>
           </fieldset>
 
           <FontPicker
