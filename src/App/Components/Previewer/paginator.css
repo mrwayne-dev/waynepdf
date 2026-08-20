@@ -137,3 +137,24 @@
     box-shadow: none;
   }
 }
+
+/*
+ * The page count.
+ *
+ * Sticky rather than scrolling away with the first page: the number is most
+ * useful while looking at page nine of twelve, which is exactly when a static
+ * caption at the top would be off screen.
+ */
+.paginator-count {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 0;
+  padding: var(--wp-space-2) var(--wp-space-4);
+  font-family: var(--wp-font-family-ui);
+  font-size: var(--wp-text-xs);
+  color: var(--wp-color-fg-muted);
+  background-color: var(--wp-color-canvas);
+  border-bottom: 1px solid var(--wp-color-border-muted);
+  font-variant-numeric: tabular-nums;
+}

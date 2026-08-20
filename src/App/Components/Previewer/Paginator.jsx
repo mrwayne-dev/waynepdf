@@ -100,6 +100,17 @@ export default function Paginator({ sourceHtml, layout, onPagesReady }) {
           Pagination failed — see the console.
         </div>
       )}
+      {/*
+        * The page count, which lived in the header until 7.2 cut that bar down
+        * to controls scoped to the document rather than to the preview. It only
+        * ever appeared in Paged mode, so it belongs to the paginated view — and
+        * this is where someone counting pages is already looking.
+        */}
+      {status === 'ready' && pages > 0 && (
+        <p className="paginator-count no-print" aria-live="polite">
+          {pages} {pages === 1 ? 'page' : 'pages'}
+        </p>
+      )}
       <div
         ref={targetRef}
         className="paginator-output"

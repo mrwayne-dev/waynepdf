@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { EXPORT_FORMATS } from '../../Lib/exportRegistry.js';
+import { EXPORT_FORMATS } from '../../../Lib/exportRegistry.js';
 
 const Check = () => (
   <svg

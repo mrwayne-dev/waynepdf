@@ -2,6 +2,15 @@ import { useProvided } from 'nonaction';
 import loadDocument from '../Lib/loadDocument.js';
 import { EncodingBannerContainer, LanguageContainer } from '../Container';
 
+/**
+ * The file picker.
+ *
+ * Lived in the header until 7.2, which cut that bar down to controls scoped to
+ * the document you already have. Importing one belongs with the rest of
+ * document management, so it sits under New Document in the sidebar. It is not
+ * merely decorative: dropping a file works too, but the picker is the only path
+ * for anyone who cannot drag.
+ */
 export default function Upload(props) {
   const [, { showBanner }] = useProvided(EncodingBannerContainer);
   const [, { detectNow }] = useProvided(LanguageContainer);
@@ -37,7 +46,7 @@ export default function Upload(props) {
           cursor: 'pointer',
         }}
       />
-      <span>Choose</span>
+      <span>Open a file…</span>
     </p>
   );
 }

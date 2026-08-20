@@ -44,7 +44,7 @@ const waynepdfKeys = (page) =>
 test('Reset clears the document and the theme together', async ({ page }) => {
   await boot(page);
   await setText(page, '# Unique Content Marker');
-  await expect(page.locator('.save-status')).toHaveText('Saved');
+  await expect(page.locator('.wp-autosave-dot')).toHaveText('Saved');
 
   await openPreferences(page);
   await page.locator('button.wp-swatch[data-theme="dark"]').click();
@@ -63,7 +63,7 @@ test('Reset leaves exactly the default document behind, not the old one', async 
 }) => {
   await boot(page);
   await setText(page, '# Doomed');
-  await expect(page.locator('.save-status')).toHaveText('Saved');
+  await expect(page.locator('.wp-autosave-dot')).toHaveText('Saved');
   await openPreferences(page);
 
   await resetEverything(page);
@@ -133,7 +133,7 @@ test('Reset leaves other origins-worth of storage alone', async ({ page }) => {
 test('cancelling the confirmation deletes nothing', async ({ page }) => {
   await boot(page);
   await setText(page, '# Still Here');
-  await expect(page.locator('.save-status')).toHaveText('Saved');
+  await expect(page.locator('.wp-autosave-dot')).toHaveText('Saved');
   await openPreferences(page);
   await page.locator('button.wp-swatch[data-theme="dark"]').click();
   await expect.poll(() => themeAttr(page)).toBe('dark');

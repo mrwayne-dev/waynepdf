@@ -13,9 +13,9 @@ import { boot, openPreferences } from './_helpers.js';
 /** Chrome, and nothing that is part of the rendered document. */
 const CHROME = {
   'app shell': '#waynepdf-app',
-  header: 'header',
-  'mode button': 'header .mode',
-  'save status': '.save-status',
+  'top bar': '.wp-topbar',
+  'document title': '.wp-title',
+  'mode button': '.wp-mode',
   sidebar: '.wp-sidebar',
   'sidebar wordmark': '.wp-sidebar-wordmark',
   'document row label': '.wp-doc-label',

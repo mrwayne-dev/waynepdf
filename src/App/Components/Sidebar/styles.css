@@ -359,3 +359,38 @@
   outline: 2px solid var(--wp-color-accent);
   outline-offset: 1px;
 }
+
+/*
+ * The file picker, moved out of the header in 7.2.
+ *
+ * A quieter sibling of New Document: opening a file is the rarer of the two,
+ * and two accent-filled buttons stacked would make neither of them the primary
+ * action.
+ */
+.wp-sidebar-open {
+  flex: 0 0 auto;
+  height: var(--wp-h-control);
+  margin: 0 var(--wp-space-4) var(--wp-space-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--wp-text-sm);
+  color: var(--wp-color-fg-muted);
+  background-color: transparent;
+  border: 1px solid var(--wp-color-border);
+  border-radius: var(--wp-radius);
+  cursor: pointer;
+  transition:
+    background-color var(--wp-ui-transition),
+    color var(--wp-ui-transition);
+}
+
+.wp-sidebar-open:hover {
+  color: var(--wp-color-fg);
+  background-color: var(--wp-color-canvas);
+}
+
+.wp-sidebar-open:focus-within {
+  outline: 2px solid var(--wp-color-accent);
+  outline-offset: 1px;
+}

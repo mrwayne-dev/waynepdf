@@ -1,6 +1,6 @@
 import styled from 'styled-components';
-import { Provider, useProvided } from 'nonaction';
-import { Header, Markdown } from './Components';
+import { Provider } from 'nonaction';
+import { TopBar, Markdown } from './Components';
 import Sidebar from './Components/Sidebar/index.jsx';
 import Toast from './Components/Toast.jsx';
 import MathCopyButton from './Components/Previewer/MathCopyButton.jsx';
@@ -19,12 +19,6 @@ import {
   ExportFormatContainer,
   PreferencesContainer,
 } from './Container';
-
-/** Bridges the page count from PageCountContainer into the Header. */
-const HeaderWithPageCount = () => {
-  const [pageCount] = useProvided(PageCountContainer);
-  return <Header pageCount={pageCount} />;
-};
 
 const App = ({ className }) => {
   return (
@@ -49,7 +43,7 @@ const App = ({ className }) => {
         <div className="wp-shell">
           <Sidebar />
           <div className="wp-workspace">
-            <HeaderWithPageCount />
+            <TopBar />
             <Markdown />
           </div>
         </div>

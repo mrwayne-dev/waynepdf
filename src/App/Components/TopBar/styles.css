@@ -1,0 +1,166 @@
+/*
+ * The top bar.
+ *
+ * Replaces the 52px header. Plain CSS rather than styled-components, matching
+ * the sidebar and preferences: every colour is a theme token, and vars in a
+ * static stylesheet repaint for free when --wp-color-* changes. The old header
+ * was the last styled-components chrome in the app.
+ */
+
+.wp-topbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wp-space-4);
+  /* Fixed by spec, down from 52px: the sidebar carries global identity now, so
+     this bar only has to hold one line of document-scoped controls. */
+  height: 44px;
+  padding: 0 var(--wp-space-4);
+  color: var(--wp-color-fg);
+  background-color: var(--wp-color-canvas);
+  border-bottom: 1px solid var(--wp-color-border);
+  font-family: var(--wp-font-family-ui);
+  font-size: var(--wp-text-base);
+  user-select: none;
+}
+
+.wp-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: var(--wp-space-2);
+  /* min-width:0 so a long title ellipsises instead of pushing the controls on
+     the right off the bar. */
+  min-width: 0;
+}
+
+.wp-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--wp-space-3);
+  flex-shrink: 0;
+}
+
+/* --- title -------------------------------------------------------------- */
+
+.wp-title {
+  max-width: 40ch;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding: 0 var(--wp-space-2);
+  height: var(--wp-h-control-sm);
+  font-family: inherit;
+  font-size: var(--wp-text-sm);
+  font-weight: 500;
+  color: var(--wp-color-fg);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--wp-radius);
+  cursor: text;
+  transition:
+    background-color var(--wp-ui-transition),
+    border-color var(--wp-ui-transition);
+}
+
+.wp-title:hover {
+  /* A hover ground rather than a permanent box: the title is text first and an
+     input second, and a field-looking title reads as a form. */
+  background-color: var(--wp-color-canvas-subtle);
+  border-color: var(--wp-color-border-muted);
+}
+
+.wp-title:focus-visible {
+  outline: 2px solid var(--wp-color-accent);
+  outline-offset: 1px;
+}
+
+.wp-title-input {
+  width: 40ch;
+  max-width: 100%;
+  height: var(--wp-h-control-sm);
+  padding: 0 var(--wp-space-2);
+  font-family: inherit;
+  font-size: var(--wp-text-sm);
+  font-weight: 500;
+  color: var(--wp-color-fg);
+  background-color: var(--wp-color-canvas);
+  border: 1px solid var(--wp-color-accent);
+  border-radius: var(--wp-radius);
+}
+
+/* --- autosave dot ------------------------------------------------------- */
+
+.wp-autosave-dot {
+  flex-shrink: 0;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--wp-color-success);
+  transition: background-color var(--wp-ui-transition);
+}
+
+.wp-autosave-dot.is-saving {
+  background-color: var(--wp-color-attention);
+}
+
+.wp-autosave-dot.is-error {
+  background-color: var(--wp-color-danger);
+}
+
+.wp-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- mode toggle -------------------------------------------------------- */
+
+.wp-modes {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.wp-mode {
+  font-family: inherit;
+  font-size: var(--wp-text-sm);
+  height: var(--wp-h-control-sm);
+  padding: 0 var(--wp-space-3);
+  color: var(--wp-color-fg);
+  background-color: var(--wp-color-canvas);
+  border: 1px solid var(--wp-color-border);
+  cursor: pointer;
+  transition: background-color var(--wp-ui-transition);
+}
+
+/* Connected pill: only the outer edges are rounded. */
+.wp-mode:first-child {
+  border-radius: var(--wp-radius) 0 0 var(--wp-radius);
+}
+
+.wp-mode:last-child {
+  border-radius: 0 var(--wp-radius) var(--wp-radius) 0;
+  border-left: 0;
+}
+
+.wp-mode:hover {
+  background-color: var(--wp-color-canvas-subtle);
+}
+
+.wp-mode.is-active {
+  color: var(--wp-color-canvas);
+  background-color: var(--wp-color-accent);
+  border-color: var(--wp-color-accent);
+}
+
+.wp-mode:focus-visible {
+  outline: 2px solid var(--wp-color-accent);
+  outline-offset: 1px;
+}

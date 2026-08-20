@@ -74,7 +74,7 @@ test('a load leaves no CodeMirror instance holding stale text', async ({
 }) => {
   await boot(page);
   await setText(page, '# First Tab\n\noriginal content');
-  await expect(page.locator('.save-status')).toHaveText('Saved');
+  await expect(page.locator('.wp-autosave-dot')).toHaveText('Saved');
 
   await page.locator('.wp-sidebar-new').click();
   await settleEditorTo(page, '');
@@ -97,7 +97,7 @@ test('a load leaves no CodeMirror instance holding stale text', async ({
 test('a dropped file loads after switching tabs', async ({ page }) => {
   await boot(page);
   await setText(page, '# First Tab\n\noriginal content');
-  await expect(page.locator('.save-status')).toHaveText('Saved');
+  await expect(page.locator('.wp-autosave-dot')).toHaveText('Saved');
 
   // Second tab, with its own content — this is the remount that broke it.
   await page.locator('.wp-sidebar-new').click();
@@ -122,12 +122,12 @@ test('the drop lands in the active tab only, not in every tab', async ({
 }) => {
   await boot(page);
   await setText(page, '# Tab One\n\nkeep me');
-  await expect(page.locator('.save-status')).toHaveText('Saved');
+  await expect(page.locator('.wp-autosave-dot')).toHaveText('Saved');
 
   await page.locator('.wp-sidebar-new').click();
   await settleEditorTo(page, '');
   await setText(page, '# Tab Two\n\nalso keep me');
-  await expect(page.locator('.save-status')).toHaveText('Saved');
+  await expect(page.locator('.wp-autosave-dot')).toHaveText('Saved');
 
   // Drop into tab two, which is active.
   await dropFile(page, 'dropped.md', '# Replaced Two\n\nnew body');
@@ -149,7 +149,7 @@ test('the drop lands in the active tab only, not in every tab', async ({
 test('the file picker also works after a tab switch', async ({ page }) => {
   await boot(page);
   await setText(page, '# Picker Tab\n\nbefore');
-  await expect(page.locator('.save-status')).toHaveText('Saved');
+  await expect(page.locator('.wp-autosave-dot')).toHaveText('Saved');
 
   await page.locator('.wp-sidebar-new').click();
   await settleEditorTo(page, '');

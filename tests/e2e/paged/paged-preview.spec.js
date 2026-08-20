@@ -123,7 +123,7 @@ test.describe('mode switching', () => {
 });
 
 test.describe('page count', () => {
-  test('the header badge matches the rendered page elements', async ({
+  test('the paginator badge matches the rendered page elements', async ({
     page,
   }) => {
     await boot(page, layout({ previewMode: 'paged' }));
@@ -131,7 +131,7 @@ test.describe('page count', () => {
 
     const count = await pages(page).count();
     expect(count).toBeGreaterThan(1);
-    await expect(page.locator('.page-count')).toHaveText(
+    await expect(page.locator('.paginator-count')).toHaveText(
       `${count} ${count === 1 ? 'page' : 'pages'}`,
     );
   });

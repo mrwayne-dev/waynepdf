@@ -23,7 +23,7 @@ const editorText = (page) =>
     return nodes[nodes.length - 1]?.innerText ?? '';
   });
 
-const saveStatus = (page) => page.locator('.save-status');
+const saveStatus = (page) => page.locator('.wp-autosave-dot');
 
 /** Reads the persisted documents straight out of IndexedDB. */
 const storedDocuments = (page) =>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useDocumentsApi } from '../../Container';
 import SidebarHeader from './SidebarHeader.jsx';
 import NewDocumentButton from './NewDocumentButton.jsx';
+import UploadButton from '../Upload.jsx';
 import SearchInput from './SearchInput.jsx';
 import DocumentList from './DocumentList.jsx';
 import SidebarFooter from './SidebarFooter.jsx';
@@ -32,6 +33,7 @@ export default function Sidebar() {
     <aside className="wp-sidebar no-print" aria-label="Documents">
       <SidebarHeader />
       <NewDocumentButton onClick={onNew} />
+      <UploadButton className="wp-sidebar-open" />
       <SearchInput value={query} onChange={setQuery} />
       {/* Before the first load resolves there is nothing truthful to draw, and
           an empty list that then pops full is worse than a beat of nothing. */}

@@ -15,7 +15,7 @@ const rows = (page) => page.locator('.wp-doc-row');
 const docLabels = (page) => page.locator('.wp-doc-row .wp-doc-label');
 const activeRow = (page) => page.locator('.wp-doc-row.is-active');
 const newDocument = (page) => page.locator('.wp-sidebar-new');
-const saveStatus = (page) => page.locator('.save-status');
+const saveStatus = (page) => page.locator('.wp-autosave-dot');
 
 const storedDocuments = (page) =>
   page.evaluate(

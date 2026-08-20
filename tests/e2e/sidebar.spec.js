@@ -63,12 +63,16 @@ test.describe('structure', () => {
      */
     await boot(page);
     await expect(page.locator('.wp-sidebar-wordmark')).toHaveCount(1);
-    // Scoped to the workspace's header: the sidebar renders a <header> of its
-    // own, so a bare `header` locator matches the wordmark it is looking for.
-    await expect(page.locator('.wp-workspace > header')).toHaveCount(1);
-    await expect(page.locator('.wp-workspace > header')).not.toContainText(
-      'WaynePDF',
-    );
+    /*
+     * Asserted as the absence of the wordmark element, not of the string. The
+     * default document is titled "WaynePDF" — its first heading names the app —
+     * so the top bar legitimately contains those letters as a document title.
+     * A text assertion here passed until 7.2 put the title in the bar, then
+     * failed for a reason that had nothing to do with wordmarks.
+     */
+    await expect(page.locator('.wp-topbar')).toHaveCount(1);
+    await expect(page.locator('.wp-topbar .wp-sidebar-wordmark')).toHaveCount(0);
+    await expect(page.locator('.wp-topbar .project')).toHaveCount(0);
   });
 
   test('the active document is marked in the list', async ({ page }) => {
