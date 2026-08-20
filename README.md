@@ -90,7 +90,7 @@ they work offline and no request ever leaves your machine.
 
 ## Roadmap
 
-WaynePDF is being built in phases. Current state: **Phase 2 complete**.
+WaynePDF was built in phases. Current state: **all phases complete**.
 
 - **Phase 0** — Vite + React 18 foundation, markdown-it parser, test harness.
   Done.
@@ -98,12 +98,15 @@ WaynePDF is being built in phases. Current state: **Phase 2 complete**.
 - **Phase 2** — Theming layer: five themes, three bundled fonts, settings panel.
   Done.
 - **Phase 3** — Unicode correctness: BOM handling, encoding detection,
-  `lang`/`dir` support.
-- **Phase 4** — Math rendering via KaTeX.
+  `lang`/`dir` support. Done.
+- **Phase 4** — Math rendering via KaTeX. Done.
 - **Phase 5** — Real PDF output via paged.js: page control, running
-  headers/footers, TOC.
-- **Phase 6** — Frontmatter, autosave, Mermaid, callouts, Shiki, task lists,
-  sanitization, exports.
+  headers/footers, TOC. Done.
+- **Phase 6** — Frontmatter, autosave, Mermaid, callouts, task lists,
+  sanitization, custom themes, HTML and DOCX export. Done.
+
+Syntax highlighting via Shiki was evaluated in Phase 6e and declined — see
+[Syntax highlighting](#syntax-highlighting) below.
 
 ## Development
 
@@ -119,6 +122,27 @@ pnpm lint             # ESLint
 pnpm format           # Prettier
 pnpm gen:icons        # regenerate favicon and PWA icons from public/favicon.svg
 ```
+
+### Syntax highlighting
+
+WaynePDF uses highlight.js with a curated 47-language grammar set. Shiki (the
+VS Code tokenizer) was evaluated and declined: the bundle cost and
+theme-integration complexity outweighed the marginal visual improvement for a
+general-purpose Markdown tool.
+
+The specifics, since "marginal" is doing real work in that sentence. Shiki's
+dual-theme output bakes one theme's colours into `color:` as literal hex and
+carries the other in a custom property, which supports exactly two themes —
+WaynePDF has five plus user-defined ones. Its CSS-variables theme integrates
+cleanly with the theme layer instead, but emits 11 token variables where
+highlight.js already emits 40 token classes, so the compatible mode is a
+downgrade in colour granularity. Measured cost for the 47-language set: the
+preview chunk grows 199.87 kB → 564.35 kB gzipped, the precache grows 2.93 MB,
+and compiling the grammars blocks the main thread for ~983 ms at startup.
+
+If you need VS Code-fidelity highlighting for a specific use case, the syntax
+highlighter is a small, well-isolated module — see
+`src/App/Components/Previewer/Preview.jsx`.
 
 ### Icons
 
