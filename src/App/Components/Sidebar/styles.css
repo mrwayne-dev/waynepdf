@@ -1,0 +1,361 @@
+/*
+ * The left sidebar.
+ *
+ * Replaces the tab strip. Plain CSS rather than styled-components for the same
+ * reason the rest of the chrome is: every colour is a theme token, and vars in
+ * a static stylesheet repaint for free when --wp-color-* changes.
+ */
+
+.wp-sidebar {
+  /*
+   * Fixed by spec. Not resizable, so this is the only width there is.
+   *
+   * min-width:0 because a flex item's automatic minimum is its min-content
+   * width, and that beats flex-basis — a wide enough child can push a rail
+   * declared at 260px well past it while `flex` computes exactly as written.
+   * The e2e test asserts the resulting width rather than these declarations,
+   * which is the level the trap actually shows up at.
+   */
+  flex: 0 0 260px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  color: var(--wp-color-fg);
+  background-color: var(--wp-color-canvas-subtle);
+  border-right: 1px solid var(--wp-color-border);
+  font-family: var(--wp-font-family-ui);
+  font-size: var(--wp-text-base);
+  user-select: none;
+}
+
+/* --- header ------------------------------------------------------------- */
+
+.wp-sidebar-head {
+  flex: 0 0 auto;
+  /* Fixed by spec, and matched to the preferences header so the two line up
+     when that window is open. */
+  height: 52px;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--wp-space-4);
+}
+
+.wp-sidebar-wordmark {
+  margin: 0;
+  font-size: var(--wp-text-lg);
+  font-weight: 600;
+  line-height: var(--wp-leading-tight);
+  color: var(--wp-color-fg);
+}
+
+/* --- new document ------------------------------------------------------- */
+
+.wp-sidebar-new {
+  flex: 0 0 auto;
+  /* Fixed by spec. */
+  height: 40px;
+  margin: var(--wp-space-3) var(--wp-space-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--wp-space-2);
+  font-family: inherit;
+  font-size: var(--wp-text-sm);
+  font-weight: 500;
+  /* --wp-color-canvas, not white: in High Contrast the accent is a saturated
+     blue on white, and white-on-accent there is the wrong end of the pair. */
+  color: var(--wp-color-canvas);
+  background-color: var(--wp-color-accent);
+  border: 1px solid var(--wp-color-accent);
+  border-radius: var(--wp-radius);
+  cursor: pointer;
+  transition: background-color var(--wp-ui-transition);
+}
+
+.wp-sidebar-new:hover {
+  background-color: var(--wp-color-accent-emphasis);
+  border-color: var(--wp-color-accent-emphasis);
+}
+
+.wp-sidebar-new:focus-visible {
+  outline: 2px solid var(--wp-color-accent);
+  outline-offset: 2px;
+}
+
+/* --- search ------------------------------------------------------------- */
+
+.wp-sidebar-search {
+  flex: 0 0 auto;
+  position: relative;
+  margin: 0 var(--wp-space-4) var(--wp-space-3);
+}
+
+.wp-sidebar-search-icon {
+  position: absolute;
+  left: var(--wp-space-2);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  color: var(--wp-color-fg-subtle);
+  pointer-events: none;
+}
+
+.wp-sidebar-search-input {
+  width: 100%;
+  /* Overrides the intrinsic width an <input> reports for its default `size`. */
+  min-width: 0;
+  /* Fixed by spec. */
+  height: 36px;
+  /* Left clears the icon, right clears the clear button. */
+  padding: 0 var(--wp-space-6) 0 var(--wp-space-6);
+  font-family: inherit;
+  font-size: var(--wp-text-sm);
+  color: var(--wp-color-fg);
+  background-color: var(--wp-color-canvas);
+  border: 1px solid var(--wp-color-border);
+  border-radius: var(--wp-radius);
+}
+
+.wp-sidebar-search-input:focus-visible {
+  outline: 2px solid var(--wp-color-accent);
+  outline-offset: 1px;
+}
+
+/* The browser's own search affordance duplicates the clear button. */
+.wp-sidebar-search-input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.wp-sidebar-search-clear {
+  position: absolute;
+  right: var(--wp-space-1);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  font-family: inherit;
+  font-size: var(--wp-text-base);
+  line-height: 1;
+  color: var(--wp-color-fg-muted);
+  background: none;
+  border: 0;
+  border-radius: var(--wp-radius-sm);
+  cursor: pointer;
+}
+
+.wp-sidebar-search-clear:hover {
+  color: var(--wp-color-fg);
+  background-color: var(--wp-color-neutral-muted);
+}
+
+/* --- document list ------------------------------------------------------ */
+
+.wp-doc-list {
+  /* min-height:0 so this scrolls rather than stretching the sidebar past the
+     viewport and pushing the footer off-screen. */
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.wp-doc-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  /* Fixed by spec. */
+  height: 36px;
+  padding: 0 var(--wp-space-4);
+  /* A transparent left border on every row, so the active row's accent bar does
+     not shift its title two pixels sideways when it appears. */
+  border-left: 2px solid transparent;
+  transition: background-color var(--wp-ui-transition);
+}
+
+.wp-doc-row:hover {
+  background-color: color-mix(in srgb, var(--wp-color-canvas) 50%, transparent);
+}
+
+.wp-doc-row.is-active {
+  background-color: var(--wp-color-canvas);
+  border-left-color: var(--wp-color-accent);
+}
+
+.wp-doc-row.is-dragging {
+  opacity: 0.4;
+}
+
+.wp-doc-row.is-drop-target::before {
+  /* A rule above the row the drop would land on. Vertical now — the tab strip
+     drew this on the left edge. */
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -1px;
+  height: 2px;
+  background-color: var(--wp-color-accent);
+}
+
+.wp-doc-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  /* The full title stays in the DOM; CSS does the truncation, so search, the
+     tooltip and a screen reader all still see it. */
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-align: left;
+  font-family: inherit;
+  font-size: var(--wp-text-sm);
+  font-weight: 400;
+  color: var(--wp-color-fg);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.wp-doc-label:focus-visible {
+  outline: 2px solid var(--wp-color-accent);
+  outline-offset: -2px;
+}
+
+.wp-doc-close {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-left: var(--wp-space-2);
+  padding: 0;
+  font-family: inherit;
+  font-size: var(--wp-text-sm);
+  line-height: 1;
+  color: var(--wp-color-fg-muted);
+  background: none;
+  border: 0;
+  border-radius: var(--wp-radius-sm);
+  cursor: pointer;
+  /* Hidden until the row is hovered or something inside it has focus, so a long
+     list is a list of titles rather than a column of ×. */
+  opacity: 0;
+}
+
+.wp-doc-row:hover .wp-doc-close,
+.wp-doc-close:focus-visible {
+  opacity: 1;
+}
+
+.wp-doc-close:hover {
+  color: var(--wp-color-fg);
+  background-color: var(--wp-color-neutral-muted);
+}
+
+.wp-doc-close:focus-visible {
+  outline: 2px solid var(--wp-color-accent);
+  outline-offset: 1px;
+}
+
+.wp-doc-rename {
+  width: 100%;
+  height: 24px;
+  font-family: inherit;
+  font-size: var(--wp-text-sm);
+  color: var(--wp-color-fg);
+  background-color: var(--wp-color-canvas);
+  border: 1px solid var(--wp-color-accent);
+  border-radius: var(--wp-radius-sm);
+  padding: 0 var(--wp-space-2);
+}
+
+.wp-sidebar-empty {
+  margin: 0;
+  padding: var(--wp-space-4);
+  font-size: var(--wp-text-sm);
+  line-height: var(--wp-leading-normal);
+  color: var(--wp-color-fg-subtle);
+}
+
+/* --- context menu ------------------------------------------------------- */
+
+.wp-doc-menu {
+  position: fixed;
+  z-index: 40;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  padding: var(--wp-space-1);
+  background-color: var(--wp-color-canvas);
+  border: 1px solid var(--wp-color-border);
+  border-radius: var(--wp-radius-lg);
+  box-shadow: var(--wp-shadow-menu);
+}
+
+.wp-doc-menu button {
+  font: inherit;
+  font-size: var(--wp-text-sm);
+  text-align: left;
+  color: var(--wp-color-fg);
+  background: none;
+  border: 0;
+  border-radius: var(--wp-radius-sm);
+  padding: var(--wp-space-2) var(--wp-space-3);
+  cursor: pointer;
+}
+
+.wp-doc-menu button:hover {
+  background-color: var(--wp-color-neutral-muted);
+}
+
+.wp-doc-menu button:focus-visible {
+  outline: 2px solid var(--wp-color-accent);
+  outline-offset: -2px;
+}
+
+/* --- footer ------------------------------------------------------------- */
+
+.wp-sidebar-foot {
+  flex: 0 0 auto;
+  /* Fixed by spec. */
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: var(--wp-space-1);
+  padding: 0 var(--wp-space-3);
+  border-top: 1px solid var(--wp-color-border);
+}
+
+.wp-sidebar-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  color: var(--wp-color-fg-muted);
+  background: none;
+  border: 0;
+  border-radius: var(--wp-radius-sm);
+  cursor: pointer;
+  transition:
+    background-color var(--wp-ui-transition),
+    color var(--wp-ui-transition);
+}
+
+.wp-sidebar-icon:hover {
+  color: var(--wp-color-fg);
+  background-color: var(--wp-color-neutral-muted);
+}
+
+.wp-sidebar-icon:focus-visible {
+  outline: 2px solid var(--wp-color-accent);
+  outline-offset: 1px;
+}

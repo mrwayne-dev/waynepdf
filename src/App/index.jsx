@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import { Provider, useProvided } from 'nonaction';
 import { Header, Markdown } from './Components';
+import Sidebar from './Components/Sidebar/index.jsx';
 import Toast from './Components/Toast.jsx';
 import MathCopyButton from './Components/Previewer/MathCopyButton.jsx';
 import LayoutStyles from './Components/LayoutStyles.jsx';
@@ -43,8 +44,15 @@ const App = ({ className }) => {
       >
         <LayoutStyles />
         <FrontmatterWatcher />
-        <HeaderWithPageCount />
-        <Markdown />
+        {/* A flex row: the sidebar is chrome that spans the full height, and
+            the workspace is everything the document owns. */}
+        <div className="wp-shell">
+          <Sidebar />
+          <div className="wp-workspace">
+            <HeaderWithPageCount />
+            <Markdown />
+          </div>
+        </div>
         {/* Both are chrome, not document: they portal/fix outside the flow and
             carry no-print, so they never reach the PDF. */}
         <MathCopyButton />
@@ -64,6 +72,24 @@ export default styled(App)`
   display: flex;
   flex-direction: column;
   font-family: var(--wp-font-family-ui);
+
+  .wp-shell {
+    flex: 1 1 auto;
+    display: flex;
+    /* min-height:0 so the sidebar's list and the preview scroll internally
+       rather than stretching the shell past the viewport. */
+    min-height: 0;
+  }
+
+  .wp-workspace {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    /* min-width:0 so the editor/preview split can shrink inside the 260px-
+       narrower viewport instead of overflowing it. */
+    min-width: 0;
+    min-height: 0;
+  }
   @media print {
     /*
      * Only the shell itself. This used to read "&, div", ported from upstream

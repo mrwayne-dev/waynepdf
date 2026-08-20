@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 import { useProvided } from 'nonaction';
 import UploadButton from '../Upload.jsx';
-import PreferencesButton from './PreferencesButton.jsx';
 import ExportButton from './ExportButton.jsx';
 import { LayoutContainer, useDocumentsApi } from '../../Container';
 
@@ -30,8 +29,6 @@ const Header = ({ className, pageCount }) => {
 
   return (
     <header className={className + ' no-print'}>
-      <p className="project"> WaynePDF </p>
-
       <div className="modes" role="group" aria-label="Preview mode">
         {MODES.map((mode) => (
           <button
@@ -61,8 +58,6 @@ const Header = ({ className, pageCount }) => {
           {SAVE_LABELS[status] ?? SAVE_LABELS.saved}
         </p>
       )}
-
-      <PreferencesButton />
 
       <div className="menu">
         <UploadButton className="button upload" />
@@ -94,15 +89,6 @@ export default styled(Header)`
   border-bottom: 1px solid var(--wp-color-border);
   font-family: var(--wp-font-family-ui);
   font-size: var(--wp-text-base);
-
-  .project {
-    flex-shrink: 0;
-    margin: 0;
-    font-size: var(--wp-text-lg);
-    font-weight: 600;
-    line-height: var(--wp-leading-tight);
-    color: var(--wp-color-fg);
-  }
 
   div.modes {
     display: flex;

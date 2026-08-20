@@ -3,11 +3,17 @@ import { useEffect, useRef } from 'react';
 /*
  * Right-click menu. Rename and Duplicate only.
  *
- * No Delete: the close button already deletes, and offering both would imply
- * they differ. Nothing in this phase provides a way back to a closed-but-kept
- * document, so pretending closing is reversible would be the worse lie.
+ * No Delete: the row's × already deletes, and offering both would imply they
+ * differ. Nothing here provides a way back to a deleted document, so pretending
+ * otherwise would be the worse lie.
  */
-export default function TabMenu({ x, y, onRename, onDuplicate, onDismiss }) {
+export default function DocumentContextMenu({
+  x,
+  y,
+  onRename,
+  onDuplicate,
+  onDismiss,
+}) {
   const ref = useRef(null);
 
   useEffect(() => {
@@ -17,7 +23,7 @@ export default function TabMenu({ x, y, onRename, onDuplicate, onDismiss }) {
     const onKeyDown = (event) => {
       if (event.key === 'Escape') onDismiss();
     };
-    // Capture phase: a tab underneath would otherwise activate on the same
+    // Capture phase: a row underneath would otherwise activate on the same
     // click that dismisses the menu.
     document.addEventListener('mousedown', onPointerDown, true);
     document.addEventListener('keydown', onKeyDown);
@@ -30,7 +36,7 @@ export default function TabMenu({ x, y, onRename, onDuplicate, onDismiss }) {
   return (
     <div
       ref={ref}
-      className="wp-tab-menu"
+      className="wp-doc-menu"
       role="menu"
       style={{ left: x, top: y }}
     >

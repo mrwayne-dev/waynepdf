@@ -20,7 +20,12 @@ const Markdown = ({ className }) => {
   const [, { setPageCount }] = useProvided(PageCountContainer);
   const [isDrag, setDrag] = useState(false);
   const [startX, setStartX] = useState(0);
-  const [width, setWidth] = useState(window.innerWidth / 2);
+  /*
+   * null until measured. The old initial value was window.innerWidth / 2, which
+   * was right while the split filled the window — 7.1's sidebar takes 260px off
+   * the left, so half the *window* is well past half the split.
+   */
+  const [width, setWidth] = useState(null);
   const markdownRef = useRef(null);
 
   const onDropFile = useCallback(
@@ -33,6 +38,19 @@ const Markdown = ({ className }) => {
   useEffect(() => {
     observeText(text);
   }, [text, observeText]);
+
+  /*
+   * Half the split, measured from the split itself.
+   *
+   * Runs once the container exists rather than at state-init time, because the
+   * sidebar's width is a layout fact and layout has not happened yet when the
+   * initialiser runs.
+   */
+  useEffect(() => {
+    const el = markdownRef.current;
+    if (!el) return;
+    setWidth((current) => current ?? el.getBoundingClientRect().width / 2);
+  }, []);
 
   useEffect(() => {
     const handleMouseUp = () => setDrag(false);
@@ -95,11 +113,22 @@ const Markdown = ({ className }) => {
       className={`${className} wp-split`}
       onMouseMove={(e) => {
         if (!isDrag) return;
-        const pageX = e.nativeEvent.pageX;
-        setWidth(pageX - startX);
+        /*
+         * Relative to the split's own left edge, not the page's. pageX counts
+         * from the viewport, so with a 260px sidebar in front of it the editor
+         * came out 260px wider than the cursor.
+         */
+        const left = markdownRef.current?.getBoundingClientRect().left ?? 0;
+        setWidth(e.nativeEvent.pageX - left - startX);
       }}
     >
-      <Editor className="no-print" width={width} setText={setText} />
+      {/* undefined rather than null, so Editor falls back to its CSS width
+          (50%) for the frame before the measurement lands. */}
+      <Editor
+        className="no-print"
+        width={width ?? undefined}
+        setText={setText}
+      />
       <DragBar
         className="no-print"
         isDrag={isDrag}

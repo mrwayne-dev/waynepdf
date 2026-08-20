@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 
-/** Long titles are truncated rather than allowed to widen the strip. */
-const MAX_TITLE = 20;
-
-const truncate = (title) =>
-  title.length > MAX_TITLE ? `${title.slice(0, MAX_TITLE - 1)}…` : title;
-
-export default function Tab({
+/**
+ * One document in the list.
+ *
+ * The title is not truncated in JS the way the tab label was: a fixed-width row
+ * can ellipsis in CSS, which keeps the full title in the DOM for search, for the
+ * tooltip, and for a screen reader.
+ */
+export default function DocumentRow({
   document: doc,
   isActive,
   isDragging,
@@ -25,7 +26,7 @@ export default function Tab({
   useEffect(() => {
     if (!renaming) return;
     setDraft(doc.title);
-    // Select the whole title: renaming a tab almost always means replacing it.
+    // Select the whole title: renaming almost always means replacing.
     inputRef.current?.focus();
     inputRef.current?.select();
   }, [renaming, doc.title]);
@@ -33,7 +34,7 @@ export default function Tab({
   const commit = () => onRename(draft);
 
   const classes = [
-    'wp-tab',
+    'wp-doc-row',
     isActive && 'is-active',
     isDragging && 'is-dragging',
     isDropTarget && 'is-drop-target',
@@ -43,10 +44,10 @@ export default function Tab({
 
   if (renaming) {
     return (
-      <div className={classes} data-tab-id={doc.id}>
+      <div className={classes} data-drag-id={doc.id} data-doc-id={doc.id}>
         <input
           ref={inputRef}
-          className="wp-tab-rename"
+          className="wp-doc-rename"
           aria-label="Rename document"
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
@@ -64,27 +65,29 @@ export default function Tab({
   return (
     <div
       className={classes}
-      data-tab-id={doc.id}
+      data-drag-id={doc.id}
+      data-doc-id={doc.id}
       onMouseDown={(event) => onMouseDown(event, doc.id)}
       onContextMenu={onContextMenu}
     >
       <button
         type="button"
-        className="wp-tab-label"
+        className="wp-doc-label"
         aria-current={isActive ? 'page' : undefined}
         title={doc.title}
         onClick={onActivate}
       >
-        {truncate(doc.title)}
+        {doc.title}
       </button>
       <button
         type="button"
-        /* no-drag: a mousedown here must close the tab, not start a reorder. */
-        className="wp-tab-close no-drag"
+        /* no-drag: a mousedown here must delete the document, not start a
+           reorder. */
+        className="wp-doc-close no-drag"
         aria-label={`Close ${doc.title}`}
         onClick={onClose}
       >
-        ×
+        &times;
       </button>
     </div>
   );
