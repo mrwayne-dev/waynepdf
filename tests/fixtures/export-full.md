@@ -10,6 +10,8 @@ date: 2026-08-20
 
 Paragraph with **bold**, *italic*, ~~strikethrough~~, `inline code`, and a [link](https://example.com).
 
+Reserved characters that must survive escaping: 5 < 10 & 10 > 5, a "quoted" word.
+
 ## Lists
 
 - Unordered

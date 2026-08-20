@@ -11,6 +11,7 @@ import {
 import { formatById } from '../../Lib/exportRegistry.js';
 import { runExport } from '../../Lib/exportDispatcher.js';
 import { isCustomTheme } from '../../Lib/generateCustomThemeCSS.js';
+import { parseFrontmatter } from '../../Lib/parseFrontmatter.js';
 import ExportMenu from './ExportMenu.jsx';
 import './exportButton.css';
 
@@ -59,6 +60,9 @@ export default function ExportButton() {
         resolvedTheme: themeSettings.resolvedTheme,
         fontFamily: themeSettings.fontFamily,
         sanitizeHtml: themeSettings.sanitizeHtml === true,
+        // DOCX writes title/author/date into the package metadata. Parsed here
+        // rather than in the exporter so every format is handed the same shape.
+        frontmatter: parseFrontmatter(text ?? '').frontmatter,
         // Resolved here so the exporter is handed the record, not an id it
         // would have to look up in a container it cannot read.
         activeCustomTheme: isCustomTheme(themeSettings.theme)

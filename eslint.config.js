@@ -31,6 +31,7 @@ const browserGlobals = {
   btoa: 'readonly',
   atob: 'readonly',
   Image: 'readonly',
+  DOMParser: 'readonly',
   Uint8Array: 'readonly',
   performance: 'readonly',
   MutationObserver: 'readonly',

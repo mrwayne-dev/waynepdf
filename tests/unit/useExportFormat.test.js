@@ -10,6 +10,10 @@ import {
   __getRegisteredReset as getRegisteredReset,
   __resetRegistryForTests,
 } from '@/App/Lib/resetAll.js';
+import {
+  isFormatAvailable,
+  effectiveFormat,
+} from '@/App/Lib/exportRegistry.js';
 
 beforeEach(() => {
   window.localStorage.clear();
@@ -52,18 +56,34 @@ describe('useExportFormat', () => {
     expect(state(second.result).format).toBe('html');
   });
 
-  it('stores docx but acts on pdf until the format is wired', () => {
+  it('acts on docx now that the format is wired', () => {
     /*
-     * The preference and the action deliberately diverge. Overwriting the stored
-     * value would silently discard what the user asked for the moment 6d.2
-     * lands; refusing to store it would make the menu forget the choice.
+     * Through 6d.1 this asserted the opposite — docx stored but acting as pdf,
+     * because the format was named in the menu before it was written. 6d.2 wired
+     * it, so stored and effective agree again. The degradation mechanism itself
+     * is still exercised below through an unknown value.
      */
     const { result } = mount();
     act(() => api(result).setFormat('docx'));
     expect(state(result).stored).toBe('docx');
-    expect(state(result).format).toBe('pdf');
-    expect(state(result).available).toBe(false);
+    expect(state(result).format).toBe('docx');
+    expect(state(result).available).toBe(true);
     expect(stored()).toBe('docx');
+  });
+
+  it('every declared format is available', () => {
+    // If a future format is added but not wired, the menu must say so rather
+    // than dispatching into nothing.
+    for (const format of ['pdf', 'html', 'docx']) {
+      expect(isFormatAvailable(format), `${format}`).toBe(true);
+    }
+  });
+
+  it('an unavailable format would still degrade to pdf without losing the choice', () => {
+    // The mechanism, tested directly: nothing is unavailable today, so the hook
+    // cannot demonstrate it end to end.
+    expect(effectiveFormat('pdf')).toBe('pdf');
+    expect(effectiveFormat('not-a-format')).toBe('pdf');
   });
 
   it('ignores an invalid setter argument', () => {

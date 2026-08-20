@@ -27,8 +27,7 @@ export const EXPORT_FORMATS = [
     label: 'DOCX',
     actionLabel: 'Save as DOCX',
     extension: 'docx',
-    available: false,
-    unavailableReason: 'coming in 6d.2',
+    available: true,
   },
 ];
 
@@ -42,8 +41,15 @@ export const isFormatAvailable = (id) => formatById(id).available === true;
 /**
  * The format to actually act on.
  *
- * A stored choice for a format that is not available yet degrades to PDF for
- * *this session* without overwriting what the user picked — when the format
- * lands, their choice is still there.
+ * A stored choice for a format that is not available degrades to PDF for this
+ * session without overwriting what the user picked. Nothing is unavailable as
+ * of 6d.2, but the mechanism stays: it is what let DOCX sit in the menu, named
+ * and disabled, through the phase where it was not yet written.
  */
-export const effectiveFormat = (id) => (isFormatAvailable(id) ? id : 'pdf');
+export const effectiveFormat = (id) => {
+  // formatById falls back to PDF for an unknown id, so the resolved entry's own
+  // id is returned rather than the input — echoing the input let a value that
+  // matches no format at all through as if it were one.
+  const format = formatById(id);
+  return format.available ? format.id : 'pdf';
+};

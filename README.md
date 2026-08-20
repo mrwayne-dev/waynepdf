@@ -62,6 +62,32 @@ code size are all adjustable, and the preview updates live. Settings persist in
 All three fonts are bundled as WOFF2 and served from the app's own origin, so
 they work offline and no request ever leaves your machine.
 
+## Export formats
+
+- **PDF** — full fidelity. Themes, fonts, math, diagrams, callouts and page
+  layout: everything you see is what prints.
+- **HTML** — a single self-contained file. All CSS and fonts are inlined as data
+  URIs, so it opens in any browser with identical rendering and makes no network
+  requests at all.
+- **DOCX** — a reasonable transformation for Word and LibreOffice, written
+  in-house rather than by bundling a converter.
+
+  *Preserved:* headings, paragraphs with bold/italic/strikethrough/code/links,
+  ordered and unordered lists (three levels of nesting), task lists, tables with
+  a repeating header row, blockquotes, code blocks, images, and diagrams as
+  embedded PNGs. Frontmatter `title`, `author` and `date` become document
+  metadata.
+
+  *Not preserved:* rendered math — the LaTeX source travels as literal text you
+  can paste into Word's equation editor; syntax highlighting — code is monospace
+  on a plain ground; custom theme colours — DOCX uses Word's own styling;
+  callout colours — a callout becomes a blockquote prefixed with `[NOTE]`,
+  `[WARNING]` and so on; right-to-left text direction — the whole document is
+  laid out left-to-right.
+
+  Reach for HTML or PDF when fidelity matters, and DOCX when the point is to
+  hand someone content they can edit.
+
 ## Roadmap
 
 WaynePDF is being built in phases. Current state: **Phase 2 complete**.

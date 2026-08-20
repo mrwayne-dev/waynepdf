@@ -19,6 +19,11 @@ export async function runExport({ format, ...context }) {
       return exportPDF(context);
     case 'html':
       return exportHTML(context);
+    case 'docx': {
+      // Dynamic, so jszip and the OOXML writer stay out of the main chunk.
+      const { exportDOCX } = await import('./docx/index.js');
+      return exportDOCX(context);
+    }
     default:
       throw new Error(`Unknown export format "${format}".`);
   }

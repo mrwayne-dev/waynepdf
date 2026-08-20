@@ -63,17 +63,49 @@ test('the active format is checked in the menu', async ({ page }) => {
   await expect(item(page, 'html').locator('.wp-export-check')).toHaveCount(0);
 });
 
-test('DOCX is present, disabled, and says why', async ({ page }) => {
+test('all three formats are available and selectable', async ({ page }) => {
+  /*
+   * Through 6d.1 this asserted the opposite: DOCX sat in the menu disabled, with
+   * "(coming in 6d.2)" attached. 6d.2 wired it, so the assertion inverts.
+   */
   await boot(page);
   await caret(page).click();
-  const docx = item(page, 'docx');
-  await expect(docx).toBeVisible();
-  await expect(docx).toBeDisabled();
-  await expect(docx).toContainText('coming in 6d.2');
+  for (const format of ['pdf', 'html', 'docx']) {
+    await expect(item(page, format)).toBeVisible();
+    await expect(item(page, format)).toBeEnabled();
+  }
+  await expect(menu(page)).not.toContainText('coming in');
+});
 
-  // A disabled item must not change the format even if something clicks it.
-  await docx.click({ force: true }).catch(() => {});
-  await expect(mainButton(page)).toHaveText('Save as PDF');
+test('choosing DOCX updates the button and survives a reload', async ({
+  page,
+}) => {
+  await boot(page);
+  await caret(page).click();
+  await item(page, 'docx').click();
+
+  await expect(menu(page)).toHaveCount(0);
+  await expect(mainButton(page)).toHaveText('Save as DOCX');
+
+  await reload(page);
+  await expect(mainButton(page)).toHaveText('Save as DOCX');
+  await caret(page).click();
+  await expect(item(page, 'docx')).toHaveAttribute('aria-current', 'true');
+});
+
+test('the main button actually dispatches a DOCX export', async ({ page }) => {
+  await boot(page);
+  await page.evaluate(() =>
+    window.__waynepdf_setText('# Dispatch Check\n\nbody'),
+  );
+  await caret(page).click();
+  await item(page, 'docx').click();
+
+  const [download] = await Promise.all([
+    page.waitForEvent('download', { timeout: 60_000 }),
+    mainButton(page).click(),
+  ]);
+  expect(download.suggestedFilename()).toBe('Dispatch Check.docx');
 });
 
 test('arrow keys move through the menu and Enter selects', async ({ page }) => {
