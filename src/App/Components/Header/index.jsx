@@ -1,14 +1,9 @@
-import { useState } from 'react';
 import styled from 'styled-components';
 import { useProvided } from 'nonaction';
 import UploadButton from '../Upload.jsx';
 import Settings from '../Settings/index.jsx';
-import {
-  LayoutContainer,
-  TextContainer,
-  useDocumentsApi,
-} from '../../Container';
-import { deriveTitle } from '../../Lib/paginatorPreprocess.js';
+import ExportButton from './ExportButton.jsx';
+import { LayoutContainer, useDocumentsApi } from '../../Container';
 
 /**
  * Autosave state, in words.
@@ -31,74 +26,7 @@ const MODES = [
 
 const Header = ({ className, pageCount }) => {
   const [layout, { setPreviewMode }] = useProvided(LayoutContainer);
-  const [text] = useProvided(TextContainer);
   const { status, ready } = useDocumentsApi();
-  const [printing, setPrinting] = useState(false);
-
-  /*
-   * Transform always prints paginated output, whichever mode the preview is in.
-   *
-   * In Paged mode the fragmented DOM is already on screen and print CSS just
-   * strips the screen chrome. In Flowing mode there is nothing paginated yet,
-   * so we build it into a hidden target first — the user gets real page breaks,
-   * headers and page numbers without having to switch modes to get them.
-   */
-  const onTransform = async () => {
-    if (printing) return;
-    setPrinting(true);
-
-    const previewEl = document.querySelector('.preview');
-    const isPaged = layout.previewMode === 'paged';
-    let printTarget = null;
-
-    try {
-      if (!isPaged) {
-        const { md } = await import('../Previewer/Preview.jsx');
-        const { paginateInto } = await import('../Previewer/Paginator.jsx');
-        // From the text container, not by scraping CodeMirror's DOM: the
-        // container is the source of truth the preview renders from, so the
-        // printed output cannot drift from what the user is looking at.
-        const html = md.render(text ?? '');
-
-        printTarget = document.createElement('div');
-        printTarget.id = 'wp-print-target';
-        // Inside the app shell so the scoped print rules reach it.
-        (document.getElementById('waynepdf-app') ?? document.body).appendChild(
-          printTarget,
-        );
-        await paginateInto(html, layout, printTarget);
-      }
-
-      document.body.classList.add('wp-printing');
-
-      // Chrome uses document.title as the default Save-as-PDF filename.
-      const title = deriveTitle(layout, printTarget ?? previewEl);
-      const originalTitle = document.title;
-      document.title = title;
-
-      // Let the browser lay out the freshly-mounted pages before it snapshots.
-      await new Promise((resolve) => requestAnimationFrame(resolve));
-      window.print();
-      document.title = originalTitle;
-    } finally {
-      /*
-       * afterprint is unreliable — Safari never fires it, and Chrome fires it
-       * before the user has dismissed the dialog in some flows. The timeout is
-       * the real guarantee; the listener just makes the common case tidy.
-       */
-      let done = false;
-      const cleanup = () => {
-        if (done) return;
-        done = true;
-        document.body.classList.remove('wp-printing');
-        printTarget?.remove();
-        window.removeEventListener('afterprint', cleanup);
-        setPrinting(false);
-      };
-      window.addEventListener('afterprint', cleanup);
-      setTimeout(cleanup, 5000);
-    }
-  };
 
   return (
     <header className={className + ' no-print'}>
@@ -138,9 +66,7 @@ const Header = ({ className, pageCount }) => {
 
       <div className="menu">
         <UploadButton className="button upload" />
-        <p className="button download" onClick={onTransform}>
-          <span>{printing ? 'Preparing…' : 'Transform'}</span>
-        </p>
+        <ExportButton />
       </div>
     </header>
   );
@@ -262,16 +188,6 @@ export default styled(Header)`
     }
     .button:hover {
       background-color: var(--wp-color-canvas-subtle);
-    }
-    /* Transform is the primary action of the whole app. */
-    .button.download {
-      color: var(--wp-color-canvas);
-      background-color: var(--wp-color-accent);
-      border-color: var(--wp-color-accent);
-    }
-    .button.download:hover {
-      background-color: var(--wp-color-accent-emphasis);
-      border-color: var(--wp-color-accent-emphasis);
     }
     .button:focus-visible {
       outline: 2px solid var(--wp-color-accent);

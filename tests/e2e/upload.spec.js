@@ -95,7 +95,7 @@ test('Transform triggers the print dialog', async ({ page }) => {
     };
   });
 
-  await page.locator('p.button.download').click();
+  await page.locator('.wp-export-main').click();
   // Transform is async since Phase 5: in Flowing mode it paginates on demand
   // before printing, so the call is not synchronous with the click.
   await expect
@@ -118,7 +118,7 @@ test('Transform names the PDF after the first h1', async ({ page }) => {
     };
   });
 
-  await page.locator('p.button.download').click();
+  await page.locator('.wp-export-main').click();
 
   await expect
     .poll(() => page.evaluate(() => window.__titleAtPrint), { timeout: 60_000 })

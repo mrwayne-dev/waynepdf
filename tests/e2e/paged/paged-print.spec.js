@@ -327,7 +327,7 @@ test.describe('paginated print output', () => {
      */
     for (const chrome of [
       'WaynePDF',
-      'Transform',
+      'Save as PDF',
       'Reset everything',
       'Page size',
       'Show copy button on math',
@@ -393,7 +393,7 @@ test.describe('Transform handler', () => {
       };
     });
 
-    await page.locator('p.button.download').click();
+    await page.locator('.wp-export-main').click();
 
     await expect
       .poll(() => page.evaluate(() => window.__printState), { timeout: 60_000 })
@@ -418,7 +418,7 @@ test.describe('Transform handler', () => {
       window.print = () => {};
     });
 
-    await page.locator('p.button.download').click();
+    await page.locator('.wp-export-main').click();
 
     /*
      * Only the settled state is asserted. With print() stubbed to a no-op,
@@ -459,7 +459,7 @@ test.describe('Transform handler', () => {
       };
     });
 
-    await page.locator('p.button.download').click();
+    await page.locator('.wp-export-main').click();
     await expect
       .poll(() => page.evaluate(() => window.__printState), { timeout: 30_000 })
       .not.toBeNull();

@@ -6,6 +6,7 @@ import useEncodingBanner from './Hooks/useEncodingBanner.js';
 import useLayout from './Hooks/useLayout.js';
 import usePageCount from './Hooks/usePageCount.js';
 import useCustomThemes from './Hooks/useCustomThemes.js';
+import useExportFormat from './Hooks/useExportFormat.js';
 
 export const TextContainer = Container(useText);
 export const ThemeContainer = Container(useTheme);
@@ -14,6 +15,7 @@ export const EncodingBannerContainer = Container(useEncodingBanner);
 export const LayoutContainer = Container(useLayout);
 export const PageCountContainer = Container(usePageCount);
 export const CustomThemesContainer = Container(useCustomThemes);
+export const ExportFormatContainer = Container(useExportFormat);
 
 /**
  * The document store, which lives inside TextContainer's third slot.

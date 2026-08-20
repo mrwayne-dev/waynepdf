@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import LazyLoad from '../LazyLoad.jsx';
+import { loadMermaid, mermaidTheme } from '../../Lib/mermaidLoader.js';
 
 /*
  * Mermaid diagrams.
@@ -9,33 +10,10 @@ import LazyLoad from '../LazyLoad.jsx';
  * synchronous and string-based. Rewriting the DOM after the fact is the seam
  * that actually fits.
  *
- * Module-level promise so the ~280 KB chunk is fetched once per session no
- * matter how many documents or diagrams are opened.
+ * The loader and the theme map moved to Lib/mermaidLoader.js in 6d.1 so the
+ * exporters can render diagrams without mounting this component, sharing the one
+ * module-level promise rather than fetching the chunk twice.
  */
-let mermaidPromise = null;
-
-/** Maps a WaynePDF theme to the closest mermaid built-in. */
-export function mermaidTheme(resolvedTheme) {
-  switch (resolvedTheme) {
-    case 'dark':
-      return 'dark';
-    case 'sepia':
-      return 'neutral';
-    // Mermaid has no high-contrast theme; neutral has the strongest strokes of
-    // the four and is the least-bad fit.
-    case 'high-contrast':
-      return 'neutral';
-    default:
-      return 'default';
-  }
-}
-
-async function loadMermaid() {
-  if (!mermaidPromise) {
-    mermaidPromise = import('mermaid').then((m) => m.default);
-  }
-  return mermaidPromise;
-}
 
 const SELECTOR = 'pre > code.language-mermaid';
 

@@ -1,0 +1,127 @@
+/* Split export button and its format menu. All 6.5b tokens. */
+
+.wp-export {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+/* The two halves read as one control: no gap, and only the outer edges round. */
+.wp-export-main,
+.wp-export-caret {
+  height: var(--wp-h-control);
+  font-family: var(--wp-font-family-ui);
+  font-size: var(--wp-text-sm);
+  font-weight: 500;
+  color: var(--wp-color-canvas);
+  background-color: var(--wp-color-accent);
+  border: 1px solid var(--wp-color-accent);
+  cursor: pointer;
+  transition: background-color var(--wp-ui-transition);
+}
+
+.wp-export-main {
+  padding: 0 var(--wp-space-4);
+  border-radius: var(--wp-radius) 0 0 var(--wp-radius);
+}
+
+.wp-export-caret {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  padding: 0;
+  border-radius: 0 var(--wp-radius) var(--wp-radius) 0;
+  /* The divider is the only thing separating the halves, so it sits on the
+     caret's leading edge rather than being a gap. */
+  border-left: 1px solid var(--wp-color-border-muted);
+}
+
+.wp-export-main:hover:not(:disabled),
+.wp-export-caret:hover {
+  background-color: var(--wp-color-accent-emphasis);
+  border-color: var(--wp-color-accent-emphasis);
+}
+
+.wp-export-main:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.wp-export-main:focus-visible,
+.wp-export-caret:focus-visible {
+  outline: 2px solid var(--wp-color-accent);
+  outline-offset: 1px;
+}
+
+/* ----------------------------------------------------------------- menu */
+
+.wp-export-menu {
+  position: absolute;
+  top: calc(100% + var(--wp-space-1));
+  right: 0;
+  z-index: 120;
+  display: flex;
+  flex-direction: column;
+  /* Matches the split button rather than sizing to content, so the menu reads
+     as belonging to it. */
+  min-width: 100%;
+  padding: var(--wp-space-1);
+  background-color: var(--wp-color-canvas);
+  border: 1px solid var(--wp-color-border);
+  border-radius: var(--wp-radius);
+  box-shadow: var(--wp-shadow-menu);
+}
+
+.wp-export-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wp-space-3);
+  width: 100%;
+  padding: var(--wp-space-2) var(--wp-space-3);
+  font-family: var(--wp-font-family-ui);
+  font-size: var(--wp-text-sm);
+  text-align: left;
+  white-space: nowrap;
+  color: var(--wp-color-fg);
+  background: none;
+  border: 0;
+  border-radius: var(--wp-radius-sm);
+  cursor: pointer;
+}
+
+.wp-export-item:hover:not([aria-disabled]) {
+  background-color: var(--wp-color-canvas-subtle);
+}
+
+.wp-export-item[aria-disabled] {
+  color: var(--wp-color-fg-subtle);
+  cursor: not-allowed;
+}
+
+.wp-export-item[aria-disabled]:hover {
+  background: none;
+}
+
+.wp-export-item:focus-visible {
+  outline: 2px solid var(--wp-color-accent);
+  outline-offset: -2px;
+}
+
+.wp-export-item-label {
+  display: flex;
+  align-items: baseline;
+  gap: var(--wp-space-2);
+}
+
+.wp-export-item-note {
+  font-size: var(--wp-text-xs);
+  color: var(--wp-color-fg-subtle);
+}
+
+.wp-export-check {
+  flex-shrink: 0;
+  color: var(--wp-color-accent);
+}

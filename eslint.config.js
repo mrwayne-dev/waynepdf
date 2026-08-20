@@ -27,6 +27,11 @@ const browserGlobals = {
   CustomEvent: 'readonly',
   Event: 'readonly',
   indexedDB: 'readonly',
+  fetch: 'readonly',
+  btoa: 'readonly',
+  atob: 'readonly',
+  Image: 'readonly',
+  Uint8Array: 'readonly',
   performance: 'readonly',
   MutationObserver: 'readonly',
   localStorage: 'readonly',
@@ -34,7 +39,6 @@ const browserGlobals = {
   TextDecoder: 'readonly',
   TextEncoder: 'readonly',
   DataView: 'readonly',
-  Uint8Array: 'readonly',
 };
 
 const nodeGlobals = {
