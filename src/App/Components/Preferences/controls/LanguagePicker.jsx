@@ -1,8 +1,8 @@
 import { useId } from 'react';
 import { useProvided } from 'nonaction';
-import { LanguageContainer } from '../../Container';
-import { LANG_OPTIONS, DIRECTIONS } from '../../Container/Hooks/useLanguage.js';
-import { LANG_LABELS } from '../../Lib/detectLanguage.js';
+import { LanguageContainer } from '../../../Container';
+import { LANG_OPTIONS, DIRECTIONS } from '../../../Container/Hooks/useLanguage.js';
+import { LANG_LABELS } from '../../../Lib/detectLanguage.js';
 
 const DIRECTION_LABELS = { auto: 'Auto', ltr: 'LTR', rtl: 'RTL' };
 

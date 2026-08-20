@@ -1,11 +1,11 @@
 import { useId, useState } from 'react';
 import { useProvided } from 'nonaction';
-import { LayoutContainer } from '../../Container';
+import { LayoutContainer } from '../../../Container';
 import {
   PAGE_SIZES,
   ORIENTATIONS,
   MARGIN_PRESET_NAMES,
-} from '../../Container/Hooks/useLayout.js';
+} from '../../../Container/Hooks/useLayout.js';
 
 const PAGE_SIZE_LABELS = {
   a4: 'A4',

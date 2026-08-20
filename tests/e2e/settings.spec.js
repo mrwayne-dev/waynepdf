@@ -1,9 +1,14 @@
 import { test, expect } from '@playwright/test';
-import { resetEverything } from './_helpers.js';
+import { resetEverything, openPreferences, prefs } from './_helpers.js';
 
 /**
- * Settings panel behaviour: open/close, theme application, live typography
- * updates, persistence across reload, and absence from printed output.
+ * Settings behaviour: theme application, live typography updates, persistence
+ * across reload, and absence from printed output.
+ *
+ * Phase 7.0 moved these controls out of a 320px slide-out and into the
+ * preferences window's sections. The assertions are unchanged — what a slider
+ * does to --wp-font-size-base does not depend on the surface it sits on — but
+ * every test now has to say which section it is looking at.
  */
 
 const STORAGE_KEY = 'waynepdf.settings.v1';
@@ -20,8 +25,7 @@ async function boot(page) {
   await expect(page.locator('.preview')).toBeVisible();
 }
 
-const gear = (page) => page.locator('button.wp-gear');
-const panel = (page) => page.locator('#wp-settings-panel');
+const panel = prefs;
 const themeAttr = (page) =>
   page.evaluate(() => document.documentElement.dataset.theme);
 const cssVar = (page, name) =>
@@ -46,54 +50,50 @@ async function pickFont(page, label) {
   await expect(page.getByRole('radio', { name: label })).toBeChecked();
 }
 
-test.describe('panel open/close', () => {
-  test('gear opens the panel', async ({ page }) => {
+test.describe('preferences open/close', () => {
+  test('the gear opens the window', async ({ page }) => {
     await boot(page);
-    await expect(panel(page)).not.toHaveClass(/is-open/);
-    await gear(page).click();
-    await expect(panel(page)).toHaveClass(/is-open/);
-    await expect(page.locator('.wp-panel-title')).toHaveText('Settings');
+    await expect(panel(page)).toHaveCount(0);
+    await openPreferences(page);
+    await expect(page.locator('.wp-prefs-title')).toHaveText('Preferences');
   });
 
-  test('Esc closes the panel', async ({ page }) => {
+  test('Esc closes the window', async ({ page }) => {
     await boot(page);
-    await gear(page).click();
-    await expect(panel(page)).toHaveClass(/is-open/);
+    await openPreferences(page);
     await page.keyboard.press('Escape');
-    await expect(panel(page)).not.toHaveClass(/is-open/);
+    await expect(panel(page)).toHaveCount(0);
   });
 
-  test('clicking the gear again closes the panel', async ({ page }) => {
+  test('the close button closes the window', async ({ page }) => {
     await boot(page);
-    await gear(page).click();
-    await expect(panel(page)).toHaveClass(/is-open/);
-    await gear(page).click();
-    await expect(panel(page)).not.toHaveClass(/is-open/);
+    await openPreferences(page);
+    await page.getByRole('button', { name: 'Close preferences' }).click();
+    await expect(panel(page)).toHaveCount(0);
   });
 
-  test('the close button closes the panel', async ({ page }) => {
-    await boot(page);
-    await gear(page).click();
-    await page.locator('button.wp-close').click();
-    await expect(panel(page)).not.toHaveClass(/is-open/);
-  });
-
-  test('focus moves into the panel on open and back to the gear on close', async ({
+  test('focus moves to search on open and back to the gear on close', async ({
     page,
   }) => {
     await boot(page);
-    await gear(page).click();
-    await expect(page.locator('button.wp-close')).toBeFocused();
+    await openPreferences(page);
+    await expect(page.getByLabel('Search preferences')).toBeFocused();
     await page.keyboard.press('Escape');
-    await expect(gear(page)).toBeFocused();
+    await expect(page.locator('button.wp-gear')).toBeFocused();
   });
 
-  test('the closed panel is not reachable by keyboard', async ({ page }) => {
+  test('the closed window is not in the DOM at all', async ({ page }) => {
+    /*
+     * Replaces an `inert` assertion. The old panel was always rendered and only
+     * translated off-screen, so it needed inert to stay out of the tab order.
+     * This one unmounts, which is a stronger guarantee than inert and needs no
+     * attribute to enforce it.
+     */
     await boot(page);
-    // inert while closed, so nothing inside can take focus.
-    await expect(panel(page)).toHaveAttribute('inert', '');
-    await gear(page).click();
-    await expect(panel(page)).not.toHaveAttribute('inert', '');
+    await expect(panel(page)).toHaveCount(0);
+    await expect(page.getByLabel('Search preferences')).toHaveCount(0);
+    await openPreferences(page);
+    await expect(panel(page)).toBeVisible();
   });
 });
 
@@ -103,7 +103,7 @@ test.describe('theme selection', () => {
   for (const theme of THEMES) {
     test(`selecting ${theme} sets data-theme`, async ({ page }) => {
       await boot(page);
-      await gear(page).click();
+      await openPreferences(page);
       await page.locator(`button.wp-swatch[data-theme="${theme}"]`).click();
       await expect.poll(() => themeAttr(page)).toBe(theme);
     });
@@ -114,7 +114,7 @@ test.describe('theme selection', () => {
   }) => {
     await page.emulateMedia({ colorScheme: 'dark' });
     await boot(page);
-    await gear(page).click();
+    await openPreferences(page);
     // The System swatch is the only one without its own data-theme.
     await page.locator('button.wp-swatch[aria-label="System"]').click();
     await expect.poll(() => themeAttr(page)).toBe('dark');
@@ -125,7 +125,7 @@ test.describe('theme selection', () => {
   }) => {
     await page.emulateMedia({ colorScheme: 'light' });
     await boot(page);
-    await gear(page).click();
+    await openPreferences(page);
     await page.locator('button.wp-swatch[aria-label="System"]').click();
     await expect.poll(() => themeAttr(page)).toBe('light');
   });
@@ -133,7 +133,7 @@ test.describe('theme selection', () => {
   test('System follows a live OS preference change', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light' });
     await boot(page);
-    await gear(page).click();
+    await openPreferences(page);
     await page.locator('button.wp-swatch[aria-label="System"]').click();
     await expect.poll(() => themeAttr(page)).toBe('light');
 
@@ -143,7 +143,7 @@ test.describe('theme selection', () => {
 
   test('the active swatch is marked pressed', async ({ page }) => {
     await boot(page);
-    await gear(page).click();
+    await openPreferences(page);
     await page.locator('button.wp-swatch[data-theme="sepia"]').click();
     await expect(
       page.locator('button.wp-swatch[data-theme="sepia"]'),
@@ -157,7 +157,7 @@ test.describe('typography controls', () => {
     page,
   }) => {
     await boot(page);
-    await gear(page).click();
+    await openPreferences(page);
     expect(await cssVar(page, '--wp-font-size-base')).toBe('16px');
 
     await page.getByLabel('Body size').fill('22');
@@ -168,7 +168,7 @@ test.describe('typography controls', () => {
     page,
   }) => {
     await boot(page);
-    await gear(page).click();
+    await openPreferences(page);
     await page.getByLabel('Line height').fill('1.9');
     await expect.poll(() => cssVar(page, '--wp-line-height-base')).toBe('1.9');
   });
@@ -177,7 +177,7 @@ test.describe('typography controls', () => {
     page,
   }) => {
     await boot(page);
-    await gear(page).click();
+    await openPreferences(page);
     await page.getByLabel('Code size').fill('19');
     await expect.poll(() => cssVar(page, '--wp-font-size-code')).toBe('19px');
   });
@@ -194,7 +194,7 @@ test.describe('typography controls', () => {
     const sans = await bodyFont();
     expect(sans).toContain('Inter');
 
-    await gear(page).click();
+    await openPreferences(page);
     await pickFont(page, 'Serif');
     await expect.poll(bodyFont).toContain('Source Serif');
 
@@ -211,7 +211,7 @@ test.describe('typography controls', () => {
         () => getComputedStyle(document.querySelector('.preview')).fontSize,
       );
     expect(await size()).toBe('16px');
-    await gear(page).click();
+    await openPreferences(page);
     await page.getByLabel('Body size').fill('24');
     await expect.poll(size).toBe('24px');
   });
@@ -220,7 +220,7 @@ test.describe('typography controls', () => {
 test.describe('persistence', () => {
   test('settings survive a reload', async ({ page }) => {
     await boot(page);
-    await gear(page).click();
+    await openPreferences(page);
     await page.locator('button.wp-swatch[data-theme="dark"]').click();
     await page.getByLabel('Body size').fill('21');
     await pickFont(page, 'Serif');
@@ -244,7 +244,7 @@ test.describe('persistence', () => {
 
   test('exactly one WaynePDF storage key is written', async ({ page }) => {
     await boot(page);
-    await gear(page).click();
+    await openPreferences(page);
     await page.locator('button.wp-swatch[data-theme="sepia"]').click();
     const keys = await page.evaluate(() => Object.keys(localStorage).sort());
     // Phase 3 added a second key. Two is the expected total; the assertion is
@@ -259,7 +259,7 @@ test.describe('persistence', () => {
 
   test('reset returns every control to its default', async ({ page }) => {
     await boot(page);
-    await gear(page).click();
+    await openPreferences(page);
     await page.locator('button.wp-swatch[data-theme="high-contrast"]').click();
     await page.getByLabel('Body size').fill('23');
     await page.getByLabel('Code size').fill('20');
@@ -272,7 +272,7 @@ test.describe('persistence', () => {
     await expect.poll(() => cssVar(page, '--wp-font-size-base')).toBe('16px');
     expect(await cssVar(page, '--wp-font-size-code')).toBe('14px');
     expect(await cssVar(page, '--wp-line-height-base')).toBe('1.6');
-    await gear(page).click();
+    await openPreferences(page);
     await expect(page.locator('.wp-theme-name')).toHaveText('System');
     await expect(page.getByLabel('Body size')).toHaveValue('16');
   });
@@ -281,7 +281,7 @@ test.describe('persistence', () => {
     page,
   }) => {
     await boot(page);
-    await gear(page).click();
+    await openPreferences(page);
     await page.getByLabel('Body size').fill('23');
     await expect.poll(() => cssVar(page, '--wp-font-size-base')).toBe('23px');
 
@@ -289,7 +289,7 @@ test.describe('persistence', () => {
     await page.getByRole('button', { name: 'Reset everything' }).click();
 
     // No reload, no clearing — the panel is even still open.
-    await expect(panel(page)).toHaveClass(/is-open/);
+    await expect(panel(page)).toBeVisible();
     expect(await cssVar(page, '--wp-font-size-base')).toBe('23px');
     expect(
       await page.evaluate((k) => localStorage.getItem(k), STORAGE_KEY),
@@ -300,7 +300,8 @@ test.describe('persistence', () => {
     page,
   }) => {
     await boot(page);
-    await gear(page).click();
+    // Language lives under Document, not Appearance, since 7.0.
+    await openPreferences(page, 'document');
     await page.locator('select.wp-select-language').selectOption('ja');
     await expect
       .poll(() =>
@@ -341,8 +342,8 @@ test.describe('print output', () => {
   }) => {
     test.skip(browserName !== 'chromium', 'page.pdf() is Chromium-only');
     await boot(page);
-    await gear(page).click();
-    await expect(panel(page)).toHaveClass(/is-open/);
+    await openPreferences(page);
+    await expect(panel(page)).toBeVisible();
 
     const buffer = await page.pdf({ format: 'A4', printBackground: true });
     const text = buffer.toString('latin1');
@@ -387,7 +388,7 @@ test.describe('print output', () => {
 test.describe('language section', () => {
   test('renders the language select and direction pills', async ({ page }) => {
     await boot(page);
-    await gear(page).click();
+    await openPreferences(page, 'document');
     await expect(page.locator('select.wp-select-language')).toBeVisible();
     await expect(page.getByRole('radio', { name: 'Auto' })).toHaveCount(1);
     await expect(page.getByRole('radio', { name: 'LTR' })).toHaveCount(1);
@@ -398,7 +399,7 @@ test.describe('language section', () => {
     page,
   }) => {
     await boot(page);
-    await gear(page).click();
+    await openPreferences(page, 'document');
     await page.locator('select.wp-select-language').selectOption('ko');
     await expect
       .poll(() =>
@@ -413,7 +414,7 @@ test.describe('language section', () => {
     page,
   }) => {
     await boot(page);
-    await gear(page).click();
+    await openPreferences(page, 'document');
     await page.locator('label.wp-pill', { hasText: /^RTL$/ }).click();
     await expect
       .poll(() =>
@@ -428,7 +429,7 @@ test.describe('language section', () => {
     page,
   }) => {
     await boot(page);
-    await gear(page).click();
+    await openPreferences(page, 'document');
     await expect(page.locator('.wp-detected-lang')).toHaveText(/^Detected: /);
 
     await page.locator('select.wp-select-language').selectOption('ja');
@@ -439,8 +440,14 @@ test.describe('language section', () => {
     page,
   }) => {
     await boot(page);
-    await gear(page).click();
+    /*
+     * The one test that spans two sections. Theme is Appearance, language and
+     * direction are Document — which is itself worth asserting: the settings
+     * split across sections must still persist as one payload each.
+     */
+    await openPreferences(page, 'appearance');
     await page.locator('button.wp-swatch[data-theme="sepia"]').click();
+    await openPreferences(page, 'document');
     await page.locator('select.wp-select-language').selectOption('ar');
     await page.locator('label.wp-pill', { hasText: /^LTR$/ }).click();
 
@@ -468,7 +475,7 @@ test.describe('language section', () => {
   }) => {
     test.skip(browserName !== 'chromium', 'page.pdf() is Chromium-only');
     await boot(page);
-    await gear(page).click();
+    await openPreferences(page, 'document');
     const buffer = await page.pdf({ format: 'A4', printBackground: true });
     const text = buffer.toString('latin1');
     for (const needle of ['Language', 'Text direction', 'Detected:']) {
@@ -485,7 +492,7 @@ test.describe('layout section', () => {
 
   test('renders the layout controls', async ({ page }) => {
     await boot(page);
-    await gear(page).click();
+    await openPreferences(page, 'layout');
     await expect(page.locator('select.wp-select-page-size')).toBeVisible();
     await expect(page.locator('select.wp-select-margins')).toBeVisible();
     await expect(
@@ -506,7 +513,7 @@ test.describe('layout section', () => {
     page,
   }) => {
     await boot(page);
-    await gear(page).click();
+    await openPreferences(page, 'layout');
     const head = page.locator('.wp-collapsible-head', { hasText: 'Watermark' });
     await expect(head).toHaveAttribute('aria-expanded', 'false');
     await head.click();
@@ -517,7 +524,7 @@ test.describe('layout section', () => {
     await boot(page);
     expect(await layoutCSS(page)).toContain('size: A4 portrait');
 
-    await gear(page).click();
+    await openPreferences(page, 'layout');
     await page.locator('select.wp-select-page-size').selectOption('legal');
     await expect.poll(() => layoutCSS(page)).toContain('size: LEGAL portrait');
   });
@@ -526,7 +533,7 @@ test.describe('layout section', () => {
     await boot(page);
     expect(await layoutCSS(page)).toContain('margin: 25mm');
 
-    await gear(page).click();
+    await openPreferences(page, 'layout');
     await page.locator('select.wp-select-margins').selectOption('small');
     await expect.poll(() => layoutCSS(page)).toContain('margin: 15mm');
   });
@@ -535,7 +542,7 @@ test.describe('layout section', () => {
     page,
   }) => {
     await boot(page);
-    await gear(page).click();
+    await openPreferences(page, 'layout');
     await page.locator('.wp-collapsible-head', { hasText: 'Footer' }).click();
 
     const center = page.locator('.wp-collapsible-body input.wp-text').nth(1);
@@ -550,7 +557,7 @@ test.describe('layout section', () => {
     await boot(page);
     expect(await layoutCSS(page)).not.toContain('pagedjs_page_content::before');
 
-    await gear(page).click();
+    await openPreferences(page, 'layout');
     await page
       .locator('.wp-collapsible-head', { hasText: 'Watermark' })
       .click();
@@ -566,7 +573,7 @@ test.describe('layout section', () => {
     await boot(page);
     expect(await layoutCSS(page)).not.toContain('.wp-toc');
 
-    await gear(page).click();
+    await openPreferences(page, 'layout');
     await page
       .locator('.wp-collapsible-head', { hasText: 'Table of contents' })
       .click();
@@ -579,7 +586,7 @@ test.describe('layout section', () => {
 
   test('layout settings survive a reload', async ({ page }) => {
     await boot(page);
-    await gear(page).click();
+    await openPreferences(page, 'layout');
     await page.locator('select.wp-select-page-size').selectOption('a5');
     await page.locator('select.wp-select-margins').selectOption('wide');
 
@@ -596,7 +603,7 @@ test.describe('layout section', () => {
 
   test('Reset returns the layout to defaults', async ({ page }) => {
     await boot(page);
-    await gear(page).click();
+    await openPreferences(page, 'layout');
     await page.locator('select.wp-select-page-size').selectOption('a3');
     await expect.poll(() => layoutCSS(page)).toContain('size: A3');
 

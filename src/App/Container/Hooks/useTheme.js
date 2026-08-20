@@ -74,6 +74,7 @@ const useTheme = () => {
       setFontSize: patch('fontSize'),
       setLineHeight: patch('lineHeight'),
       setCodeFontSize: patch('codeFontSize'),
+      setEditorFontSize: patch('editorFontSize'),
       setMathCopyEnabled: patch('mathCopyEnabled'),
       setSanitizeHtml: patch('sanitizeHtml'),
       reset: () => setSettings({ ...DEFAULTS }),

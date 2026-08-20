@@ -1,4 +1,4 @@
-import { FONT_FAMILIES } from '../../Lib/settings.js';
+import { FONT_FAMILIES } from '../../../Lib/settings.js';
 
 const LABELS = { sans: 'Sans', serif: 'Serif', mono: 'Mono' };
 

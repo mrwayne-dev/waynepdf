@@ -5,6 +5,8 @@ import Toast from './Components/Toast.jsx';
 import MathCopyButton from './Components/Previewer/MathCopyButton.jsx';
 import LayoutStyles from './Components/LayoutStyles.jsx';
 import FrontmatterWatcher from './Components/FrontmatterWatcher.jsx';
+import PreferencesWindow from './Components/Preferences/index.jsx';
+import KeyboardShortcuts from './Components/KeyboardShortcuts.jsx';
 import {
   TextContainer,
   ThemeContainer,
@@ -14,6 +16,7 @@ import {
   PageCountContainer,
   CustomThemesContainer,
   ExportFormatContainer,
+  PreferencesContainer,
 } from './Container';
 
 /** Bridges the page count from PageCountContainer into the Header. */
@@ -35,6 +38,7 @@ const App = ({ className }) => {
           PageCountContainer,
           CustomThemesContainer,
           ExportFormatContainer,
+          PreferencesContainer,
         ]}
       >
         <LayoutStyles />
@@ -45,6 +49,11 @@ const App = ({ className }) => {
             carry no-print, so they never reach the PDF. */}
         <MathCopyButton />
         <Toast />
+        <KeyboardShortcuts />
+        {/* Last, and a sibling of the workspace rather than a replacement for
+            it: the editor stays mounted underneath so its buffer, scroll
+            position and in-flight autosave survive a trip to preferences. */}
+        <PreferencesWindow />
       </Provider>
     </div>
   );

@@ -74,6 +74,7 @@ export function applyTheme({
   fontSize,
   lineHeight,
   codeFontSize,
+  editorFontSize,
 }) {
   const resolved = resolveTheme(theme);
   const root = document.documentElement;
@@ -91,6 +92,7 @@ export function applyTheme({
   );
   root.style.setProperty('--wp-font-size-base', `${fontSize}px`);
   root.style.setProperty('--wp-font-size-code', `${codeFontSize}px`);
+  root.style.setProperty('--wp-font-size-editor', `${editorFontSize}px`);
   root.style.setProperty('--wp-line-height-base', String(lineHeight));
 
   toggleHljsTheme(resolved);

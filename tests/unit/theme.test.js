@@ -226,6 +226,7 @@ describe('loadSettings', () => {
       fontSize: 18,
       lineHeight: 1.75,
       codeFontSize: 16,
+      editorFontSize: 15,
       mathCopyEnabled: false,
       sanitizeHtml: true,
     };
@@ -245,12 +246,14 @@ describe('loadSettings', () => {
       codeFontSize: 16,
     };
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(legacy));
-    // Two fields have been added inside v1 now (Phase 4's mathCopyEnabled and
-    // Phase 6a's sanitizeHtml); both must appear with their defaults.
+    // Three fields have been added inside v1 now (Phase 4's mathCopyEnabled,
+    // Phase 6a's sanitizeHtml and Phase 7.0's editorFontSize); all must appear
+    // with their defaults.
     expect(loadSettings()).toEqual({
       ...legacy,
       mathCopyEnabled: true,
       sanitizeHtml: false,
+      editorFontSize: 14,
     });
   });
 

@@ -1,5 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { boot, setText, resetEverything } from './_helpers.js';
+import {
+  boot,
+  setText,
+  resetEverything,
+  openPreferences,
+} from './_helpers.js';
 
 /**
  * Reset, end to end.
@@ -9,7 +14,7 @@ import { boot, setText, resetEverything } from './_helpers.js';
  * in one click, with one confirmation.
  */
 
-const gear = (page) => page.locator('button.wp-gear');
+
 const themeAttr = (page) =>
   page.evaluate(() => document.documentElement.dataset.theme);
 
@@ -41,7 +46,7 @@ test('Reset clears the document and the theme together', async ({ page }) => {
   await setText(page, '# Unique Content Marker');
   await expect(page.locator('.save-status')).toHaveText('Saved');
 
-  await gear(page).click();
+  await openPreferences(page);
   await page.locator('button.wp-swatch[data-theme="dark"]').click();
   await expect.poll(() => themeAttr(page)).toBe('dark');
 
@@ -59,7 +64,7 @@ test('Reset leaves exactly the default document behind, not the old one', async 
   await boot(page);
   await setText(page, '# Doomed');
   await expect(page.locator('.save-status')).toHaveText('Saved');
-  await gear(page).click();
+  await openPreferences(page);
 
   await resetEverything(page);
 
@@ -79,9 +84,16 @@ test('Reset clears every settings key, including ones the old button missed', as
   page,
 }) => {
   await boot(page);
-  await gear(page).click();
+  /*
+   * One setting from each of the three storage keys, which since 7.0 means one
+   * setting from each of three sections. Touching all three is the point: Reset
+   * missing a key is the bug this test was written for.
+   */
+  await openPreferences(page, 'appearance');
   await page.locator('button.wp-swatch[data-theme="sepia"]').click();
+  await openPreferences(page, 'document');
   await page.locator('select.wp-select-language').selectOption('ar');
+  await openPreferences(page, 'layout');
   await page.locator('select.wp-select-page-size').selectOption('a3');
 
   await expect
@@ -109,7 +121,7 @@ test('Reset leaves other origins-worth of storage alone', async ({ page }) => {
   await page.evaluate(() =>
     localStorage.setItem('somethingElse.state', 'keep me'),
   );
-  await gear(page).click();
+  await openPreferences(page);
 
   await resetEverything(page);
 
@@ -122,15 +134,17 @@ test('cancelling the confirmation deletes nothing', async ({ page }) => {
   await boot(page);
   await setText(page, '# Still Here');
   await expect(page.locator('.save-status')).toHaveText('Saved');
-  await gear(page).click();
+  await openPreferences(page);
   await page.locator('button.wp-swatch[data-theme="dark"]').click();
   await expect.poll(() => themeAttr(page)).toBe('dark');
 
   page.once('dialog', (dialog) => dialog.dismiss());
   await page.getByRole('button', { name: 'Reset everything' }).click();
 
-  // No reload happened, so the panel is still open and everything is intact.
-  await expect(page.locator('#wp-settings-panel')).toHaveClass(/is-open/);
+  // No reload happened, so the window is still open and everything is intact.
+  // Reset deliberately leaves it open: it is triggered from this window's own
+  // footer, and the reload is what dismisses it.
+  await expect(page.locator('.wp-prefs')).toBeVisible();
   expect(await themeAttr(page)).toBe('dark');
   await expect(page.locator('.preview h1')).toHaveText('Still Here');
 

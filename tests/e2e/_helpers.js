@@ -53,8 +53,34 @@ export const setText = (page, text) =>
 
 export const loadFixture = (page, name) => setText(page, readFixture(name));
 
+/** The preferences window, absent from the DOM entirely while closed. */
+export const prefs = (page) => page.locator('.wp-prefs');
+
 /**
- * Clicks Settings' Reset, accepts the confirmation, and waits out the reload.
+ * Opens preferences and optionally selects a section.
+ *
+ * Goes through the gear rather than the keyboard because that is the path a
+ * user takes, and because Cmd+, deliberately does nothing while focus is in the
+ * editor — which is where focus usually is.
+ */
+export async function openPreferences(page, section) {
+  if ((await prefs(page).count()) === 0) {
+    await page.locator('button.wp-gear').click();
+  }
+  await expect(prefs(page)).toBeVisible();
+  if (section) {
+    await page.locator(`.wp-prefs-rail-item[data-section="${section}"]`).click();
+  }
+}
+
+export async function closePreferences(page) {
+  await page.getByRole('button', { name: 'Close preferences' }).click();
+  await expect(prefs(page)).toHaveCount(0);
+}
+
+/**
+ * Clicks Reset in the preferences footer, accepts the confirmation, and waits
+ * out the reload.
  *
  * The reload needs an unambiguous settle signal, not a timeout: a marker planted
  * on `window` before the click is gone once — and only once — the new document
@@ -66,6 +92,8 @@ export async function resetEverything(page) {
     window[k] = true;
   }, MARKER);
 
+  // Reset moved into the preferences footer in 7.0; it has to be open first.
+  await openPreferences(page);
   page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('button', { name: 'Reset everything' }).click();
 

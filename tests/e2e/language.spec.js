@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { openPreferences } from './_helpers.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURE_DIR = path.resolve(__dirname, '../fixtures');
@@ -41,7 +42,7 @@ const fontFamily = (page) =>
     () => getComputedStyle(document.querySelector('.markdown-body')).fontFamily,
   );
 
-const gear = (page) => page.locator('button.wp-gear');
+
 
 test.describe('lang detection is applied to the container', () => {
   const CASES = [
@@ -196,7 +197,7 @@ test.describe('settings overrides win over detection', () => {
       .poll(() => attr(page, 'lang'), { timeout: 10_000 })
       .toBe('zh-Hant');
 
-    await gear(page).click();
+    await openPreferences(page, 'document');
     await page.locator('select.wp-select-language').selectOption('ja');
 
     await expect.poll(() => attr(page, 'lang')).toBe('ja');
@@ -226,7 +227,7 @@ test.describe('settings overrides win over detection', () => {
     expect(rtlRail.right).toBeGreaterThan(0);
     expect(rtlRail.left).toBe(0);
 
-    await gear(page).click();
+    await openPreferences(page, 'document');
     await page.locator('label.wp-pill', { hasText: /^LTR$/ }).click();
 
     await expect.poll(() => attr(page, 'dir')).toBe('ltr');
@@ -240,7 +241,7 @@ test.describe('settings overrides win over detection', () => {
   }) => {
     await boot(page);
     await load(page, 'cjk-ko.md');
-    await gear(page).click();
+    await openPreferences(page, 'document');
     // Auto is selected, so the caption shows what detection found.
     await expect(page.locator('.wp-detected-lang')).toHaveText(
       'Detected: Korean',
@@ -250,7 +251,7 @@ test.describe('settings overrides win over detection', () => {
 
   test('both language settings survive a reload', async ({ page }) => {
     await boot(page);
-    await gear(page).click();
+    await openPreferences(page, 'document');
     await page.locator('select.wp-select-language').selectOption('he');
     await page.locator('label.wp-pill', { hasText: /^RTL$/ }).click();
     await expect.poll(() => attr(page, 'dir')).toBe('rtl');
@@ -269,8 +270,10 @@ test.describe('settings overrides win over detection', () => {
 
   test('theme and language use two separate storage keys', async ({ page }) => {
     await boot(page);
-    await gear(page).click();
+    // Two sections since 7.0: language under Document, theme under Appearance.
+    await openPreferences(page, 'document');
     await page.locator('select.wp-select-language').selectOption('ja');
+    await openPreferences(page, 'appearance');
     await page.locator('button.wp-swatch[data-theme="dark"]').click();
 
     const keys = await page.evaluate(() => Object.keys(localStorage).sort());

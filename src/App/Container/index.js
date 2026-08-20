@@ -7,6 +7,7 @@ import useLayout from './Hooks/useLayout.js';
 import usePageCount from './Hooks/usePageCount.js';
 import useCustomThemes from './Hooks/useCustomThemes.js';
 import useExportFormat from './Hooks/useExportFormat.js';
+import usePreferences from './Hooks/usePreferences.js';
 
 export const TextContainer = Container(useText);
 export const ThemeContainer = Container(useTheme);
@@ -16,6 +17,7 @@ export const LayoutContainer = Container(useLayout);
 export const PageCountContainer = Container(usePageCount);
 export const CustomThemesContainer = Container(useCustomThemes);
 export const ExportFormatContainer = Container(useExportFormat);
+export const PreferencesContainer = Container(usePreferences);
 
 /**
  * The document store, which lives inside TextContainer's third slot.

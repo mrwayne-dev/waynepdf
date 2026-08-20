@@ -314,9 +314,18 @@ test.describe('paginated print output', () => {
       window.__wpSource = s;
     }, source);
 
-    // Open the settings panel so every control is mounted and would print if
-    // the no-print rules were wrong.
+    /*
+     * Open preferences so its chrome is mounted and would print if the no-print
+     * rules were wrong.
+     *
+     * Only the active section renders, so the section-scoped strings below
+     * ("Page size", "Show copy button on math") are no longer mounted at all
+     * during this check — their assertions still hold but no longer discriminate.
+     * "Preferences" is the string that does: it is the window's own title and is
+     * present whenever the overlay is.
+     */
     await page.locator('button.wp-gear').click();
+    await expect(page.locator('.wp-prefs-title')).toBeVisible();
     const text = pdfText(await printPaginated(page, source, l));
 
     /*
@@ -329,6 +338,7 @@ test.describe('paginated print output', () => {
       'WaynePDF',
       'Save as PDF',
       'Reset everything',
+      'Preferences',
       'Page size',
       'Show copy button on math',
       'Table of contents',

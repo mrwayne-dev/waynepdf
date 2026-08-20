@@ -41,6 +41,16 @@ export const DEFAULTS = {
   fontSize: 16,
   lineHeight: 1.6,
   codeFontSize: 14,
+  /*
+   * The editor's own type size, deliberately separate from codeFontSize.
+   *
+   * They defaulted to one value because the editor borrowed the document's code
+   * variable, which conflated two unrelated things: how big fenced code looks in
+   * the rendered output, and how big the source is while you write it. Someone
+   * on a large monitor wants a bigger editor without inflating every code block
+   * in their PDF.
+   */
+  editorFontSize: 14,
   mathCopyEnabled: true,
   sanitizeHtml: false,
 };
@@ -50,6 +60,7 @@ export const RANGES = {
   fontSize: { min: 12, max: 24, step: 1 },
   lineHeight: { min: 1.2, max: 2.0, step: 0.05 },
   codeFontSize: { min: 10, max: 20, step: 1 },
+  editorFontSize: { min: 10, max: 24, step: 1 },
 };
 
 const inRange = (value, { min, max }) =>
@@ -81,6 +92,9 @@ export function normalizeSettings(input) {
     codeFontSize: inRange(raw.codeFontSize, RANGES.codeFontSize)
       ? raw.codeFontSize
       : DEFAULTS.codeFontSize,
+    editorFontSize: inRange(raw.editorFontSize, RANGES.editorFontSize)
+      ? raw.editorFontSize
+      : DEFAULTS.editorFontSize,
     // Booleans have no range to clamp; anything non-boolean is the default.
     mathCopyEnabled:
       typeof raw.mathCopyEnabled === 'boolean'

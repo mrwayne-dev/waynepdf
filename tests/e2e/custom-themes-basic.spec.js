@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { boot, resetEverything } from './_helpers.js';
+import { boot, resetEverything, openPreferences } from './_helpers.js';
 
 /*
  * Custom themes at the state level. 6c.1 ships no editor UI, so themes are
@@ -57,14 +57,14 @@ const token = (page, name) =>
 const dataTheme = (page) =>
   page.evaluate(() => document.documentElement.dataset.theme);
 
-const gear = (page) => page.locator('button.wp-gear');
+
 
 test('a seeded custom theme appears after the presets, behind a divider', async ({
   page,
 }) => {
   await seed(page);
   await boot(page);
-  await gear(page).click();
+  await openPreferences(page);
 
   await expect(page.locator('.wp-swatch')).toHaveCount(7);
   await expect(page.locator('.wp-swatch.is-custom')).toHaveCount(1);
@@ -77,7 +77,7 @@ test('a seeded custom theme appears after the presets, behind a divider', async 
 
 test('no divider shows when there are no custom themes', async ({ page }) => {
   await boot(page);
-  await gear(page).click();
+  await openPreferences(page);
   await expect(page.locator('.wp-swatch')).toHaveCount(6);
   await expect(page.locator('.wp-swatch-divider')).toHaveCount(0);
 });
@@ -85,7 +85,7 @@ test('no divider shows when there are no custom themes', async ({ page }) => {
 test('activating a custom theme applies its palette', async ({ page }) => {
   await seed(page);
   await boot(page);
-  await gear(page).click();
+  await openPreferences(page);
   await page.locator('.wp-swatch.is-custom').click();
 
   await expect.poll(() => dataTheme(page)).toBe(`custom-${OCEAN.id}`);
@@ -177,7 +177,7 @@ test('malformed stored themes are dropped without breaking the panel', async ({
     ],
   });
   await boot(page);
-  await gear(page).click();
+  await openPreferences(page);
   // Ocean plus the salvageable "Bad base"; the other three are dropped.
   await expect(page.locator('.wp-swatch.is-custom')).toHaveCount(2);
 });
@@ -206,7 +206,7 @@ test('Reset clears custom themes', async ({ page }) => {
     () => typeof window.__waynepdf_setText === 'function',
     { timeout: 30_000 },
   );
-  await gear(page).click();
+  await openPreferences(page);
   await expect(page.locator('.wp-swatch.is-custom')).toHaveCount(1);
   await expect.poll(() => dataTheme(page)).toBe(`custom-${OCEAN.id}`);
 
@@ -215,7 +215,7 @@ test('Reset clears custom themes', async ({ page }) => {
   expect(
     await page.evaluate((k) => localStorage.getItem(k), CUSTOM_KEY),
   ).toBeNull();
-  await gear(page).click();
+  await openPreferences(page);
   await expect(page.locator('.wp-swatch.is-custom')).toHaveCount(0);
   await expect.poll(() => dataTheme(page)).toBe('light');
 });

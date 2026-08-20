@@ -1,122 +1,22 @@
 /*
- * Settings panel chrome.
+ * The individual settings controls: labels, sliders, selects, pills, swatches,
+ * checkboxes and the layout form.
  *
  * Plain CSS rather than styled-components because every colour here is a theme
- * token: the panel has to repaint itself when --wp-color-* changes, and vars in
- * a static stylesheet do that for free.
+ * token: the controls have to repaint themselves when --wp-color-* changes, and
+ * vars in a static stylesheet do that for free.
+ *
+ * Phase 7.0 moved this out of the slide-out panel it was written for and
+ * stripped that panel's own chrome (.wp-panel, .wp-gear, .wp-close, .wp-reset).
+ * What remains is the controls, which the preferences window reuses unchanged —
+ * the surface moved, the knobs did not.
  */
-
-/* ------------------------------------------------------------------ gear */
-
-.wp-gear {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--wp-h-control);
-  height: var(--wp-h-control);
-  padding: 0;
-  color: var(--wp-color-fg);
-  background: none;
-  border: 1px solid transparent;
-  border-radius: var(--wp-radius);
-  cursor: pointer;
-  transition: background-color var(--wp-ui-transition);
-}
-
-.wp-gear:hover {
-  background-color: var(--wp-color-canvas-subtle);
-}
-
-.wp-gear:focus-visible {
-  outline: 2px solid var(--wp-color-accent);
-  outline-offset: 1px;
-}
-
-/* ----------------------------------------------------------------- panel */
-
-.wp-panel {
-  position: fixed;
-  top: 0;
-  right: 0;
-  z-index: 100;
-  display: flex;
-  flex-direction: column;
-  width: 320px;
-  height: 100vh;
-  color: var(--wp-color-fg);
-  background-color: var(--wp-color-canvas-subtle);
-  border-left: 1px solid var(--wp-color-border);
-  transform: translateX(100%);
-  transition: transform var(--wp-ui-transition);
-}
-
-.wp-panel.is-open {
-  transform: translateX(0);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .wp-panel {
-    transition: none;
-  }
-}
-
-.wp-panel-head {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: space-between;
-  height: var(--wp-h-control);
-  /* Matches the body's inline padding so the title lines up with the sections
-     beneath it, and adds the spec'd gap below as margin rather than padding so
-     the head keeps its stated height. */
-  padding: 0 var(--wp-space-4);
-  margin: var(--wp-space-4) 0 var(--wp-space-4);
-}
-
-.wp-panel-title {
-  margin: 0;
-  font-family: var(--wp-font-family-ui);
-  font-size: var(--wp-text-lg);
-  font-weight: 600;
-  line-height: var(--wp-leading-tight);
-}
-
-.wp-close {
-  width: var(--wp-h-control);
-  height: var(--wp-h-control);
-  padding: 0;
-  font-size: var(--wp-text-xl);
-  line-height: 1;
-  color: var(--wp-color-fg-muted);
-  background: none;
-  border: 1px solid transparent;
-  border-radius: var(--wp-radius);
-  cursor: pointer;
-}
-
-.wp-close:hover {
-  color: var(--wp-color-fg);
-  background-color: var(--wp-color-canvas-subtle);
-}
-
-.wp-close:focus-visible,
-.wp-reset:focus-visible,
 .wp-swatch:focus-visible,
 .wp-range:focus-visible,
 .wp-pill:focus-within {
   outline: 2px solid var(--wp-color-accent);
   outline-offset: 1px;
 }
-
-.wp-panel-body {
-  flex: 1;
-  /* No top padding: the panel head already contributes the gap below itself. */
-  padding: 0 var(--wp-space-4) var(--wp-space-6);
-  overflow-y: auto;
-  font-family: var(--wp-font-family-ui);
-  font-size: var(--wp-text-sm);
-}
-
 /* --------------------------------------------------------------- fields */
 
 .wp-fieldset {
@@ -334,35 +234,6 @@
 }
 
 /* --------------------------------------------------------------- footer */
-
-.wp-divider {
-  height: 1px;
-  margin: var(--wp-space-6) 0;
-  background-color: var(--wp-color-border);
-  border: 0;
-}
-
-/* Destructive, so it reads as danger text rather than as another grey button —
-   it deletes every document, not just settings. */
-.wp-reset {
-  width: 100%;
-  height: var(--wp-h-control);
-  padding: 0 var(--wp-space-3);
-  font-family: var(--wp-font-family-ui);
-  font-size: var(--wp-text-sm);
-  font-weight: 500;
-  color: var(--wp-color-danger);
-  background-color: transparent;
-  border: 1px solid var(--wp-color-border);
-  border-radius: var(--wp-radius);
-  cursor: pointer;
-  transition: background-color var(--wp-ui-transition);
-}
-
-.wp-reset:hover {
-  background-color: var(--wp-color-canvas-subtle);
-}
-
 /* ------------------------------------------------------------------ layout */
 
 /*

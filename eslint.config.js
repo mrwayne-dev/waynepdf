@@ -32,6 +32,9 @@ const browserGlobals = {
   atob: 'readonly',
   Image: 'readonly',
   DOMParser: 'readonly',
+  // Injected by Vite's `define` from package.json (Phase 7.0 About section).
+  __WAYNEPDF_VERSION__: 'readonly',
+  __WAYNEPDF_HOMEPAGE__: 'readonly',
   Uint8Array: 'readonly',
   performance: 'readonly',
   MutationObserver: 'readonly',

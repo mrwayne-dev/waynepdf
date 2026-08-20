@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { useProvided } from 'nonaction';
 import UploadButton from '../Upload.jsx';
-import Settings from '../Settings/index.jsx';
+import PreferencesButton from './PreferencesButton.jsx';
 import ExportButton from './ExportButton.jsx';
 import { LayoutContainer, useDocumentsApi } from '../../Container';
 
@@ -62,7 +62,7 @@ const Header = ({ className, pageCount }) => {
         </p>
       )}
 
-      <Settings />
+      <PreferencesButton />
 
       <div className="menu">
         <UploadButton className="button upload" />
@@ -160,6 +160,34 @@ export default styled(Header)`
   p.save-status.is-error {
     color: var(--wp-color-danger);
     font-weight: 500;
+  }
+
+  .wp-gear {
+    /* Lived in the settings stylesheet until 7.0 stripped that panel's chrome;
+       it belongs to the header now, and leaves with it in 7.2. */
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--wp-h-control);
+    height: var(--wp-h-control);
+    padding: 0;
+    color: var(--wp-color-fg-muted);
+    background-color: transparent;
+    border: 0;
+    border-radius: var(--wp-radius);
+    cursor: pointer;
+    transition:
+      background-color var(--wp-ui-transition),
+      color var(--wp-ui-transition);
+  }
+  .wp-gear:hover {
+    color: var(--wp-color-fg);
+    background-color: var(--wp-color-canvas-subtle);
+  }
+  .wp-gear:focus-visible {
+    outline: 2px solid var(--wp-color-accent);
+    outline-offset: 1px;
   }
 
   div.menu {

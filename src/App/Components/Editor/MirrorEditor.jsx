@@ -69,6 +69,7 @@ export default styled(Editor)`
     /* The editor is chrome, not document: it tracks the code size setting but
        not the body font family, which belongs to the rendered output. */
     font-family: var(--wp-font-family-mono);
-    font-size: var(--wp-font-size-code);
+    /* The editor's own size (Phase 7.0), not the document's code size. */
+    font-size: var(--wp-font-size-editor, var(--wp-font-size-code));
   }
 `;

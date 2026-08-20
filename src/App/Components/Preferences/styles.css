@@ -1,0 +1,377 @@
+/*
+ * The preferences window.
+ *
+ * A full-window overlay rather than a modal or a slide-out. The old panel was
+ * 320px wide and held ten sections, which meant every control was a compromise
+ * between "readable" and "fits". Given the whole window, the content pane can
+ * cap itself at a reading measure and the controls can be the size they want to
+ * be.
+ *
+ * It is not a route and not a <dialog>. A route would put preferences in the
+ * back button's history, and a dialog would fight the app's own Esc handling.
+ */
+
+.wp-prefs {
+  position: fixed;
+  inset: 0;
+  /* Above everything the workspace paints, including the export menu. */
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--wp-color-canvas);
+  color: var(--wp-color-fg);
+  font-family: var(--wp-font-family-ui);
+  font-size: var(--wp-text-base);
+}
+
+/* --- header ------------------------------------------------------------- */
+
+.wp-prefs-head {
+  flex: 0 0 auto;
+  /* Fixed by spec. The only vertical rhythm here is the height itself, so
+     horizontal padding is the only padding — vertical padding on a fixed-height
+     flex row just fights the height. */
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: var(--wp-space-4);
+  padding: 0 var(--wp-space-4);
+  border-bottom: 1px solid var(--wp-color-border);
+}
+
+.wp-prefs-title {
+  flex-shrink: 0;
+  margin: 0;
+  font-size: var(--wp-text-lg);
+  font-weight: 600;
+  line-height: var(--wp-leading-tight);
+}
+
+.wp-prefs-search {
+  /* Centred by taking the slack on both sides rather than by absolute
+     positioning, so a long title cannot overlap it. */
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: center;
+}
+
+.wp-prefs-search-field {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+}
+
+.wp-prefs-search-icon {
+  position: absolute;
+  left: var(--wp-space-2);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  color: var(--wp-color-fg-subtle);
+  pointer-events: none;
+}
+
+.wp-prefs-search-input {
+  width: 100%;
+  height: var(--wp-h-control);
+  /* Left padding clears the icon; the rest is the ordinary inset. */
+  padding: 0 var(--wp-space-3) 0 var(--wp-space-6);
+  font-family: inherit;
+  font-size: var(--wp-text-sm);
+  color: var(--wp-color-fg);
+  background-color: var(--wp-color-canvas-subtle);
+  border: 1px solid var(--wp-color-border);
+  border-radius: var(--wp-radius);
+}
+
+.wp-prefs-search-input:focus-visible {
+  outline: 2px solid var(--wp-color-accent);
+  outline-offset: 1px;
+}
+
+.wp-prefs-close {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--wp-h-control);
+  height: var(--wp-h-control);
+  padding: 0;
+  font-family: inherit;
+  font-size: var(--wp-text-xl);
+  line-height: 1;
+  color: var(--wp-color-fg-muted);
+  background-color: transparent;
+  border: 0;
+  border-radius: var(--wp-radius);
+  cursor: pointer;
+  transition:
+    background-color var(--wp-ui-transition),
+    color var(--wp-ui-transition);
+}
+
+.wp-prefs-close:hover {
+  color: var(--wp-color-fg);
+  background-color: var(--wp-color-canvas-subtle);
+}
+
+.wp-prefs-close:focus-visible {
+  outline: 2px solid var(--wp-color-accent);
+  outline-offset: 1px;
+}
+
+/* --- body: rail + content ----------------------------------------------- */
+
+.wp-prefs-body {
+  flex: 1 1 auto;
+  display: flex;
+  /* min-height:0 so the two children can scroll instead of stretching this
+     row past the viewport — the classic flex overflow trap. */
+  min-height: 0;
+}
+
+.wp-prefs-rail {
+  /* Fixed by spec. */
+  flex: 0 0 240px;
+  display: flex;
+  flex-direction: column;
+  padding: var(--wp-space-3) 0;
+  overflow-y: auto;
+  background-color: var(--wp-color-canvas-subtle);
+  border-right: 1px solid var(--wp-color-border);
+}
+
+.wp-prefs-rail-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: var(--wp-h-control);
+  padding: 0 var(--wp-space-4);
+  font-family: inherit;
+  font-size: var(--wp-text-sm);
+  font-weight: 500;
+  text-align: left;
+  color: var(--wp-color-fg);
+  background-color: transparent;
+  /* A transparent left border on every item, so the active one's accent bar
+     does not shift the label two pixels sideways when it appears. */
+  border: 0;
+  border-left: 2px solid transparent;
+  cursor: pointer;
+  transition: background-color var(--wp-ui-transition);
+}
+
+.wp-prefs-rail-item:hover {
+  /* "50%" from the spec, expressed against the rail's own ground rather than
+     with an opacity that would also fade the text. */
+  background-color: color-mix(
+    in srgb,
+    var(--wp-color-canvas) 50%,
+    transparent
+  );
+}
+
+.wp-prefs-rail-item.is-active {
+  background-color: var(--wp-color-canvas);
+  border-left-color: var(--wp-color-accent);
+}
+
+.wp-prefs-rail-item:focus-visible {
+  outline: 2px solid var(--wp-color-accent);
+  outline-offset: -2px;
+}
+
+.wp-prefs-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-y: auto;
+  padding: var(--wp-space-6) var(--wp-space-8);
+}
+
+.wp-prefs-pane {
+  /* A reading measure, not the full window. Form controls stretched to 1600px
+     are the reason the old panel felt like a settings dump. */
+  max-width: 720px;
+  margin-inline: auto;
+}
+
+/* --- section content ---------------------------------------------------- */
+
+.wp-prefs-section-title {
+  margin: 0 0 var(--wp-space-1);
+  font-size: var(--wp-text-xl);
+  font-weight: 600;
+  line-height: var(--wp-leading-tight);
+}
+
+.wp-prefs-section-caption {
+  margin: 0 0 var(--wp-space-6);
+  font-size: var(--wp-text-sm);
+  color: var(--wp-color-fg-muted);
+  line-height: var(--wp-leading-normal);
+}
+
+.wp-prefs-group {
+  margin: 0 0 var(--wp-space-6);
+  padding: 0;
+  border: 0;
+}
+
+.wp-prefs-group-title {
+  display: block;
+  margin: 0 0 var(--wp-space-3);
+  padding: 0;
+  font-size: var(--wp-text-xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--wp-color-fg-muted);
+}
+
+.wp-prefs-field {
+  margin-bottom: var(--wp-space-5);
+}
+
+.wp-prefs-field:last-child {
+  margin-bottom: 0;
+}
+
+/*
+ * Search hides non-matching items outright.
+ *
+ * display:none rather than visibility or opacity, and nothing reflows to fill
+ * the gap, because the rail keeps its order: a section you have visited twice
+ * stays where your hand expects it even while a filter is on.
+ */
+.wp-prefs-hidden {
+  display: none;
+}
+
+.wp-prefs-empty {
+  padding: var(--wp-space-6) 0;
+  font-size: var(--wp-text-sm);
+  color: var(--wp-color-fg-subtle);
+}
+
+/* An informational banner, used for the frontmatter-override note. */
+.wp-prefs-note {
+  margin: 0 0 var(--wp-space-6);
+  padding: var(--wp-space-3) var(--wp-space-4);
+  font-size: var(--wp-text-sm);
+  line-height: var(--wp-leading-normal);
+  color: var(--wp-color-fg-muted);
+  background-color: var(--wp-color-canvas-subtle);
+  border: 1px solid var(--wp-color-border-muted);
+  border-radius: var(--wp-radius);
+}
+
+/* --- About -------------------------------------------------------------- */
+
+.wp-prefs-about p {
+  margin: 0 0 var(--wp-space-4);
+  font-size: var(--wp-text-sm);
+  line-height: var(--wp-leading-normal);
+  color: var(--wp-color-fg-muted);
+}
+
+.wp-prefs-about a {
+  color: var(--wp-color-accent);
+}
+
+.wp-prefs-version {
+  font-family: var(--wp-font-family-mono);
+  font-size: var(--wp-text-sm);
+  color: var(--wp-color-fg);
+}
+
+.wp-prefs-license {
+  max-height: 320px;
+  overflow-y: auto;
+  padding: var(--wp-space-4);
+  font-family: var(--wp-font-family-mono);
+  font-size: var(--wp-text-xs);
+  line-height: var(--wp-leading-normal);
+  white-space: pre-wrap;
+  color: var(--wp-color-fg-muted);
+  background-color: var(--wp-color-canvas-subtle);
+  border: 1px solid var(--wp-color-border-muted);
+  border-radius: var(--wp-radius);
+}
+
+/* --- footer ------------------------------------------------------------- */
+
+.wp-prefs-foot {
+  flex: 0 0 auto;
+  /* Fixed by spec. */
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 var(--wp-space-4);
+  border-top: 1px solid var(--wp-color-border);
+}
+
+.wp-prefs-reset {
+  height: var(--wp-h-control);
+  padding: 0 var(--wp-space-4);
+  font-family: inherit;
+  font-size: var(--wp-text-sm);
+  font-weight: 500;
+  color: var(--wp-color-danger);
+  background-color: transparent;
+  border: 0;
+  border-radius: var(--wp-radius);
+  cursor: pointer;
+  transition: background-color var(--wp-ui-transition);
+}
+
+.wp-prefs-reset:hover {
+  background-color: var(--wp-color-canvas-subtle);
+}
+
+.wp-prefs-reset:focus-visible {
+  outline: 2px solid var(--wp-color-accent);
+  outline-offset: 1px;
+}
+
+.wp-prefs-field-hint {
+  margin: var(--wp-space-2) 0 0;
+  font-size: var(--wp-text-xs);
+  line-height: var(--wp-leading-normal);
+  color: var(--wp-color-fg-muted);
+}
+
+/*
+ * A group whose every field is filtered out hides its own heading.
+ *
+ * :has() rather than a labels prop on the group: passing the field labels up so
+ * the group could count matches would duplicate every label string, and a
+ * duplicated label is one that drifts. Browsers without :has() show a bare
+ * heading during search, which is a cosmetic degradation, not a broken filter.
+ */
+.wp-prefs-group:not(:has(.wp-prefs-field:not(.wp-prefs-hidden))) {
+  display: none;
+}
+
+/*
+ * Two heading levels, not one.
+ *
+ * `.wp-label` is uppercase, letterspaced and muted — the right call inside a
+ * 320px column where it was the only heading there was. The preferences pane
+ * has group titles above it in exactly that treatment, so the two levels read
+ * as one flat list. Control labels drop to sentence case and full contrast,
+ * leaving the uppercase style to mean "group".
+ */
+.wp-prefs .wp-label {
+  font-size: var(--wp-text-sm);
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--wp-color-fg);
+  margin-bottom: var(--wp-space-2);
+}
+
+/* The readout beside a slider stays muted so the label leads. */
+.wp-prefs .wp-readout {
+  color: var(--wp-color-fg-muted);
+}

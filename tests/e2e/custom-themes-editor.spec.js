@@ -1,21 +1,39 @@
 import { test, expect } from '@playwright/test';
-import { boot } from './_helpers.js';
+import { boot, openPreferences } from './_helpers.js';
 
 /** The custom-theme editor: create, edit, live preview, validation, delete. */
 
 const CUSTOM_KEY = 'waynepdf.customThemes.v1';
 
-const gear = (page) => page.locator('button.wp-gear');
-const section = (page) => page.locator('.wp-custom-themes-head');
+const section = (page) => page.locator('.wp-custom-themes');
 const modal = (page) => page.locator('.wp-modal');
 const newButton = (page) => page.locator('.wp-new-theme');
 const row = (page, token) =>
   page.locator(`.wp-color-row[data-token="${token}"]`);
 
+/*
+ * The list is its own preferences section now and renders open, so there is no
+ * disclosure to click — 7.0 replaced two clicks with one.
+ */
+/**
+ * Counts the custom swatches, in the section that renders them.
+ *
+ * 7.0 put the swatch row in Appearance and the manager in Themes, so a test
+ * that creates a theme in one and counts it in the other has to navigate. The
+ * split is deliberate — the row is for picking, the list is for editing — but it
+ * makes "did my new theme appear" a two-section question. Returns to Themes so
+ * callers can keep working where they were.
+ */
+async function expectCustomSwatches(page, count) {
+  await openPreferences(page, 'appearance');
+  await expect(page.locator('.wp-swatch.is-custom')).toHaveCount(count);
+  await openPreferences(page, 'themes');
+}
+
 const openSection = async (page) => {
   await boot(page);
-  await gear(page).click();
-  await section(page).click();
+  await openPreferences(page, 'themes');
+  await expect(section(page)).toBeVisible();
 };
 
 const seed = (page, themes) =>
@@ -36,7 +54,7 @@ const previewBg = (page) =>
 
 test('the section reports the count and opens the editor', async ({ page }) => {
   await openSection(page);
-  await expect(section(page)).toContainText('(0/10)');
+  await expect(section(page)).toContainText('0 of 10 used');
   await expect(modal(page)).toHaveCount(0);
 
   await newButton(page).click();
@@ -62,8 +80,11 @@ test('creating a theme saves it, activates it and lists it', async ({
   await page.locator('.wp-btn-primary').click();
 
   await expect(modal(page)).toHaveCount(0);
+  // The swatch row and its caption are both in Appearance.
+  await openPreferences(page, 'appearance');
   await expect(page.locator('.wp-swatch.is-custom')).toHaveCount(1);
   await expect(page.locator('.wp-theme-name')).toHaveText('Ocean');
+  await openPreferences(page, 'themes');
   await expect.poll(() => dataTheme(page)).toMatch(/^custom-/);
 
   const canvas = await page.evaluate(() =>
@@ -163,7 +184,13 @@ test('a duplicate name is rejected with a message', async ({ page }) => {
 
   await expect(page.locator('.wp-modal-error')).toContainText('exists');
   await expect(modal(page)).toBeVisible();
-  await expect(page.locator('.wp-swatch.is-custom')).toHaveCount(1);
+  /*
+   * Counted in the list behind the modal rather than by visiting Appearance:
+   * the modal is still open — that is the point of the test — and it covers the
+   * rail, so navigating would be a click into an overlay. The list rows answer
+   * the real question anyway, which is whether a second theme got created.
+   */
+  await expect(page.locator('.wp-custom-theme-row')).toHaveCount(1);
 });
 
 test('save is disabled until the theme has a name', async ({ page }) => {
@@ -205,15 +232,16 @@ test('cancel and Esc both close without saving', async ({ page }) => {
   await page.locator('#wp-theme-name').fill('Discarded');
   await page.locator('.wp-btn-ghost', { hasText: 'Cancel' }).click();
   await expect(modal(page)).toHaveCount(0);
-  await expect(page.locator('.wp-swatch.is-custom')).toHaveCount(0);
+  await expectCustomSwatches(page, 0);
 
   await newButton(page).click();
   await page.locator('#wp-theme-name').fill('Also discarded');
   await page.keyboard.press('Escape');
   await expect(modal(page)).toHaveCount(0);
-  // Esc must not also close the settings panel behind it.
-  await expect(page.locator('#wp-settings-panel')).toHaveClass(/is-open/);
-  await expect(page.locator('.wp-swatch.is-custom')).toHaveCount(0);
+  // Esc must not also close the preferences window behind it. The window's own
+  // Esc handler checks defaultPrevented for exactly this reason.
+  await expect(page.locator('.wp-prefs')).toBeVisible();
+  await expectCustomSwatches(page, 0);
 });
 
 test('a backdrop click closes the modal', async ({ page }) => {
@@ -228,20 +256,20 @@ test('delete confirms and removes the theme', async ({ page }) => {
     { id: 'cccc', name: 'Doomed', basedOn: 'light', overrides: {} },
   ]);
   await openSection(page);
-  await expect(page.locator('.wp-swatch.is-custom')).toHaveCount(1);
+  await expectCustomSwatches(page, 1);
 
   page.once('dialog', (d) => d.dismiss());
   await page
     .locator('.wp-custom-theme-row .wp-btn-ghost', { hasText: 'Delete' })
     .click();
-  await expect(page.locator('.wp-swatch.is-custom')).toHaveCount(1);
+  await expectCustomSwatches(page, 1);
 
   page.once('dialog', (d) => d.accept());
   await page
     .locator('.wp-custom-theme-row .wp-btn-ghost', { hasText: 'Delete' })
     .click();
-  await expect(page.locator('.wp-swatch.is-custom')).toHaveCount(0);
-  await expect(section(page)).toContainText('(0/10)');
+  await expectCustomSwatches(page, 0);
+  await expect(section(page)).toContainText('0 of 10 used');
 });
 
 test('the new-theme button is disabled at the limit', async ({ page }) => {
@@ -255,7 +283,7 @@ test('the new-theme button is disabled at the limit', async ({ page }) => {
     })),
   );
   await openSection(page);
-  await expect(section(page)).toContainText('(10/10)');
+  await expect(section(page)).toContainText('10 of 10 used');
   await expect(newButton(page)).toBeDisabled();
   await expect(newButton(page)).toHaveAttribute('title', /limit reached/i);
 });

@@ -5,8 +5,8 @@ import {
   PRESET_NAMES,
   EDITABLE_TOKENS,
   TOKEN_LABELS,
-} from '../../Lib/presetPalettes.js';
-import { paletteBlock } from '../../Lib/generateCustomThemeCSS.js';
+} from '../../../Lib/presetPalettes.js';
+import { paletteBlock } from '../../../Lib/generateCustomThemeCSS.js';
 import ColorPicker from './ColorPicker.jsx';
 import './customThemeStyles.css';
 
@@ -40,7 +40,7 @@ const sample = 1;
 let samplePromise = null;
 const renderSample = () => {
   if (!samplePromise) {
-    samplePromise = import('../Previewer/Preview.jsx')
+    samplePromise = import('../../Previewer/Preview.jsx')
       .then((m) => m.md.render(SAMPLE))
       .catch(() => '');
   }

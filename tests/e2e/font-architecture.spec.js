@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { boot } from './_helpers.js';
+import { boot, openPreferences } from './_helpers.js';
 
 /*
  * The document face and the app face are separate decisions.
  *
- * Picking Serif or Mono in Settings is a statement about the document being
+ * Picking Serif or Mono in preferences is a statement about the document being
  * written, not about the application. --wp-font-family-ui exists so chrome
  * cannot accidentally follow --wp-font-family-body; these tests are what keeps
  * the two from being quietly re-merged.
@@ -19,10 +19,13 @@ const CHROME = {
   'tab strip': '.wp-tabs',
   'tab label': '.wp-tab-label',
   'new tab button': '.wp-tab-new',
-  'settings panel': '#wp-settings-panel',
-  'settings label': '#wp-settings-panel .wp-label',
-  'settings select': '#wp-settings-panel select',
-  'reset button': 'button.wp-reset',
+  'preferences window': '.wp-prefs',
+  'preferences title': '.wp-prefs-title',
+  'preferences search': '.wp-prefs-search-input',
+  'preferences rail item': '.wp-prefs-rail-item',
+  'preferences label': '.wp-prefs .wp-label',
+  'preferences select': '.wp-prefs select',
+  'reset button': 'button.wp-prefs-reset',
 };
 
 const firstFamily = (page, selector) =>
@@ -45,7 +48,7 @@ for (const family of ['Serif', 'Mono']) {
     page,
   }) => {
     await boot(page);
-    await page.locator('button.wp-gear').click();
+    await openPreferences(page, 'appearance');
     await pickFont(page, family);
 
     // The document really did change — otherwise this test proves nothing.
@@ -56,6 +59,13 @@ for (const family of ['Serif', 'Mono']) {
           ? 'Source Serif 4 Variable'
           : 'JetBrains Mono Variable',
       );
+
+    /*
+     * Layout, because Appearance contains no <select> and a select is the one
+     * chrome control that does not inherit font-family from its ancestors by
+     * default — which makes it the most likely place for the UI face to leak.
+     */
+    await openPreferences(page, 'layout');
 
     for (const [name, selector] of Object.entries(CHROME)) {
       expect(
@@ -68,7 +78,7 @@ for (const family of ['Serif', 'Mono']) {
 
 test('the UI token is independent of the body token', async ({ page }) => {
   await boot(page);
-  await page.locator('button.wp-gear').click();
+  await openPreferences(page, 'appearance');
   await pickFont(page, 'Mono');
 
   const tokens = await page.evaluate(() => {
@@ -87,7 +97,7 @@ test('nothing visible falls through to the browser default serif', async ({
   page,
 }) => {
   await boot(page);
-  await page.locator('button.wp-gear').click();
+  await openPreferences(page, 'appearance');
 
   const offenders = await page.evaluate(() => {
     const out = [];

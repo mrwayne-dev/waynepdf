@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { boot, loadFixture, setText, themeSettings } from './_helpers.js';
+import { boot, loadFixture, setText, themeSettings, openPreferences } from './_helpers.js';
 
 // Mermaid is a ~139 KB gzip chunk plus a per-diagram-type chunk each, so first
 // render in a fresh context is genuinely slow.
@@ -73,7 +73,7 @@ test('a theme change re-renders diagrams with the new mermaid theme', async ({
     });
   const before = await svgFill();
 
-  await page.locator('button.wp-gear').click();
+  await openPreferences(page, 'appearance');
   await page.locator('button.wp-swatch[data-theme="dark"]').click();
   await page.keyboard.press('Escape');
 

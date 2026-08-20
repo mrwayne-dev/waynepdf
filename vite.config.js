@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { fileURLToPath, URL } from 'node:url';
+import { appDefines } from './scripts/appDefines.js';
 
 /**
  * Legacy @font-face formats we refuse to ship.
@@ -71,6 +72,7 @@ const dropLegacyFontAssets = {
 // subpath (GitHub Pages, Docker/nginx).
 export default defineConfig({
   base: './',
+  define: appDefines(import.meta.url),
   css: {
     postcss: { plugins: [stripLegacyFontFallbacks] },
   },

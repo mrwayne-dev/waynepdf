@@ -1,22 +1,25 @@
 import { useState } from 'react';
 import { useProvided } from 'nonaction';
-import { CustomThemesContainer, ThemeContainer } from '../../Container';
-import { customThemeId } from '../../Lib/generateCustomThemeCSS.js';
+import { CustomThemesContainer, ThemeContainer } from '../../../Container';
+import { customThemeId } from '../../../Lib/generateCustomThemeCSS.js';
 import CustomThemeEditor from './CustomThemeEditor.jsx';
 import './customThemeStyles.css';
 
 /**
- * The custom-theme manager: a collapsible list with edit and delete, plus the
- * button that opens the editor.
+ * The custom-theme manager: the list with edit and delete, plus the button that
+ * opens the editor.
  *
- * Collapsed by default. The swatch row above already gives one-click access to
- * every custom theme; this section is for the rarer act of changing one.
+ * `inline` drops the disclosure header and renders the body open. Inside the
+ * old 320px panel this had to collapse — it was one of ten things competing for
+ * that column — but the preferences Themes section contains nothing else, and a
+ * disclosure triangle guarding an otherwise empty page is a click that buys the
+ * user nothing.
  */
-export default function CustomThemeList() {
+export default function CustomThemeList({ inline = false }) {
   const [{ themes, count, atLimit, limit }, { create, update, remove }] =
     useProvided(CustomThemesContainer);
   const [, { setTheme }] = useProvided(ThemeContainer);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(inline);
   // null = closed, 'new' = creating, otherwise the id being edited.
   const [editing, setEditing] = useState(null);
 
@@ -47,21 +50,27 @@ export default function CustomThemeList() {
   };
 
   return (
-    <div className="wp-custom-themes">
-      <button
-        type="button"
-        className="wp-collapsible-head wp-custom-themes-head"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-      >
-        <span className="wp-collapsible-caret" aria-hidden="true">
-          {open ? '▾' : '▸'}
-        </span>
-        Custom themes
-        <span className="wp-custom-themes-count">
-          ({count}/{limit})
-        </span>
-      </button>
+    <div className={`wp-custom-themes${inline ? ' is-inline' : ''}`}>
+      {inline ? (
+        <p className="wp-custom-themes-count wp-hint">
+          {count} of {limit} used
+        </p>
+      ) : (
+        <button
+          type="button"
+          className="wp-collapsible-head wp-custom-themes-head"
+          aria-expanded={open}
+          onClick={() => setOpen((v) => !v)}
+        >
+          <span className="wp-collapsible-caret" aria-hidden="true">
+            {open ? '▾' : '▸'}
+          </span>
+          Custom themes
+          <span className="wp-custom-themes-count">
+            ({count}/{limit})
+          </span>
+        </button>
+      )}
 
       {open && (
         <div className="wp-custom-themes-body">

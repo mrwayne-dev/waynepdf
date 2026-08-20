@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { openPreferences } from '../_helpers.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURE_DIR = path.resolve(__dirname, '../../fixtures');
@@ -157,7 +158,7 @@ test.describe('layout changes re-paginate', () => {
     expect(Math.round(a4.width)).toBeGreaterThan(700);
     expect(Math.round(a4.height)).toBeGreaterThan(a4.width);
 
-    await page.locator('button.wp-gear').click();
+    await openPreferences(page, 'layout');
     await page.locator('select.wp-select-page-size').selectOption('a5');
     await page.keyboard.press('Escape');
 
@@ -210,7 +211,7 @@ test.describe('layout changes re-paginate', () => {
     // Driven through the UI rather than a reload: addInitScript re-seeds
     // localStorage on every navigation, so a reload would silently restore the
     // old value and the assertion would pass without testing anything.
-    await page.locator('button.wp-gear').click();
+    await openPreferences(page, 'layout');
     await page.locator('select.wp-select-margins').selectOption('wide');
     await page.keyboard.press('Escape');
 

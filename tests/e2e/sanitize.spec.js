@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { boot, loadFixture, themeSettings } from './_helpers.js';
+import { boot, loadFixture, themeSettings, openPreferences } from './_helpers.js';
 
 const html = (page) => page.locator('.preview').innerHTML();
 
@@ -69,7 +69,7 @@ test.describe('sanitize on', () => {
     await loadFixture(page, 'xss.md');
     expect(await html(page)).toContain('<script');
 
-    await page.locator('button.wp-gear').click();
+    await openPreferences(page, 'document');
     await page
       .locator('label.wp-check', { hasText: 'Sanitize HTML output' })
       .click();
