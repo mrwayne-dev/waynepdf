@@ -174,13 +174,22 @@ describe('generateLayoutCSS: margin boxes', () => {
 describe('generateLayoutCSS: fragmentation', () => {
   it('always emits the fragmentation rules', () => {
     const css = generateLayoutCSS(layout());
-    expect(css).toContain('.markdown-body h1 { break-before: page; }');
-    expect(css).toContain(
-      '.markdown-body h1:first-child { break-before: auto; }',
-    );
     expect(css).toContain('break-after: avoid');
     expect(css).toContain('orphans: 3');
     expect(css).toContain('widows: 3');
+  });
+
+  it('does not force a page break before headings, so pages flow continuously', () => {
+    // Forcing break-before: page on every h1 ended pages early and left a blank
+    // band below the last paragraph. Content now flows and fills each page.
+    const css = generateLayoutCSS(layout());
+    expect(css).not.toContain('break-before: page');
+  });
+
+  it('keeps every heading glued to the content that follows it', () => {
+    const css = generateLayoutCSS(layout());
+    expect(css).toContain('.markdown-body h1,');
+    expect(css).toMatch(/\.markdown-body h4 \{ break-after: avoid; \}/);
   });
 
   it('lets tables split but keeps rows whole and repeats headers', () => {
@@ -216,11 +225,15 @@ describe('generateLayoutCSS: cover', () => {
     expect(css).toContain('@bottom-center { content: none; }');
   });
 
-  it('suppresses the extra break from the document h1 after a cover', () => {
+  it('breaks after the cover via the cover page itself, not an h1 override', () => {
+    // Headings no longer force a page break, so the cover owns its own sheet
+    // through break-after on .wp-cover-page and needs no h1:first-child rule to
+    // cancel a break that is no longer emitted.
     const css = generateLayoutCSS(
       layout({ cover: { ...DEFAULTS.cover, enabled: true } }),
     );
-    expect(css).toContain('h1:first-child { break-before: auto; }');
+    expect(css).toContain('.wp-cover-page { page: cover; break-after: page; }');
+    expect(css).not.toContain('h1:first-child { break-before: auto; }');
   });
 });
 

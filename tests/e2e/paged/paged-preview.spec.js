@@ -185,9 +185,9 @@ test.describe('layout changes re-paginate', () => {
   test('wider margins shrink the printable content area', async ({ page }) => {
     /*
      * Asserted on the content box, not the page count. Page count is a poor
-     * proxy here: `h1 { break-before: page }` means section count dominates,
-     * so this fixture stays at 7 pages under both presets even though the
-     * printable area really did change.
+     * proxy for a margin change — a wider margin can leave the number of pages
+     * unchanged while the printable area genuinely shrinks — so this measures
+     * the content box width directly.
      */
     await boot(page, layout({ previewMode: 'paged', marginPreset: 'small' }));
     await loadAndPaginate(page, read('paged-basic.md'));

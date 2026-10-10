@@ -133,9 +133,13 @@ ${boxes}}
 /* First H1 becomes the {title} placeholder's value. */
 .markdown-body h1 { string-set: doc-title content(text); }
 
-/* Fragmentation. */
-.markdown-body h1 { break-before: page; }
-.markdown-body h1:first-child { break-before: auto; }
+/* Fragmentation.
+   Content flows continuously: a heading does NOT force a new page, so pages
+   fill before the next section starts instead of ending early with a blank
+   band below the last paragraph. Headings still stay glued to the content that
+   follows them (break-after: avoid), so a heading never strands at the foot of
+   a page away from its section. */
+.markdown-body h1,
 .markdown-body h2,
 .markdown-body h3,
 .markdown-body h4 { break-after: avoid; }
@@ -169,9 +173,6 @@ ${boxes}}
   @bottom-center { content: none; }
   @bottom-right { content: none; }
 }
-/* The document's own first H1 must not add a second break after the cover. */
-.wp-cover-page + .markdown-body > h1:first-child,
-.wp-cover-page ~ * > h1:first-child { break-before: auto; }
 `;
   }
 

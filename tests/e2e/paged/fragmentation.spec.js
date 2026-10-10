@@ -162,15 +162,20 @@ test.describe('fixtures fragment without spilling', () => {
 });
 
 test.describe('headings and cover', () => {
-  test('every H1 after the first starts a page, and the first does not waste one', async ({
+  test('headings flow continuously rather than each forcing a new page', async ({
     page,
   }) => {
     await paginate(page, read('paged-long.md'));
     const starts = await startsOfPages(page);
-    // paged-long is 34 chapters; the first H1 shares page 1 rather than
-    // forcing a blank sheet before it.
+    // The document opens with its first heading, sharing page 1.
     expect(starts[0]).toBe('h1');
-    expect(starts.filter((s) => s === 'h1').length).toBeGreaterThan(30);
+    // paged-long has 34 H1 sections. When each H1 forced a page break there
+    // were more than 34 pages and almost every page opened on an h1 — ending
+    // the previous page early with a blank band. Flowing continuously packs the
+    // short sections together, so the document is far shorter than its section
+    // count and most pages begin mid-flow instead of on a heading.
+    expect(starts.length).toBeLessThan(34);
+    expect(starts.filter((s) => s === 'h1').length).toBeLessThan(starts.length);
   });
 
   test('a cover page does not push a blank sheet before the first heading', async ({

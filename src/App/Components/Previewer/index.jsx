@@ -76,6 +76,7 @@ export default function Previewer({ children, onPagesReady }) {
             <LazyPagedPreview
               source={children}
               layout={layout}
+              theme={themeSettings.resolvedTheme}
               sanitizeHtml={sanitizeHtml}
               onPagesReady={onPagesReady}
             />

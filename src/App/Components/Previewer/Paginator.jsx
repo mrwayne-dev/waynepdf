@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { preprocess } from '../../Lib/paginatorPreprocess.js';
 import { generateLayoutCSS } from '../../Lib/generateLayoutCSS.js';
+import { renderMermaidInHTML } from '../../Lib/mermaidLoader.js';
 import LazyLoad from '../LazyLoad.jsx';
 import './paginator.css';
 
@@ -26,11 +27,21 @@ export const PAGINATE_DEBOUNCE_MS = 800;
  * document: browsers ignore @top-center, string-set and target-counter, so
  * only paged.js's own Polisher can act on them. Passing an empty array here
  * would silently produce unstyled pages with no headers or footers.
+ *
+ * Mermaid fences are rendered to SVG *before* pagination. markdown-it leaves
+ * them as `<pre><code class="language-mermaid">` code blocks, and paged.js would
+ * otherwise fragment the diagram source as a code listing — which is exactly why
+ * diagrams never appeared in the printed PDF. Doing it here covers both routes
+ * that print: the live Paged preview and the Flowing-mode Transform target.
  */
-export async function paginateInto(sourceHtml, layout, target) {
+export async function paginateInto(sourceHtml, layout, target, { theme } = {}) {
   const { Previewer } = await import('pagedjs');
+  const withDiagrams = await renderMermaidInHTML(sourceHtml, {
+    theme,
+    idPrefix: 'wp-paged-diagram',
+  });
   const previewer = new Previewer();
-  const content = preprocess(sourceHtml, layout);
+  const content = preprocess(withDiagrams, layout);
   const css = generateLayoutCSS(layout);
   const started = performance.now();
   const flow = await previewer.preview(
@@ -41,7 +52,7 @@ export async function paginateInto(sourceHtml, layout, target) {
   return { flow, elapsed: performance.now() - started };
 }
 
-export default function Paginator({ sourceHtml, layout, onPagesReady }) {
+export default function Paginator({ sourceHtml, layout, theme, onPagesReady }) {
   const targetRef = useRef(null);
   const [status, setStatus] = useState('loading');
   const [pages, setPages] = useState(0);
@@ -64,7 +75,9 @@ export default function Paginator({ sourceHtml, layout, onPagesReady }) {
           // paged.js has no cancel API; clearing the target is what makes a
           // superseded run harmless.
           target.innerHTML = '';
-          const { flow } = await paginateInto(sourceHtml, layout, target);
+          const { flow } = await paginateInto(sourceHtml, layout, target, {
+            theme,
+          });
           if (cancelled) return;
           setPages(flow.total);
           setStatus('ready');
@@ -81,7 +94,7 @@ export default function Paginator({ sourceHtml, layout, onPagesReady }) {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [sourceHtml, layout, onPagesReady]);
+  }, [sourceHtml, layout, theme, onPagesReady]);
 
   return (
     <div className="paginator">
@@ -101,11 +114,11 @@ export default function Paginator({ sourceHtml, layout, onPagesReady }) {
         </div>
       )}
       {/*
-        * The page count, which lived in the header until 7.2 cut that bar down
-        * to controls scoped to the document rather than to the preview. It only
-        * ever appeared in Paged mode, so it belongs to the paginated view — and
-        * this is where someone counting pages is already looking.
-        */}
+       * The page count, which lived in the header until 7.2 cut that bar down
+       * to controls scoped to the document rather than to the preview. It only
+       * ever appeared in Paged mode, so it belongs to the paginated view — and
+       * this is where someone counting pages is already looking.
+       */}
       {status === 'ready' && pages > 0 && (
         <p className="paginator-count no-print" aria-live="polite">
           {pages} {pages === 1 ? 'page' : 'pages'}

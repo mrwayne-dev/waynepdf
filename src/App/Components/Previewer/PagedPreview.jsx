@@ -13,6 +13,7 @@ import Paginator from './Paginator.jsx';
 export default function PagedPreview({
   source,
   layout,
+  theme,
   sanitizeHtml = false,
   onPagesReady,
 }) {
@@ -23,6 +24,11 @@ export default function PagedPreview({
     [source, sanitizeHtml],
   );
   return (
-    <Paginator sourceHtml={html} layout={layout} onPagesReady={onPagesReady} />
+    <Paginator
+      sourceHtml={html}
+      layout={layout}
+      theme={theme}
+      onPagesReady={onPagesReady}
+    />
   );
 }

@@ -1,4 +1,4 @@
-import { renderMermaidSVG } from './mermaidLoader.js';
+import { renderMermaidInHTML } from './mermaidLoader.js';
 import {
   deriveDocumentTitle,
   UNTITLED,
@@ -46,21 +46,14 @@ export function deriveExportTitle({ body, layout }) {
 
 /* ------------------------------------------------------------------ mermaid */
 
-const MERMAID_BLOCK =
-  /<pre><code class="language-mermaid">([\s\S]*?)<\/code><\/pre>/g;
-
-const decodeEntities = (html) => {
-  const el = document.createElement('textarea');
-  el.innerHTML = html;
-  return el.value;
-};
-
 /**
  * Renders the document, then swaps each mermaid fence for its SVG.
  *
  * Rendered against mermaid's own detached container and matched on the emitted
  * HTML rather than the live preview's DOM: an export must not depend on the
- * preview being mounted, in the right mode, or finished rendering.
+ * preview being mounted, in the right mode, or finished rendering. The fence →
+ * SVG swap is shared with the PDF pagination path via renderMermaidInHTML, so
+ * every format turns diagrams into the same markup.
  */
 export async function renderMarkdownWithMermaid(
   body,
@@ -79,41 +72,9 @@ export async function renderMarkdownWithMermaid(
     await import('../Components/Previewer/Preview.jsx');
   const { html } = renderDocument(body ?? '', { sanitizeHtml });
 
-  const blocks = [...html.matchAll(MERMAID_BLOCK)];
-  if (blocks.length === 0) return html;
-
-  const rendered = await Promise.all(
-    blocks.map(async (match, index) => {
-      const source = decodeEntities(match[1]);
-      try {
-        // Deterministic and namespaced: one id per block position, so two
-        // exports of the same document produce byte-identical output.
-        const svg = await renderMermaidSVG(
-          source,
-          `wp-export-diagram-${index}`,
-          theme,
-        );
-        return {
-          match: match[0],
-          html: `<div class="mermaid-diagram">${svg}</div>`,
-        };
-      } catch (error) {
-        // The source stays visible, the same choice the live renderer makes.
-        return {
-          match: match[0],
-          html: `<pre class="mermaid-error">Mermaid error: ${escapeHTML(
-            error?.message ?? error,
-          )}\n\n${escapeHTML(source)}</pre>`,
-        };
-      }
-    }),
-  );
-
-  let out = html;
-  for (const { match, html: replacement } of rendered) {
-    out = out.replace(match, () => replacement);
-  }
-  return out;
+  // Deterministic prefix: one id per block position, so two exports of the same
+  // document produce byte-identical output.
+  return renderMermaidInHTML(html, { theme, idPrefix: 'wp-export-diagram' });
 }
 
 /* ---------------------------------------------------------------- css + fonts */
