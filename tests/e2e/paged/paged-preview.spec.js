@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { openPreferences } from '../_helpers.js';
+import { pageBox } from './_pageBox.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURE_DIR = path.resolve(__dirname, '../../fixtures');
@@ -148,12 +149,97 @@ test.describe('page count', () => {
   });
 });
 
+test.describe('the sheet fits the pane', () => {
+  test('no part of the page is clipped or unreachable', async ({ page }) => {
+    /*
+     * An A4 sheet is 794px at 96dpi and the preview pane is narrower than that
+     * at any ordinary window size once the 260px sidebar is accounted for. The
+     * sheet used to overflow, and because paged.js nests every page inside one
+     * centred wrapper, half that overflow sat off the *start* edge where no
+     * horizontal scroll could reach it — the first character of every line was
+     * simply gone.
+     */
+    await boot(page, layout({ previewMode: 'paged' }));
+    await loadAndPaginate(page, read('paged-basic.md'));
+
+    const fitted = await page.evaluate(() => {
+      const out = document.querySelector('.paginator-output');
+      const pane = document.querySelector('.preview').getBoundingClientRect();
+      const sheet = document
+        .querySelector('.pagedjs_page')
+        .getBoundingClientRect();
+      return {
+        clippedLeft: sheet.left < pane.left - 1,
+        clippedRight: sheet.right > pane.right + 1,
+        horizontalScroll: out.scrollWidth > out.clientWidth + 1,
+      };
+    });
+
+    expect(fitted.clippedLeft, 'sheet runs off the left of the pane').toBe(
+      false,
+    );
+    expect(fitted.clippedRight, 'sheet runs off the right of the pane').toBe(
+      false,
+    );
+    expect(
+      fitted.horizontalScroll,
+      'the pane scrolls sideways instead of fitting the sheet',
+    ).toBe(false);
+  });
+
+  test('scaling the sheet does not move where the breaks fall', async ({
+    page,
+  }) => {
+    /*
+     * The reason the fit is a transform and not `zoom`. Zoom re-lays-out at the
+     * scaled size — text re-wraps, line boxes round differently — so content
+     * paged.js had fitted inside a page starts spilling out of it, and the
+     * preview shows breaks the printed page does not have. A transform moves
+     * pixels and nothing else.
+     *
+     * The 14px tolerance is fragmentation.spec.js's, for its reasons: a line
+     * box may straddle a break by a fraction of its height, measured at 7px for
+     * tables and 9-10px for code. Zoom's reflow pushed content well past that —
+     * it failed three of those checks — so the same bar discriminates here.
+     */
+    const TOLERANCE_PX = 14;
+    await boot(page, layout({ previewMode: 'paged' }));
+    await loadAndPaginate(page, read('paged-mixed.md'));
+
+    const spills = await page.evaluate((tolerance) => {
+      const out = [];
+      for (const pg of document.querySelectorAll('.pagedjs_page')) {
+        const content = pg.querySelector('.pagedjs_page_content');
+        if (!content) continue;
+        const cb = content.getBoundingClientRect();
+        for (const el of content.querySelectorAll('p,pre,table,blockquote,li')) {
+          const b = el.getBoundingClientRect();
+          if (!b.height) continue;
+          const over =
+            Math.max(0, b.bottom - cb.bottom) + Math.max(0, cb.top - b.top);
+          if (over > tolerance) {
+            out.push(`${el.tagName.toLowerCase()} by ${Math.round(over)}px`);
+          }
+        }
+      }
+      return out;
+    }, TOLERANCE_PX);
+
+    expect(spills).toEqual([]);
+  });
+});
+
 test.describe('layout changes re-paginate', () => {
   test('page size changes the page box dimensions', async ({ page }) => {
     await boot(page, layout({ previewMode: 'paged' }));
     await loadAndPaginate(page, read('paged-basic.md'));
 
-    const a4 = await pages(page).first().boundingBox();
+    /*
+     * Page units, not screen units: the preview scales the sheet to fit the
+     * pane, so the on-screen rect is some fraction of the real page. A4 is a
+     * fact about paper and does not change with the window.
+     */
+    const a4 = await pageBox(page);
     // A4 portrait at 96dpi is about 794x1123.
     expect(Math.round(a4.width)).toBeGreaterThan(700);
     expect(Math.round(a4.height)).toBeGreaterThan(a4.width);
@@ -163,12 +249,9 @@ test.describe('layout changes re-paginate', () => {
     await page.keyboard.press('Escape');
 
     await expect
-      .poll(
-        async () => Math.round((await pages(page).first().boundingBox()).width),
-        {
-          timeout: 60_000,
-        },
-      )
+      .poll(async () => Math.round((await pageBox(page)).width), {
+        timeout: 60_000,
+      })
       .toBeLessThan(Math.round(a4.width));
   });
 

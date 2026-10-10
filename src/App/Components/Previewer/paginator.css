@@ -25,9 +25,29 @@
      contrasting ground, which is what makes page boundaries readable. */
   display: flex;
   flex-direction: column;
+  /*
+   * align-items, not center. paged.js nests every sheet inside one
+   * .pagedjs_pages wrapper, so this container has exactly one child — centring
+   * it did nothing for the sheets and, once that wrapper was wider than the
+   * pane, pushed half the overflow off the *start* edge, where no amount of
+   * horizontal scrolling can reach it. The sheets are centred by the fit
+   * below instead.
+   *
+   * The `gap` that used to sit here was aspirational for the same reason: with
+   * one child there was nothing to space. Sheet separation is a margin on the
+   * sheet itself now.
+   */
+  align-items: stretch;
+  /* Horizontal padding is the gutter the fit calculation subtracts; keep the
+     two in step (FIT_GUTTER_PX in Paginator.jsx). */
+  padding: var(--wp-space-4);
+}
+
+/* The sheet stack, centred now that it is scaled to fit. */
+.paginator-output .pagedjs_pages {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: var(--wp-space-4);
-  padding: var(--wp-space-4) 0;
 }
 
 /*
@@ -43,6 +63,44 @@
 
 .paginator-output .pagedjs_page_content {
   position: relative;
+}
+
+/*
+ * Fit the sheet to the pane.
+ *
+ * `transform: scale()`, emphatically not `zoom`. Zoom is the shorter spelling —
+ * it shrinks the layout box too, so centring, gaps and scroll height would all
+ * come out right for free — but zoom *re-lays-out* the content at the scaled
+ * size. Text re-wraps, line boxes round differently, and elements paged.js had
+ * fitted inside a page start spilling out of it. The preview would then be
+ * showing breaks in places the printed page does not have them, which is worse
+ * than the clipping this exists to fix. A transform moves pixels and nothing
+ * else, so the fragmentation on screen stays exactly what paged.js computed.
+ *
+ * The price is that the layout box keeps its full size, which would leave the
+ * overflow in place and strand a sheet-sized gap under every page. Negative
+ * margins pull it back to the scaled size; --wp-page-w/h carry the real
+ * dimensions, since the ratio alone is not enough to compute them.
+ *
+ * Screen only. Paper gets a 1:1 page — scaling there would shrink the document
+ * inside a full-size sheet. Set by Paginator.jsx once pagination has finished,
+ * never during it.
+ */
+@media screen {
+  .paginator-output .pagedjs_page {
+    transform: scale(var(--wp-page-fit, 1));
+    transform-origin: top left;
+    /*
+     * fit - 1 is negative, so these shrink the outer box back to the visual
+     * size. The bottom one then adds a real gap, which the sheets never had:
+     * the flex gap above could not reach them through paged.js's wrapper, so
+     * every page butted against the next one.
+     */
+    margin-right: calc(var(--wp-page-w, 0px) * (var(--wp-page-fit, 1) - 1));
+    margin-bottom: calc(
+      var(--wp-page-h, 0px) * (var(--wp-page-fit, 1) - 1) + var(--wp-space-4)
+    );
+  }
 }
 
 /*

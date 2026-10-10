@@ -38,6 +38,7 @@ const browserGlobals = {
   Uint8Array: 'readonly',
   performance: 'readonly',
   MutationObserver: 'readonly',
+  ResizeObserver: 'readonly',
   localStorage: 'readonly',
   matchMedia: 'readonly',
   TextDecoder: 'readonly',

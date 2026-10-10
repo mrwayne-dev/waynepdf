@@ -52,10 +52,21 @@ export async function paginateInto(sourceHtml, layout, target, { theme } = {}) {
   return { flow, elapsed: performance.now() - started };
 }
 
+/** Breathing room either side of the sheet, matching the output's padding. */
+const FIT_GUTTER_PX = 32;
+
 export default function Paginator({ sourceHtml, layout, theme, onPagesReady }) {
   const targetRef = useRef(null);
   const [status, setStatus] = useState('loading');
   const [pages, setPages] = useState(0);
+  /*
+   * The sheet's width at zoom 1, measured once per pagination.
+   *
+   * Kept rather than re-measured on every resize because reading it back while
+   * the fit is applied returns the *scaled* width, and feeding that into the
+   * next ratio shrinks the page a little further on every resize tick.
+   */
+  const sheetWidthRef = useRef(0);
 
   useEffect(() => {
     /*
@@ -75,6 +86,16 @@ export default function Paginator({ sourceHtml, layout, theme, onPagesReady }) {
           // paged.js has no cancel API; clearing the target is what makes a
           // superseded run harmless.
           target.innerHTML = '';
+          /*
+           * Clear any fit from the previous run before fragmenting. paged.js
+           * measures the boxes it creates, so a scale left in place here would
+           * have it fragmenting against a page it thinks is 586px wide — every
+           * break would land in the wrong place.
+           */
+          target.style.removeProperty('--wp-page-fit');
+          target.style.removeProperty('--wp-page-w');
+          target.style.removeProperty('--wp-page-h');
+          sheetWidthRef.current = 0;
           const { flow } = await paginateInto(sourceHtml, layout, target, {
             theme,
           });
@@ -95,6 +116,62 @@ export default function Paginator({ sourceHtml, layout, theme, onPagesReady }) {
       clearTimeout(timer);
     };
   }, [sourceHtml, layout, theme, onPagesReady]);
+
+  /*
+   * Fit the sheet to the pane.
+   *
+   * An A4 page is 794px at 96dpi and the preview pane is narrower than that at
+   * any normal window size once the 260px sidebar is out — so the sheet
+   * overflowed. Worse, `align-items: center` on an overflowing flex item spills
+   * it equally both ways, and the left half of that overflow cannot be scrolled
+   * to: the first character of every line was simply unreachable.
+   *
+   * Applied only once status is 'ready', never during fragmentation, and scoped
+   * to screen in CSS so paper still gets a 1:1 page.
+   *
+   * The sheet's own dimensions go out alongside the ratio because the CSS
+   * compensates the layout box with negative margins, and it needs the real
+   * numbers to do that — a transform shrinks what you see and nothing else.
+   */
+  useEffect(() => {
+    if (status !== 'ready') return undefined;
+    const target = targetRef.current;
+    if (!target) return undefined;
+
+    const measure = () => {
+      const sheet = target.querySelector('.pagedjs_page');
+      if (!sheet) return;
+
+      if (!sheetWidthRef.current) {
+        // First pass after this pagination: nothing is scaled yet, so the rect
+        // is the sheet's true size.
+        const rect = sheet.getBoundingClientRect();
+        sheetWidthRef.current = rect.width;
+        target.style.setProperty('--wp-page-w', `${rect.width}px`);
+        target.style.setProperty('--wp-page-h', `${rect.height}px`);
+      }
+      const sheetWidth = sheetWidthRef.current;
+      if (!sheetWidth) return;
+
+      const available = target.clientWidth - FIT_GUTTER_PX;
+      // Never scale up: a page smaller than the pane sits at its real size.
+      const next = Math.min(1, available / sheetWidth);
+      if (!Number.isFinite(next) || next <= 0) return;
+
+      const current = Number(
+        target.style.getPropertyValue('--wp-page-fit') || 1,
+      );
+      // A threshold, because applying the fit can add or remove the vertical
+      // scrollbar, which changes clientWidth and wakes the observer again.
+      if (Math.abs(next - current) < 0.005) return;
+      target.style.setProperty('--wp-page-fit', String(next));
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [status, pages, layout]);
 
   return (
     <div className="paginator">

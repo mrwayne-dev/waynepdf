@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { boot, setText, themeSettings } from '../_helpers.js';
+import { pageBox } from './_pageBox.js';
 
 const LAYOUT = JSON.stringify({
   previewMode: 'paged',
@@ -44,19 +45,20 @@ test('frontmatter page size and toc re-paginate the document', async ({
   await setText(page, body);
   await paginated(page);
 
-  const a4Width = (await page.locator('.pagedjs_page').first().boundingBox())
-    .width;
+  /*
+   * Measured in page units, not screen units. The preview scales each sheet to
+   * fit the pane, and a smaller page earns a *larger* scale factor — so on
+   * screen A5 can come out wider than A4 while being narrower on paper, which
+   * is what this test is actually about.
+   */
+  const a4Width = (await pageBox(page)).width;
 
   await setText(page, `---\npageSize: a5\ntoc: true\n---\n${body}`);
   await paginated(page);
 
   // A5 is narrower than A4, so the sheet must shrink.
   await expect
-    .poll(
-      async () =>
-        (await page.locator('.pagedjs_page').first().boundingBox()).width,
-      { timeout: 60_000 },
-    )
+    .poll(async () => (await pageBox(page)).width, { timeout: 60_000 })
     .toBeLessThan(a4Width);
   await expect(page.locator('.wp-toc')).toHaveCount(1);
   await expect(page.locator('.wp-toc a').first()).toBeVisible();
