@@ -2,7 +2,7 @@
 
 Write Markdown. Get a beautiful PDF. Offline, private, and yours to configure.
 
-[Screenshot placeholder — coming in a later phase]
+![WaynePDF — sidebar, editor and live preview](docs/screenshots/workspace-light.png)
 
 ## What it is
 
@@ -46,18 +46,57 @@ Open `http://localhost:8080`.
 
 ## Usage
 
-Drop a `.md` file onto the window, or click **Choose** to pick one, or start
-typing on the left. When you're ready, click **Transform** and pick **Save as
-PDF** in the print dialog. For cleaner output, uncheck **Headers and Footers**
-in that dialog — backgrounds print automatically.
+Documents live in the sidebar on the left. Click **+ New Document** to start one,
+**Open a file…** to import a `.md`, or drop a file anywhere on the window. Search
+filters the list, rows drag to reorder, and right-clicking one offers Rename and
+Duplicate.
+
+Type on the left, watch the preview on the right. The top bar carries the
+document's title — click it to rename — a dot showing autosave state, the
+**Flowing** / **Paged** preview toggle, and the export button.
+
+When you're ready, click **Save as PDF** and pick **Save as PDF** in the print
+dialog. For cleaner output, uncheck **Headers and Footers** in that dialog —
+backgrounds print automatically.
+
+![WaynePDF in the Dark theme](docs/screenshots/workspace-dark.png)
+
+### Preferences
+
+Press <kbd>Cmd</kbd>+<kbd>,</kbd> (<kbd>Ctrl</kbd>+<kbd>,</kbd> elsewhere) or
+click the gear in the sidebar footer. Preferences opens as a full window over
+the workspace — nothing is unmounted, so your document, scroll position and
+in-flight autosave are exactly where you left them when you close it.
+
+Six sections: **Appearance** (theme, fonts, sizes), **Editor**, **Document**
+(language, direction, math, sanitization), **Layout** (page size, margins,
+headers, footers, cover, watermark, table of contents), **Themes** (your own
+palettes), and **About**. The search box at the top filters both the section
+list and the controls inside a section.
+
+![The preferences window](docs/screenshots/preferences.png)
+
+### Keyboard shortcuts
+
+| Shortcut | Action |
+| --- | --- |
+| <kbd>Cmd/Ctrl</kbd>+<kbd>,</kbd> | Toggle preferences |
+| <kbd>Cmd/Ctrl</kbd>+<kbd>N</kbd> | New document |
+| <kbd>Esc</kbd> | Close preferences, menus, or a rename |
+| <kbd>↑</kbd> <kbd>↓</kbd> | Move through the preferences sections |
+
+Shortcuts deliberately yield to text fields, so they do nothing while the
+editor has focus.
 
 ### Themes and typography
 
-The gear button opens a settings panel with five themes — Light, Dark, Sepia,
-High Contrast and Print Optimized — plus a System option that follows your OS.
-Body font (Inter, Source Serif 4 or JetBrains Mono), body size, line height and
-code size are all adjustable, and the preview updates live. Settings persist in
-`localStorage` under `waynepdf.settings.v1`.
+Preferences → Appearance carries five themes — Light, Dark, Sepia, High Contrast
+and Print Optimized — plus a System option that follows your OS. The sidebar
+footer has a one-click toggle that cycles Light → Dark → System; the full set,
+including your own custom palettes, lives in preferences. Body font (Inter,
+Source Serif 4 or JetBrains Mono), body size, line height and code size are all
+adjustable, and the preview updates live. Settings persist in `localStorage`
+under `waynepdf.settings.v1`.
 
 All three fonts are bundled as WOFF2 and served from the app's own origin, so
 they work offline and no request ever leaves your machine.
@@ -104,6 +143,8 @@ WaynePDF was built in phases. Current state: **all phases complete**.
   headers/footers, TOC. Done.
 - **Phase 6** — Frontmatter, autosave, Mermaid, callouts, task lists,
   sanitization, custom themes, HTML and DOCX export. Done.
+- **Phase 7** — Workspace layout: left sidebar navigation, full-screen
+  preferences, thin top bar. Done.
 
 Syntax highlighting via Shiki was evaluated in Phase 6e and declined — see
 [Syntax highlighting](#syntax-highlighting) below.

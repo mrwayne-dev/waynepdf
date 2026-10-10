@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { Provider } from 'nonaction';
-import { TopBar, Markdown } from './Components';
 import Sidebar from './Components/Sidebar/index.jsx';
+import Workspace from './Components/Workspace.jsx';
 import Toast from './Components/Toast.jsx';
 import MathCopyButton from './Components/Previewer/MathCopyButton.jsx';
 import LayoutStyles from './Components/LayoutStyles.jsx';
@@ -42,10 +42,7 @@ const App = ({ className }) => {
             the workspace is everything the document owns. */}
         <div className="wp-shell">
           <Sidebar />
-          <div className="wp-workspace">
-            <TopBar />
-            <Markdown />
-          </div>
+          <Workspace />
         </div>
         {/* Both are chrome, not document: they portal/fix outside the flow and
             carry no-print, so they never reach the PDF. */}

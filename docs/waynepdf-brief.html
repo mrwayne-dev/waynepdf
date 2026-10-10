@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WaynePDF Engineering Brief</title>
+<meta name="description" content="Architecture, phase history, recurring traps and current state of the WaynePDF repo, written for planning Phase 8.">
+
+  <style>
+    /* The reset the artifact host supplies, restated for a standalone file. */
+    :root { color-scheme: light dark; }
+    img, video { max-width: 100%; height: auto; }
+    [hidden] { display: none !important; }
+  </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+  /* ---------------------------------------------------------------
+   * Set in the three faces WaynePDF itself bundles: Source Serif 4 for
+   * the document voice, Inter for chrome and data, JetBrains Mono for
+   * code — the same split the app makes between --wp-font-family-body
+   * and --wp-font-family-ui.
+   * --------------------------------------------------------------- */
+
+  :root {
+    --paper:      #FBFAF8;
+    --paper-sunk: #F3F1EC;
+    --ink:        #16181D;
+    --ink-muted:  #5C636E;
+    --ink-faint:  #878D97;
+    --rule:       #E4E0D9;
+    --rule-soft:  #EEEBE5;
+    --accent:     #0B5FC7;
+    --accent-sunk:#E8EFFA;
+    --shipped:    #1A7F37;
+    --caution:    #8A5D00;
+    --declined:   #7A4CC4;
+
+    --measure: 68ch;
+    --rail: 248px;
+
+    --step--1: 0.8125rem;
+    --step-0:  1rem;
+    --step-1:  1.1875rem;
+    --step-2:  1.5rem;
+    --step-3:  2rem;
+    --step-4:  2.75rem;
+
+    --serif: 'Source Serif 4', 'Iowan Old Style', Georgia, serif;
+    --sans: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  }
+
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --paper:      #13151A;
+      --paper-sunk: #1A1D24;
+      --ink:        #E6E8EC;
+      --ink-muted:  #9BA3AF;
+      --ink-faint:  #6C737E;
+      --rule:       #272B33;
+      --rule-soft:  #1F232A;
+      --accent:     #6BA6F5;
+      --accent-sunk:#18243A;
+      --shipped:    #4CC470;
+      --caution:    #D9A441;
+      --declined:   #B18AEA;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper:      #13151A;
+    --paper-sunk: #1A1D24;
+    --ink:        #E6E8EC;
+    --ink-muted:  #9BA3AF;
+    --ink-faint:  #6C737E;
+    --rule:       #272B33;
+    --rule-soft:  #1F232A;
+    --accent:     #6BA6F5;
+    --accent-sunk:#18243A;
+    --shipped:    #4CC470;
+    --caution:    #D9A441;
+    --declined:   #B18AEA;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: var(--step-0);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .shell {
+    display: grid;
+    grid-template-columns: var(--rail) minmax(0, 1fr);
+    gap: 0 3.5rem;
+    max-width: 1180px;
+    margin-inline: auto;
+    padding-inline: 20px;
+    padding-block: 0 5rem;
+    align-items: start;
+  }
+
+  /* ------------------------------------------------ contents rail */
+
+  .rail {
+    position: sticky;
+    top: 0;
+    padding-block: 3rem 2rem;
+    font-family: var(--sans);
+    font-size: var(--step--1);
+    max-height: 100vh;
+    overflow-y: auto;
+  }
+
+  .rail-label {
+    margin: 0 0 0.85rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .rail ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  .rail a {
+    display: flex;
+    gap: 0.7rem;
+    padding: 0.3rem 0;
+    color: var(--ink-muted);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+  }
+
+  .rail a:hover { color: var(--accent); }
+  .rail a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  .rail .n {
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.6875rem;
+    padding-top: 0.18rem;
+  }
+
+  /* ------------------------------------------------------ masthead */
+
+  .masthead {
+    padding-block: 3rem 2rem;
+    border-bottom: 2px solid var(--ink);
+    margin-bottom: 2.5rem;
+  }
+
+  .eyebrow {
+    margin: 0 0 1rem;
+    font-family: var(--sans);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: var(--step-4);
+    font-weight: 600;
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  .standfirst {
+    margin: 1rem 0 0;
+    max-width: var(--measure);
+    font-size: var(--step-1);
+    line-height: 1.5;
+    color: var(--ink-muted);
+  }
+
+  .vitals {
+    margin-top: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 2.5rem;
+    font-family: var(--sans);
+  }
+
+  .vital { padding-block: 0.4rem; }
+
+  .vital dt {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .vital dd {
+    margin: 0.15rem 0 0;
+    font-size: var(--step-0);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ------------------------------------------------------ sections */
+
+  section { padding-block: 2.25rem 0; scroll-margin-top: 1.5rem; }
+
+  h2 {
+    margin: 0 0 0.35rem;
+    font-size: var(--step-3);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  h3 {
+    margin: 2rem 0 0.5rem;
+    font-size: var(--step-1);
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .deck {
+    margin: 0 0 1.5rem;
+    max-width: var(--measure);
+    color: var(--ink-muted);
+  }
+
+  p { max-width: var(--measure); }
+
+  a { color: var(--accent); }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.875em;
+    background: var(--paper-sunk);
+    padding: 0.1em 0.32em;
+    border-radius: 3px;
+  }
+
+  /* --------------------------------------------------------- tables */
+
+  .scroller { overflow-x: auto; margin-block: 1rem; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--sans);
+    font-size: var(--step--1);
+  }
+
+  th {
+    text-align: left;
+    padding: 0.5rem 1rem 0.5rem 0;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    border-bottom: 1px solid var(--rule);
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 0.62rem 1rem 0.62rem 0;
+    border-bottom: 1px solid var(--rule-soft);
+    vertical-align: top;
+  }
+
+  td:last-child, th:last-child { padding-right: 0; }
+  .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td code { background: none; padding: 0; color: var(--accent); }
+
+  /* --------------------------------------------------------- ledger */
+
+  .ledger { display: flex; flex-direction: column; }
+
+  .entry {
+    display: grid;
+    grid-template-columns: 5.2rem 4.6rem minmax(0, 1fr);
+    gap: 0 1.1rem;
+    padding-block: 0.66rem;
+    border-bottom: 1px solid var(--rule-soft);
+    font-family: var(--sans);
+    font-size: var(--step--1);
+    align-items: baseline;
+  }
+
+  .entry:first-child { border-top: 1px solid var(--rule); }
+
+  .entry .phase {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .entry .sha {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--ink-faint);
+  }
+
+  .entry .what { color: var(--ink-muted); }
+  .entry.is-current { background: var(--accent-sunk); }
+  .entry.is-current .what { color: var(--ink); }
+
+  .entry.is-current .phase::after {
+    content: '←';
+    margin-left: 0.4rem;
+    color: var(--accent);
+  }
+
+  /* ---------------------------------------------------------- chips */
+
+  .chip {
+    display: inline-block;
+    font-family: var(--sans);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.16em 0.5em;
+    border-radius: 3px;
+    border: 1px solid currentColor;
+    white-space: nowrap;
+  }
+
+  .chip-shipped  { color: var(--shipped); }
+  .chip-declined { color: var(--declined); }
+  .chip-flight   { color: var(--caution); }
+
+  /* ---------------------------------------------------------- traps */
+
+  .traps { display: flex; flex-direction: column; gap: 0; }
+
+  .trap {
+    padding-block: 1.1rem;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+
+  .trap:first-child { border-top: 1px solid var(--rule); }
+
+  .trap h4 {
+    margin: 0 0 0.3rem;
+    font-family: var(--sans);
+    font-size: var(--step-0);
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .trap p { margin: 0; color: var(--ink-muted); font-size: 0.9375rem; }
+  .trap .where {
+    display: block;
+    margin-top: 0.35rem;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--ink-faint);
+  }
+
+  /* ---------------------------------------------------- shell figure */
+
+  .anatomy {
+    margin-block: 1.25rem;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    overflow: hidden;
+    font-family: var(--sans);
+    font-size: var(--step--1);
+  }
+
+  .anatomy-row { display: flex; min-height: 172px; }
+
+  .anatomy-side {
+    flex: 0 0 132px;
+    border-right: 1px solid var(--rule);
+    background: var(--paper-sunk);
+    padding: 0.7rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .anatomy-main { flex: 1 1 auto; display: flex; flex-direction: column; min-width: 0; }
+
+  .anatomy-bar {
+    border-bottom: 1px solid var(--rule);
+    padding: 0.55rem 0.7rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .anatomy-split { flex: 1 1 auto; display: flex; min-width: 0; }
+
+  .anatomy-pane {
+    flex: 1 1 50%;
+    padding: 0.7rem;
+    min-width: 0;
+  }
+
+  .anatomy-pane + .anatomy-pane { border-left: 1px solid var(--rule); }
+
+  .anatomy b {
+    display: block;
+    font-weight: 600;
+    font-size: 0.75rem;
+  }
+
+  .anatomy span {
+    color: var(--ink-faint);
+    font-size: 0.6875rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .anatomy .dim { color: var(--accent); }
+
+  /* --------------------------------------------------------- callout */
+
+  .note {
+    margin-block: 1.25rem;
+    padding: 1rem 1.15rem;
+    background: var(--paper-sunk);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 4px 4px 0;
+  }
+
+  .note p { margin: 0; max-width: none; }
+  .note p + p { margin-top: 0.6rem; }
+
+  .note-title {
+    font-family: var(--sans);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.4rem;
+  }
+
+  /* ----------------------------------------------------------- lists */
+
+  ul.plain { padding-left: 1.1rem; max-width: var(--measure); }
+  ul.plain li { margin-bottom: 0.45rem; }
+
+  .fetch {
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    background: var(--paper-sunk);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 0.85rem 1rem;
+    overflow-x: auto;
+    white-space: pre;
+    margin-block: 1rem;
+    color: var(--ink);
+  }
+
+  footer {
+    margin-top: 3.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--rule);
+    font-family: var(--sans);
+    font-size: var(--step--1);
+    color: var(--ink-faint);
+  }
+
+  @media (max-width: 860px) {
+    .shell { grid-template-columns: minmax(0, 1fr); gap: 0; }
+    .rail {
+      position: static;
+      max-height: none;
+      padding-block: 2rem 0;
+      border-bottom: 1px solid var(--rule);
+    }
+    .rail ol {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0.3rem 1.1rem;
+      padding-bottom: 1.25rem;
+    }
+    .masthead { padding-top: 2rem; }
+    h1 { font-size: var(--step-3); }
+    .entry { grid-template-columns: 4.2rem minmax(0, 1fr); }
+    .entry .sha { display: none; }
+    .anatomy-row { flex-direction: column; }
+    .anatomy-side { flex: 0 0 auto; border-right: 0; border-bottom: 1px solid var(--rule); }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <nav class="rail" aria-label="Contents">
+    <p class="rail-label">Contents</p>
+    <ol>
+      <li><a href="#what"><span class="n">01</span> What it is</a></li>
+      <li><a href="#shell"><span class="n">02</span> Shell anatomy</a></li>
+      <li><a href="#state"><span class="n">03</span> State layers</a></li>
+      <li><a href="#history"><span class="n">04</span> Phase ledger</a></li>
+      <li><a href="#traps"><span class="n">05</span> Traps that recur</a></li>
+      <li><a href="#tests"><span class="n">06</span> Test discipline</a></li>
+      <li><a href="#now"><span class="n">07</span> Where it stands</a></li>
+      <li><a href="#backlog"><span class="n">08</span> Backlog</a></li>
+      <li><a href="#fetching"><span class="n">09</span> Reading the repo</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="masthead">
+      <p class="eyebrow">Planning brief · Phase 8 intake</p>
+      <h1>WaynePDF</h1>
+      <p class="standfirst">
+        A local-first Markdown editor and PDF typesetter. Twenty-four commits
+        across eight phases, all on <code>main</code>. This is the context a
+        planning conversation needs and the repo browser cannot reach.
+      </p>
+      <dl class="vitals">
+        <div class="vital"><dt>Commits</dt><dd>24</dd></div>
+        <div class="vital"><dt>Head</dt><dd>7.2 · 64ce810</dd></div>
+        <div class="vital"><dt>Unit tests</dt><dd>939</dd></div>
+        <div class="vital"><dt>E2E</dt><dd>358 + 58</dd></div>
+        <div class="vital"><dt>Main chunk</dt><dd>303 kB gz</dd></div>
+      </dl>
+    </header>
+
+    <section id="what">
+      <h2>What it is</h2>
+      <p class="deck">
+        Markdown in, typeset PDF out, entirely in the browser. No backend, no
+        telemetry, no accounts. A PWA that works offline once loaded.
+      </p>
+      <p>
+        A fork and rewrite of <code>realdennis/md2pdf</code>, kept only as far as
+        the editor/preview split. Everything else — parser, theming, pagination,
+        persistence, exports, chrome — was rebuilt. The PDF “engine” is
+        <code>paged.js</code> plus <code>window.print()</code>; there is no PDF
+        library anywhere in the tree.
+      </p>
+
+      <h3>Stack</h3>
+      <div class="scroller">
+        <table>
+          <thead>
+            <tr><th>Layer</th><th>Choice</th><th>Why it matters later</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Build</td>
+              <td>Vite 5, pnpm 11, Node 22</td>
+              <td>Every shell needs <code>nvm use 22</code> + corepack first</td>
+            </tr>
+            <tr>
+              <td>UI</td>
+              <td>React 18, styled-components</td>
+              <td>All new chrome is plain CSS; styled-components is legacy only</td>
+            </tr>
+            <tr>
+              <td>State</td>
+              <td><code>nonaction</code> containers</td>
+              <td>Carries the sharpest constraint in the codebase — see 05</td>
+            </tr>
+            <tr>
+              <td>Parser</td>
+              <td>markdown-it + plugins</td>
+              <td>One shared instance; exports reuse it rather than re-parsing</td>
+            </tr>
+            <tr>
+              <td>Persistence</td>
+              <td>IndexedDB via <code>idb</code></td>
+              <td>DB <code>waynepdf</code>, stores <code>documents</code> and <code>meta</code></td>
+            </tr>
+            <tr>
+              <td>Print</td>
+              <td>paged.js 0.4.3</td>
+              <td>Page margins are CSS <em>grid columns</em>, not padding</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="shell">
+      <h2>Shell anatomy</h2>
+      <p class="deck">
+        Phase 7 replaced the inherited md2pdf chrome. Fixed dimensions are spec,
+        not taste — everything else routes through the 6.5b design tokens
+        (<code>--wp-space-*</code>, <code>--wp-text-*</code>,
+        <code>--wp-radius-*</code>, <code>--wp-h-control*</code>).
+      </p>
+
+      <div class="anatomy">
+        <div class="anatomy-row">
+          <div class="anatomy-side">
+            <b>Sidebar</b>
+            <span class="dim">260px fixed</span>
+            <span>wordmark · new · open</span>
+            <span>search · doc list</span>
+            <span>gear · theme cycle</span>
+          </div>
+          <div class="anatomy-main">
+            <div class="anatomy-bar">
+              <span><b>Top bar</b><span class="dim">44px</span></span>
+              <span>title · dot · mode · export</span>
+            </div>
+            <div class="anatomy-split">
+              <div class="anatomy-pane"><b>Editor</b><span>CodeMirror 5</span></div>
+              <div class="anatomy-pane"><b>Preview</b><span>flowing or paged</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p>
+        Preferences renders as a full-window overlay above all of it — a 52px
+        header with search, a 240px section rail, a content pane capped at a
+        720px reading measure, and a 48px footer holding Reset. It never
+        unmounts the workspace, so the editor buffer, scroll position and
+        in-flight autosave survive a visit.
+      </p>
+
+      <div class="note">
+        <p class="note-title">Deletions completed in Phase 7</p>
+        <p>
+          The slide-out settings panel, the horizontal tab strip and the 52px
+          header are gone, not deprecated. Invariant tests assert that
+          <code>.wp-panel</code>, <code>.wp-tab*</code>,
+          <code>.page-count</code> and the old header classes render nowhere.
+          Anything proposing to “restore” them is proposing a rebuild.
+        </p>
+      </div>
+    </section>
+
+    <section id="state">
+      <h2>State layers</h2>
+      <p class="deck">
+        Nine container hooks. Every one that persists registers a resetter, so
+        Reset is a single call that cannot fall behind.
+      </p>
+      <div class="scroller">
+        <table>
+          <thead>
+            <tr><th>Hook</th><th>Storage</th><th>Holds</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>useTheme</code></td><td><code>settings.v1</code></td><td>theme, fonts, sizes, math toggle, sanitize</td></tr>
+            <tr><td><code>useLanguage</code></td><td><code>language.v1</code></td><td>lang, direction, detection</td></tr>
+            <tr><td><code>useLayout</code></td><td><code>layout.v1</code></td><td>page geometry, headers, cover, TOC</td></tr>
+            <tr><td><code>useCustomThemes</code></td><td><code>customThemes.v1</code></td><td>user palettes, cap of 10</td></tr>
+            <tr><td><code>useExportFormat</code></td><td><code>exportFormat.v1</code></td><td>last chosen format</td></tr>
+            <tr><td><code>useDocuments</code></td><td>IndexedDB</td><td>documents, order, active id, autosave</td></tr>
+            <tr><td><code>usePreferences</code></td><td>—</td><td>window open, section, search</td></tr>
+            <tr><td><code>useOverrides</code></td><td>—</td><td>frontmatter overrides, per document</td></tr>
+            <tr><td><code>usePageCount</code></td><td>—</td><td>pages from the paginator</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Every localStorage key carries the <code>waynepdf.</code> prefix and
+        Reset sweeps by prefix rather than by list. A unit test walks the source
+        tree and fails on any key that breaks the convention — that sweep is the
+        only reason Reset stopped forgetting things.
+      </p>
+    </section>
+
+    <section id="history">
+      <h2>Phase ledger</h2>
+      <p class="deck">
+        A real sequence, so it is numbered as one. Each phase shipped as its own
+        commit on <code>main</code>.
+      </p>
+      <div class="ledger">
+        <div class="entry"><span class="phase">0</span><span class="sha">a7d88dc</span><span class="what">Vite + React 18 foundation, markdown-it, test harness</span></div>
+        <div class="entry"><span class="phase">1</span><span class="sha">9550b75</span><span class="what">Debranding and WaynePDF identity</span></div>
+        <div class="entry"><span class="phase">2</span><span class="sha">1aefe6a</span><span class="what">Theming layer — five themes, forked github-markdown-css</span></div>
+        <div class="entry"><span class="phase">3</span><span class="sha">7bdaf3c</span><span class="what">Unicode correctness — BOM, encoding detection, lang/dir</span></div>
+        <div class="entry"><span class="phase">3.5</span><span class="sha">2ff9737</span><span class="what">highlight.js slimmed to a curated set, 1005 → 194 kB</span></div>
+        <div class="entry"><span class="phase">4</span><span class="sha">d9ac1d5</span><span class="what">Math via KaTeX + mhchem</span></div>
+        <div class="entry"><span class="phase">5</span><span class="sha">85c95ce</span><span class="what">Real PDF output via paged.js — margins, headers, TOC</span></div>
+        <div class="entry"><span class="phase">6a</span><span class="sha">3a46128</span><span class="what">Frontmatter, callouts, task lists, mermaid, sanitization</span></div>
+        <div class="entry"><span class="phase">6b</span><span class="sha">77162ce</span><span class="what">IndexedDB persistence, autosave, multi-document</span></div>
+        <div class="entry"><span class="phase">6.5</span><span class="sha">a7a3d62</span><span class="what">PDF fixes, spacing and type scales, drag-drop fix</span></div>
+        <div class="entry"><span class="phase">6c</span><span class="sha">0e276d9</span><span class="what">Custom themes — generator, injection, editor modal</span></div>
+        <div class="entry"><span class="phase">6d</span><span class="sha">f97eb86</span><span class="what">Exports — self-contained HTML, in-house DOCX writer</span></div>
+        <div class="entry"><span class="phase">6e</span><span class="sha">44fecf9</span><span class="what">Shiki evaluated and <span class="chip chip-declined">declined</span></span></div>
+        <div class="entry"><span class="phase">7.0</span><span class="sha">0c8a65f</span><span class="what">Full-screen preferences window, all settings migrated</span></div>
+        <div class="entry"><span class="phase">7.1</span><span class="sha">ea50dab</span><span class="what">Left sidebar with document list, tab strip deleted</span></div>
+        <div class="entry is-current"><span class="phase">7.2</span><span class="sha">64ce810</span><span class="what">Thin top bar, old header deleted <span class="chip chip-shipped">head</span></span></div>
+        <div class="entry"><span class="phase">7.3</span><span class="sha">—</span><span class="what">Keyboard, reset audit, empty states, README <span class="chip chip-flight">in flight</span></span></div>
+      </div>
+
+      <h3>Why Shiki was declined</h3>
+      <p>
+        Worth carrying into any future highlighting discussion, because the
+        obvious objection is the wrong one. Shiki has a CSS-variable theming
+        mode already; it emits <strong>11 token variables against
+        highlight.js’s 40</strong>, so the only mode compatible with five themes
+        plus custom palettes is a downgrade in colour granularity. The price
+        would have been +364 kB gzipped and roughly a second of blocking grammar
+        compilation. No abort criterion actually triggered — the criteria tested
+        a premise the measurements falsified.
+      </p>
+    </section>
+
+    <section id="traps">
+      <h2>Traps that recur</h2>
+      <p class="deck">
+        Each of these cost real time at least once. They are the highest-value
+        thing to read before planning work that touches the same ground.
+      </p>
+
+      <div class="traps">
+        <div class="trap">
+          <h4>Container hooks cannot read each other</h4>
+          <p>
+            nonaction invokes every container hook inside one component, above
+            the context it populates. A container hook reading a sibling gets
+            nothing. Dependencies are pushed in as arguments or composed into a
+            single hook instead — which is why <code>useDocuments</code> lives
+            inside <code>useText</code> rather than beside it.
+          </p>
+          <span class="where">hit in phases 3, 6a, 6b.1, 6c.1</span>
+        </div>
+
+        <div class="trap">
+          <h4>Invariant tests pass on broken code</h4>
+          <p>
+            Four separate times, a test written to guard a behaviour passed
+            against deliberately sabotaged production code — because the fixture
+            lacked the failure mode, or the assertion read a value the CSS
+            transition had not applied yet. Every new invariant gets sabotaged
+            before it is trusted.
+          </p>
+          <span class="where">6.5c · 6d.1 · 6d.2 · 7.2</span>
+        </div>
+
+        <div class="trap">
+          <h4>A flex item’s automatic minimum beats flex-basis</h4>
+          <p>
+            <code>flex: 0 0 260px</code> computed exactly as written while the
+            sidebar rendered 394px wide, because <code>min-width: auto</code>
+            resolves to min-content and a child’s intrinsic width won. Tests
+            assert resulting geometry, never the declarations.
+          </p>
+          <span class="where">7.1 sidebar</span>
+        </div>
+
+        <div class="trap">
+          <h4>getComputedStyle mid-transition returns the old value</h4>
+          <p>
+            Reading a colour immediately after changing a class returns the value
+            being animated <em>from</em>. A three-state indicator test passed on
+            a dot that never changed colour until the transition was disabled
+            before reading.
+          </p>
+          <span class="where">7.2 autosave dot</span>
+        </div>
+
+        <div class="trap">
+          <h4>paged.js margins are grid columns</h4>
+          <p>
+            Page margins live as CSS grid columns on
+            <code>.pagedjs_sheet</code> and <code>.pagedjs_pagebox</code>.
+            Setting margin properties does nothing, and forcing those elements to
+            <code>display: block</code> for print silently drops every margin.
+          </p>
+          <span class="where">5 · 6.5a</span>
+        </div>
+
+        <div class="trap">
+          <h4>Blob URLs taint a canvas; data URLs do not</h4>
+          <p>
+            Rasterising an in-page SVG through a blob URL throws “Tainted
+            canvases may not be exported” in Chromium even though the SVG was
+            generated in that very page. Encode with
+            <code>encodeURIComponent</code>, not <code>btoa</code>, which throws
+            above U+00FF.
+          </p>
+          <span class="where">6d.2 mermaid → PNG</span>
+        </div>
+
+        <div class="trap">
+          <h4>Playwright helpers lie in two specific ways</h4>
+          <p>
+            <code>getByText</code> matches every ancestor whose text is exactly
+            the string, so one wordmark can count as three. And
+            <code>addInitScript</code> re-runs on reload, so a test that seeds
+            state then reloads is asserting the seed, not the interaction.
+          </p>
+          <span class="where">7.1 · 7.2</span>
+        </div>
+
+        <div class="trap">
+          <h4>Vitest include globs must name .jsx explicitly</h4>
+          <p>
+            A component test written as <code>.test.js</code> fails to parse JSX;
+            renamed to <code>.jsx</code> it silently matched no glob and ran
+            zero tests while the suite reported green.
+          </p>
+          <span class="where">7.0</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="tests">
+      <h2>Test discipline</h2>
+      <p class="deck">
+        Three suites, and one rule that produced most of the value.
+      </p>
+      <div class="scroller">
+        <table>
+          <thead>
+            <tr><th>Suite</th><th>Command</th><th class="num">Files</th><th class="num">Tests</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Unit (Vitest)</td><td><code>pnpm test</code></td><td class="num">31</td><td class="num">939</td></tr>
+            <tr><td>E2E parallel</td><td><code>pnpm test:e2e:parallel</code></td><td class="num">29</td><td class="num">358</td></tr>
+            <tr><td>E2E paged</td><td><code>pnpm test:e2e:paged</code></td><td class="num">5</td><td class="num">58</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Pagination is serial with a long timeout — seven concurrent paginations
+        saturate one CPU. The two projects exist for that reason alone.
+      </p>
+      <div class="note">
+        <p class="note-title">The rule</p>
+        <p>
+          Tests observe invariants, not discriminators — and an invariant test is
+          not trusted until the production code has been deliberately broken and
+          the test has been watched to fail. Fixtures must actually contain the
+          failure mode the invariant guards against.
+        </p>
+      </div>
+    </section>
+
+    <section id="now">
+      <h2>Where it stands</h2>
+      <p class="deck">
+        Pushed through 7.2. Phase 7.3 exists in the working tree and is not
+        committed.
+      </p>
+
+      <h3>Uncommitted on disk</h3>
+      <ul class="plain">
+        <li><code>EmptyWorkspace.jsx</code>, <code>Workspace.jsx</code> — zero-document state</li>
+        <li><code>KeyboardShortcuts.jsx</code> — Cmd+N wiring</li>
+        <li><code>resetAudit.test.js</code>, <code>emptyWorkspace.test.jsx</code>, two e2e specs</li>
+        <li>README rewrite and <code>docs/screenshots/</code></li>
+      </ul>
+
+      <p>
+        The pushed README therefore still describes the pre-Phase-7 chrome and
+        points at a screenshot path that does not exist yet. Fourteen
+        <code>PHASE_*_SUMMARY.md</code> files are staged-but-uncommitted by
+        convention and are not on GitHub at all.
+      </p>
+
+      <h3>Bundle</h3>
+      <div class="scroller">
+        <table>
+          <thead>
+            <tr><th>Chunk</th><th class="num">Raw</th><th class="num">Gzip</th><th>Loading</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Main</td><td class="num">884 kB</td><td class="num">303 kB</td><td>eager</td></tr>
+            <tr><td>Preview</td><td class="num">585 kB</td><td class="num">200 kB</td><td>lazy</td></tr>
+            <tr><td>paged.js</td><td class="num">505 kB</td><td class="num">101 kB</td><td>lazy</td></tr>
+            <tr><td>DOCX + jszip</td><td class="num">116 kB</td><td class="num">37 kB</td><td>lazy</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Precache is 94 entries, about 4.2 MB. Mermaid’s ~64 per-diagram chunks
+        and the CJK Noto subsets are deliberately excluded and runtime-cached —
+        precaching them once pushed first visit to 21.8 MB.
+      </p>
+    </section>
+
+    <section id="backlog">
+      <h2>Backlog</h2>
+      <p class="deck">
+        Known limitations carried forward deliberately, each with the reason it
+        was accepted.
+      </p>
+      <div class="scroller">
+        <table>
+          <thead>
+            <tr><th>Area</th><th>Limitation</th><th>Since</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>DOCX export</td>
+              <td>Math exports as source text, not OMML; code unhighlighted; theme colours do not transfer; adjacent code blocks merge in LibreOffice</td>
+              <td class="num">6d.2</td>
+            </tr>
+            <tr>
+              <td>Highlighting</td>
+              <td>No Terraform/HCL — no highlight.js module and no maintained package</td>
+              <td class="num">3.5</td>
+            </tr>
+            <tr>
+              <td>Offline CJK</td>
+              <td>Noto TC/SC/JP/KR runtime-cached, so a CJK document needs one online visit first</td>
+              <td class="num">3</td>
+            </tr>
+            <tr>
+              <td>Autosave</td>
+              <td><code>beforeunload</code> cannot await IndexedDB; up to 1s lost on an abrupt close</td>
+              <td class="num">6b</td>
+            </tr>
+            <tr>
+              <td>Responsive</td>
+              <td>Below ~900px the 260px sidebar cramps the split; no collapse or resize</td>
+              <td class="num">7.1</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Explicitly deferred and not started: command palette (Cmd+K is reserved
+        and deliberately unbound), sidebar collapse and resize, a full
+        accessibility audit, and any CodeMirror 6 migration.
+      </p>
+    </section>
+
+    <section id="fetching">
+      <h2>Reading the repo</h2>
+      <p class="deck">
+        <code>github.com/robots.txt</code> names ClaudeBot and anthropic-ai
+        with a narrow allowlist that excludes repository paths, so repo pages
+        cannot be fetched. <code>raw.githubusercontent.com</code> serves no
+        robots.txt at all and works.
+      </p>
+      <div class="fetch">https://raw.githubusercontent.com/mrwayne-dev/waynepdf/main/&lt;path&gt;</div>
+      <p>Useful entry points:</p>
+      <ul class="plain">
+        <li><code>package.json</code> — dependencies and scripts</li>
+        <li><code>POST_PHASE_6_BACKLOG.md</code> — deferred work with rationale</li>
+        <li><code>src/App/Container/index.js</code> — the container wiring</li>
+        <li><code>src/App/Container/Hooks/useDocuments.js</code> — persistence and autosave</li>
+        <li><code>src/App/Components/Preferences/index.jsx</code> — the 7.0 window</li>
+        <li><code>src/App/Lib/resetAll.js</code> — the reset registry</li>
+      </ul>
+      <p>
+        Source files carry unusually long comments explaining why a thing is the
+        way it is, including the failed approach it replaced. When planning
+        against a file, that comment block is usually the fastest read.
+      </p>
+    </section>
+
+    <footer>
+      Snapshot at 64ce810 · mrwayne-dev/waynepdf · main · public
+    </footer>
+  </main>
+</div>
+</body>
+</html>

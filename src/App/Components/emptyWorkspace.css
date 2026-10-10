@@ -1,0 +1,46 @@
+.wp-empty-workspace {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--wp-space-4);
+  padding: var(--wp-space-4);
+  font-family: var(--wp-font-family-ui);
+  background-color: var(--wp-color-canvas);
+}
+
+.wp-empty-workspace-text {
+  margin: 0;
+  font-size: var(--wp-text-base);
+  color: var(--wp-color-fg-subtle);
+}
+
+.wp-empty-workspace-button {
+  display: flex;
+  align-items: center;
+  gap: var(--wp-space-2);
+  height: 40px;
+  padding: 0 var(--wp-space-6);
+  font-family: inherit;
+  font-size: var(--wp-text-sm);
+  font-weight: 500;
+  /* --wp-color-canvas, not white: in High Contrast the accent is a saturated
+     blue on white, and white-on-accent there is the wrong end of the pair. */
+  color: var(--wp-color-canvas);
+  background-color: var(--wp-color-accent);
+  border: 1px solid var(--wp-color-accent);
+  border-radius: var(--wp-radius);
+  cursor: pointer;
+  transition: background-color var(--wp-ui-transition);
+}
+
+.wp-empty-workspace-button:hover {
+  background-color: var(--wp-color-accent-emphasis);
+  border-color: var(--wp-color-accent-emphasis);
+}
+
+.wp-empty-workspace-button:focus-visible {
+  outline: 2px solid var(--wp-color-accent);
+  outline-offset: 2px;
+}

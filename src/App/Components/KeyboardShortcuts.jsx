@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useProvided } from 'nonaction';
-import { PreferencesContainer } from '../Container';
+import { PreferencesContainer, useDocumentsApi } from '../Container';
 import { bindShortcuts } from '../Lib/keyboardShortcuts.js';
 
 /**
@@ -11,10 +11,19 @@ import { bindShortcuts } from '../Lib/keyboardShortcuts.js';
  */
 export default function KeyboardShortcuts() {
   const [, preferences] = useProvided(PreferencesContainer);
+  const { create, open } = useDocumentsApi();
 
   useEffect(
-    () => bindShortcuts({ togglePreferences: preferences.toggle }),
-    [preferences],
+    () =>
+      bindShortcuts({
+        togglePreferences: preferences.toggle,
+        newDocument: () => {
+          // Same as the sidebar button: create implies "and take me there".
+          const id = create();
+          if (id) open(id);
+        },
+      }),
+    [preferences, create, open],
   );
 
   return null;
